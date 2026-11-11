@@ -1,0 +1,38 @@
+[
+ {
+  "app": "admin-kal",
+  "lebar": 390,
+  "jalur": "/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin-kal",
+  "lebar": 390,
+  "jalur": "/projects/7/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin-kal",
+  "lebar": 1366,
+  "jalur": "/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin-kal",
+  "lebar": 1366,
+  "jalur": "/projects/7/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ }
+]

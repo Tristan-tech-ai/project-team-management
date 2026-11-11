@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { pasangKonfirmasi, tampilkanFlash } from './inti';
+import { pasangKonfirmasi, rapikanAksesibilitas, tampilkanFlash } from './inti';
 
 window.bootstrap = bootstrap;
 
@@ -7,6 +7,7 @@ window.bootstrap = bootstrap;
 document.addEventListener('DOMContentLoaded', () => {
     pasangKonfirmasi(bootstrap.Modal);
     tampilkanFlash();
+    rapikanAksesibilitas();
     if (document.querySelector('table[data-tabel]')) import('./tabel').then((m) => m.pasangTabel());
     if (document.querySelector('[data-kanban], [data-centang], [data-ubah-status], [data-isi-durasi]')) {
         import('./kanban').then((m) => { m.pasangKanban(); m.pasangChecklist(); });

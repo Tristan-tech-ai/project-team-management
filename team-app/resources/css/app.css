@@ -15,9 +15,9 @@
     --ptm-aksi-lembut: #eaf0fd;
     --ptm-telat: #b42318;
     --ptm-telat-lembut: #fdecea;
-    --ptm-review: #9a6200;
+    --ptm-review: #8a5700;
     --ptm-review-lembut: #fff4d6;
-    --ptm-selesai: #1a7f4b;
+    --ptm-selesai: #17713f;
     --ptm-selesai-lembut: #e6f4ec;
     --ptm-sidebar: #13213d;
     --ptm-sidebar-2: #1d2e52;
@@ -126,3 +126,19 @@ div.dt-container .dt-paging .page-link { min-width: 38px; min-height: 38px; disp
 .timeline li::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--ptm-aksi); }
 .timeline li.dampak::before { border-color: var(--ptm-review); }
 .timeline li.hambat::before { border-color: var(--ptm-telat); }
+
+/* LV-06 audit axe: kontras tombol sekunder dan toolbar kalender (AA 4,5:1). */
+.btn-outline-secondary { --bs-btn-color: #3d4757; --bs-btn-border-color: #8b95a5; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #3d4757; --bs-btn-hover-border-color: #3d4757;
+    --bs-btn-active-bg: #2c3442; --bs-btn-active-border-color: #2c3442; --bs-btn-disabled-color: #5a6678; }
+.btn-light { --bs-btn-color: #142033; }
+.fc { --fc-button-bg-color: var(--ptm-aksi); --fc-button-border-color: var(--ptm-aksi); --fc-button-text-color: #fff;
+    --fc-button-hover-bg-color: var(--ptm-aksi-gelap); --fc-button-hover-border-color: var(--ptm-aksi-gelap);
+    --fc-button-active-bg-color: #163a94; --fc-button-active-border-color: #163a94; }
+.fc .fc-button-primary:disabled { opacity: 1; background-color: #3d4757; border-color: #3d4757; color: #fff; }
+.fc .fc-toolbar-title { font-size: 1.15rem; font-weight: 650; color: var(--ptm-ink); }
+.fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: var(--ptm-ink); text-decoration: none; }
+.fc .fc-day-other .fc-daygrid-day-number { color: #5a6678; opacity: 1; }
+.fc .fc-day-other .fc-daygrid-day-top { opacity: 1; }
+.fc .fc-event .fc-event-time, .fc .fc-event .fc-event-title, .fc .fc-event .fc-sticky, .fc .fc-daygrid-dot-event .fc-event-title { color: inherit !important; }
+.fc .fc-daygrid-event-dot { border-color: currentColor; }
+.fc .fc-h-event .fc-event-main, .fc .fc-v-event .fc-event-main { color: inherit !important; }

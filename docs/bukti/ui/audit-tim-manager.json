@@ -1,0 +1,20 @@
+[
+ {
+  "app": "tim-manager",
+  "lebar": 390,
+  "jalur": "/review",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": true
+ },
+ {
+  "app": "tim-manager",
+  "lebar": 1366,
+  "jalur": "/review",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": false
+ }
+]

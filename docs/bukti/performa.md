@@ -28,7 +28,7 @@ Diukur 11 Nov 2026 di lokal (PHP 8.4.16, MySQL 8.4.13 Docker, data seeder + proj
 
 ## Debugbar hanya lokal
 
-Lihat `debugbar.txt`: dengan APP_ENV=local dan APP_DEBUG=true Debugbar tampil; dengan APP_ENV=production dan APP_DEBUG=false (php artisan serve --env) tidak ada markup Debugbar dan rute `/_debugbar/open` 404. Paket dipasang sebagai dependensi `require-dev`.
+Lihat `debugbar.txt`: dengan APP_DEBUG=true Debugbar tampil; dengan APP_DEBUG=false saja (APP_ENV bukan production, DEBUGBAR_ENABLED tidak diisi) tidak ada markup Debugbar dan rute `/_debugbar/open` 404. Uji pertama sempat memakai APP_ENV=production sehingga belum membuktikan APP_DEBUG=false; sudah diulang dan dikoreksi. Catatan teknis: `php artisan serve --env=<nama>` hanya memuat `.env.<nama>` di server anak bila APP_ENV di berkas itu juga `<nama>`. Paket dipasang sebagai dependensi `require-dev`.
 
 ## Ukuran aset
 

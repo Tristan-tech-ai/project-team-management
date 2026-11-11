@@ -1,0 +1,508 @@
+[
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/dashboard",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7/board",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7/tasks",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7/team",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7/activities",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/projects/7/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/tasks",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/tasks/saya",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/tasks/review",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/tasks/38",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/activities",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/activities/hambatan-perubahan",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/templates/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/templates/projects/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/management",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/management/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/management/teams",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/management/reports",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/master/companies",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/master/members/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/settings/roles",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/settings/menus",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/settings/general",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 390,
+  "jalur": "/akun",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/dashboard",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7/board",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7/tasks",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7/team",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7/activities",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/projects/7/calendar",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/tasks",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/tasks/saya",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/tasks/review",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/tasks/38",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/calendar",
+  "http": 200,
+  "serius": [
+   "color-contrast (2): .fc-event-main-frame > .fc-event-time | .fc-sticky"
+  ],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/activities",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/activities/hambatan-perubahan",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/templates/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/templates/projects/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/management",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/management/projects",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/management/teams",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/management/reports",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/master/companies",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/master/members/create",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/settings/roles",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/settings/menus",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/settings/general",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ },
+ {
+  "app": "admin",
+  "lebar": 1366,
+  "jalur": "/akun",
+  "http": 200,
+  "serius": [],
+  "gulirSamping": 0,
+  "navBawahTerlihat": null
+ }
+]

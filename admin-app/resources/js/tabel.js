@@ -15,6 +15,7 @@ const bahasa = {
     zeroRecords: 'Tidak ada yang cocok dengan pencarian ini.',
     emptyTable: 'Belum ada data. Tambahkan yang pertama.',
     paginate: { first: 'Awal', last: 'Akhir', next: 'Berikutnya', previous: 'Sebelumnya' },
+    aria: { paginate: { first: 'Awal', last: 'Akhir', next: 'Berikutnya', previous: 'Sebelumnya' } },
 };
 
 function lencana(teks, kelas) {

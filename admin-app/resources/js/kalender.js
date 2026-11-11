@@ -36,6 +36,9 @@ export function pasangKalender() {
             info.el.title = [info.event.title, p.project, p.status].filter(Boolean).join(' · ');
         },
         noEventsContent: 'Tidak ada jadwal di rentang ini.',
+        // Aksesibilitas: label sel hari mengikuti teks yang tampil, ikon panah hanya hiasan (tombol sudah berlabel).
+        dayCellDidMount: (info) => { info.el.removeAttribute('aria-labelledby'); },
+        datesSet: () => { el.querySelectorAll('.fc-icon').forEach((i) => { i.setAttribute('aria-hidden', 'true'); i.removeAttribute('role'); }); },
     });
     kal.render();
     document.querySelectorAll('[data-mode-kalender]').forEach((b) => b.addEventListener('click', () => {

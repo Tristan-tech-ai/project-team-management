@@ -64,3 +64,15 @@ export function tampilkanFlash() {
         el.remove();
     });
 }
+
+// Wilayah tabel yang bisa digulir harus bisa dicapai keyboard (axe scrollable-region-focusable).
+export function rapikanAksesibilitas() {
+    document.querySelectorAll('.table-responsive').forEach((el) => {
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+        if (!el.hasAttribute('aria-label')) {
+            const judul = el.closest('.kartu')?.querySelector('h2, .kartu-judul')?.textContent?.trim();
+            el.setAttribute('aria-label', judul ? `Tabel ${judul}` : 'Tabel data');
+        }
+        el.setAttribute('role', 'region');
+    });
+}
