@@ -229,7 +229,7 @@ try {
         const j1 = await r1.json();
         if (j1.recordsTotal !== 520 || j1.data.length !== 25) throw new Error(`halaman 1: total ${j1.recordsTotal}, baris ${j1.data.length}`);
         await expect(e.locator('table tbody tr')).toHaveCount(25);
-        const [r2] = await Promise.all([tunggu((q) => q.get('start') === '25'), e.locator('.dt-paging button', { hasText: '2' }).click()]);
+        const [r2] = await Promise.all([tunggu((q) => q.get('start') === '25'), e.locator('.dt-paging').getByRole('button', { name: '2', exact: true }).click()]);
         const j2 = await r2.json();
         const [r3] = await Promise.all([tunggu((q) => (q.get('search[value]') ?? '') === '512'), e.fill('.dt-search input', '512')]);
         const j3 = await r3.json();
