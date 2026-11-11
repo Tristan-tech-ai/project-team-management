@@ -174,6 +174,70 @@ try {
     catat(true, `kalender: mode Jadwal ${jadwal} kejadian, mode Selesai aktual menampilkan task yang diterima`);
     await km2.close();
 
+    // 8. Skenario 11.3 butir 5: project berulang memasuki periode baru tanpa menutup induk; kartu lama tetap di periode lama.
+    if (process.env.E2E_BERULANG) {
+        const kb = await b.newContext({ viewport: { width: 1366, height: 900 } });
+        const pb = await kb.newPage();
+        kini = pb;
+        await masuk(pb, ADMIN, 'demo.manager@example.test', process.env.E2E_SANDI_DEMO);
+        await pb.goto(`${ADMIN}/projects/${process.env.E2E_BERULANG}`);
+        const sebelum = await pb.locator('#periode option').count();
+        await pb.click('button:has-text("Buka periode baru")');
+        await pb.click('#modal-konfirmasi [data-ya]');
+        await pb.waitForURL(/\/board\?periode=\d+/);
+        await expect(pb.locator('[data-kanban-column] [data-task-id]')).toHaveCount(5);
+        await pb.goto(`${ADMIN}/projects/${process.env.E2E_BERULANG}`);
+        await expect(pb.locator('#periode option')).toHaveCount(sebelum + 1);
+        await expect(pb.locator('.kepala-halaman')).toContainText('Berjalan');
+        catat(true, 'project berulang: periode baru dibuka (5 task dari template), project induk tetap Berjalan, periode lama tetap ada');
+        await pb.screenshot({ path: `${BUKTI}/06-periode-baru.png` });
+        await kb.close();
+    }
+
+    // 9. Butir 6: halaman Tim di 1366 px tanpa bottom navigation dan tanpa ruang kosong bekas navbar.
+    const kd = await b.newContext({ viewport: { width: 1366, height: 900 } });
+    const d = await kd.newPage();
+    kini = d;
+    await masuk(d, TIM, 'demo.member@example.test', process.env.E2E_SANDI_DEMO);
+    await d.goto(`${TIM}/tasks`);
+    await expect(d.locator('.mobile-bottom-nav')).toBeHidden();
+    await expect(d.locator('.desktop-sidebar')).toBeVisible();
+    const pb2 = await d.evaluate(() => getComputedStyle(document.querySelector('.app-main')).paddingBottom);
+    if (pb2 === '92px') throw new Error('padding bawah HP masih tersisa di desktop');
+    catat(true, `Tim 1366 px: bottom nav tersembunyi, sidebar tampil, padding bawah ${pb2}`);
+    await d.screenshot({ path: `${BUKTI}/07-tim-1366.png` });
+
+    // 10. Butir 7: Member memaksa URL Admin/Management di peramban: 403 ramah.
+    await masuk(d, ADMIN, 'demo.member@example.test', process.env.E2E_SANDI_DEMO);
+    for (const u of ['/management', '/settings/roles', '/master/companies']) {
+        const r = await d.goto(`${ADMIN}${u}`);
+        if (r.status() !== 403) throw new Error(`${u} memberi ${r.status()}`);
+        await expect(d.locator('body')).toContainText('bukan untuk role-mu');
+    }
+    catat(true, 'Member memaksa /management, /settings/roles, /master/companies: semua 403 dengan halaman ramah');
+    await d.screenshot({ path: `${BUKTI}/08-member-403.png` });
+    await kd.close();
+
+    // 11. Butir 8: DataTables 520 baris, paging dan pencarian terjadi di server.
+    if (process.env.E2E_ARSIP) {
+        const ke = await b.newContext({ viewport: { width: 1366, height: 900 } });
+        const e = await ke.newPage();
+        kini = e;
+        await masuk(e, ADMIN, 'admin@example.test', process.env.E2E_SANDI_ADMIN);
+        const tunggu = (cocok) => e.waitForResponse((r) => r.url().includes('/tasks/data') && cocok(new URL(r.url()).searchParams));
+        const [r1] = await Promise.all([tunggu((q) => q.get('start') === '0'), e.goto(`${ADMIN}/projects/${process.env.E2E_ARSIP}/tasks`)]);
+        const j1 = await r1.json();
+        if (j1.recordsTotal !== 520 || j1.data.length !== 25) throw new Error(`halaman 1: total ${j1.recordsTotal}, baris ${j1.data.length}`);
+        await expect(e.locator('table tbody tr')).toHaveCount(25);
+        const [r2] = await Promise.all([tunggu((q) => q.get('start') === '25'), e.locator('.dt-paging button', { hasText: '2' }).click()]);
+        const j2 = await r2.json();
+        const [r3] = await Promise.all([tunggu((q) => (q.get('search[value]') ?? '') === '512'), e.fill('.dt-search input', '512')]);
+        const j3 = await r3.json();
+        catat(true, `DataTables: recordsTotal ${j1.recordsTotal}, tiap permintaan hanya ${j1.data.length} baris (length=25), halaman 2 start=25 (${j2.data.length} baris), cari "512" difilter server menjadi ${j3.recordsFiltered}`);
+        await e.screenshot({ path: `${BUKTI}/09-datatables-520.png` });
+        await ke.close();
+    }
+
     if (galatJs.length) catat(false, `galat JS: ${galatJs.join(' | ')}`);
 } catch (e) {
     catat(false, `berhenti: ${e.message.split('\n')[0]}`);
