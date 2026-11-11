@@ -1,0 +1,25 @@
+<?php
+
+// Dibuat dari project_team_management_laravel.sql (tabel `user_profiles`).
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class UserProfile extends Model
+{
+    protected $table = 'user_profiles';
+
+    protected $guarded = ['id'];
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+}

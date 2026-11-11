@@ -1,0 +1,39 @@
+/* Tim: mobile-first (Petunjuk Teknis 6.2). Bottom navigation 72 px hanya di HP; di desktop diganti sidebar
+   dan isi melebar tanpa menyisakan ruang kosong bekas navbar (padding-bottom HP dihapus). */
+@import './app.css';
+
+.app-main { padding: 16px 16px 92px; max-width: 1440px; }
+@media (max-width: 359.98px) { .app-main { padding: 12px 12px 92px; } }
+.mobile-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; height: 72px; background: #fff; border-top: 1px solid var(--ptm-line);
+    display: grid; grid-template-columns: repeat(4, 1fr); padding-bottom: env(safe-area-inset-bottom); }
+.mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--ptm-ink-2); text-decoration: none; font-size: .78rem; font-weight: 600; min-height: 44px; }
+.mobile-bottom-nav a[aria-current="page"] { color: var(--ptm-aksi); }
+.desktop-sidebar { display: none !important; }
+.tim-kepala { position: sticky; top: 0; z-index: 1020; background: rgba(255, 255, 255, .97); border-bottom: 1px solid var(--ptm-line); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.tim-kepala .merek-kecil { font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--ptm-aksi); }
+
+@media (min-width: 992px) {
+    .app-main { padding: 28px 32px; margin-left: 248px; }
+    .mobile-bottom-nav { display: none !important; }
+    .desktop-sidebar { display: flex !important; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 248px; background: var(--ptm-sidebar); color: #dbe3f1; padding: 20px 12px; overflow-y: auto; }
+    .tim-kepala { margin-left: 248px; padding: 14px 32px; }
+}
+.desktop-sidebar .merek { display: flex; align-items: center; gap: .65rem; padding: 0 8px 18px; color: #fff; text-decoration: none; font-weight: 700; line-height: 1.1; font-size: .95rem; }
+.desktop-sidebar .merek small { display: block; font-weight: 500; color: #9fb0cc; font-size: .72rem; }
+.desktop-sidebar .merek-tanda { width: 34px; height: 34px; border-radius: 9px; background: var(--ptm-aksi); display: grid; place-items: center; color: #fff; flex: none; }
+.desktop-sidebar a.nav-tim { display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem; border-radius: 10px; color: #dbe3f1; text-decoration: none; font-weight: 550; min-height: 42px; }
+.desktop-sidebar a.nav-tim:hover { background: var(--ptm-sidebar-2); color: #fff; }
+.desktop-sidebar a.nav-tim[aria-current="page"] { background: var(--ptm-sidebar-2); color: #fff; }
+
+.kepala-halaman { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.kepala-halaman p { margin: .2rem 0 0; color: var(--ptm-ink-2); }
+.remah { font-size: .85rem; color: var(--ptm-ink-2); margin-bottom: .35rem; }
+.remah a { color: inherit; }
+.ringkas-status { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ringkas-status .kartu { padding: 12px; }
+.ringkas-status .angka-besar { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.daftar-task { display: grid; gap: 12px; }
+@media (min-width: 992px) { .daftar-task { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+.tab-project { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; }
+.tab-project a { padding: .5rem .9rem; border: 1px solid var(--ptm-line); background: #fff; border-radius: 10px; text-decoration: none; color: var(--ptm-ink-2); white-space: nowrap; font-weight: 550; }
+.tab-project a[aria-current="page"] { background: var(--ptm-aksi); border-color: var(--ptm-aksi); color: #fff; }

@@ -1,0 +1,31 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "concurrently": "^10.0.3",
+        "laravel-vite-plugin": "^3.1",
+        "vite": "^8.0.0"
+    },
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "bootstrap": "5.3.8",
+        "@popperjs/core": "2.11.8",
+        "jquery": "3.7.1",
+        "datatables.net": "^2.3.8",
+        "datatables.net-bs5": "^2.3.8",
+        "sortablejs": "1.15.7",
+        "@fullcalendar/core": "6.1.22",
+        "@fullcalendar/daygrid": "6.1.22",
+        "@fullcalendar/interaction": "6.1.22",
+        "@fullcalendar/timegrid": "6.1.22",
+        "@fullcalendar/list": "6.1.22",
+        "lucide-static": "1.72.0"
+    }
+}

@@ -1,0 +1,33 @@
+# MySQL 8.4 (memenuhi MySQL 8.0+ dokumen) dan phpMyAdmin untuk impor SQL satu kali (dokumen 2.3 langkah 5).
+# Sandi dibaca dari .env di folder ini (tidak di-commit). Data di volume bernama ptm_mysql.
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: ptm_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: project_team_management
+      MYSQL_USER: ptm
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-time-zone=+00:00"]
+    ports:
+      - "127.0.0.1:33061:3306"
+    volumes:
+      - ptm_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      retries: 30
+  phpmyadmin:
+    image: phpmyadmin:5.2.3
+    container_name: ptm_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "127.0.0.1:8180:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+volumes:
+  ptm_mysql:
