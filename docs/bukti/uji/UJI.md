@@ -52,3 +52,16 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 1. `docs/alat/siapkan-db-uji.sh` mengandaikan database `ptm_test` sudah ada; kini membuatnya dan memberi hak sendiri.
 2. `phpunit.xml` merujuk folder `tests/Unit` yang kosong sehingga tidak ikut git; suite kosong itu dibuang.
 3. Uji asap Tim sempat memakai project yang bukan milik Member; 403 yang muncul adalah perilaku benar, URL uji diganti ke project yang diikuti ketiga akun.
+
+## Temuan selama pengembangan dan pengujian (sudah diperbaiki)
+
+1. Pembuatan project gagal karena kolom `is_active` ambigu saat memeriksa anggota company; ditangkap tes domain, kolom diberi nama tabel.
+2. Progres di daftar project dan checklist di daftar task selalu 0% karena `select('tabel.*')` menimpa `withCount`; urutan diperbaiki dan dijaga tes.
+3. Yajra mengembalikan galat query sebagai JSON 200 berkunci error sehingga tes bisa lulus palsu; tes kini menolak respons bergalat.
+4. `$this->authorize()` tidak tersedia karena Controller dasar Laravel 13 kosong; trait AuthorizesRequests ditambahkan.
+5. `@json` multibaris di atribut Blade gagal dikompilasi (halaman daftar 500); diganti `json_encode`.
+6. `map('intval')` mengirim kunci sebagai basis (dashboard 500); diganti fungsi panah.
+7. Atribut `data-pratinjau` dipakai ganda di form dan wadah pratinjau; dinamai ulang.
+8. Pesan tolak Kanban ke Selesai dibuat menjelaskan jalan yang benar (kirim hasil untuk review).
+9. Bukti Debugbar pertama memakai APP_ENV=production; diulang dengan APP_DEBUG=false saja.
+10. Audit axe: kontras lencana hijau, tombol sekunder, label paginasi, tabel bergulir, dan FullCalendar diperbaiki (lihat `../ui/AUDIT.md`).
