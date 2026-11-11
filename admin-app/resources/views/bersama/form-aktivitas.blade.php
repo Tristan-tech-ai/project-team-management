@@ -28,7 +28,9 @@
         <div class="col-12">
             <details class="mb-2"><summary class="fw-semibold">Butuh geser deadline?</summary>
                 <div class="row g-2 mt-1">
-                    <div class="col-sm-6"><x-isian nama="ajukan_deadline" label="Deadline usulan" jenis="datetime-local"/></div>
+                    <div class="col-sm-6">
+                        <div class="d-flex gap-1 flex-wrap mb-1" aria-label="Isi cepat deadline usulan">@foreach ([7, 14, 30] as $h)<button type="button" class="btn btn-sm btn-outline-secondary" data-isi-hari="{{ $h }}" data-target="#f-ajukan_deadline">+{{ $h }} hari</button>@endforeach</div>
+                        <x-isian nama="ajukan_deadline" label="Deadline usulan" jenis="datetime-local"/></div>
                     <div class="col-sm-6"><x-isian nama="alasan_deadline" label="Alasan" bantuan="Diajukan ke PIC atau manager. Target awal tidak berubah."/></div>
                 </div>
             </details>

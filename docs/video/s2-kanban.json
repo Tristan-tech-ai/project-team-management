@@ -1,0 +1,91 @@
+{
+ "name": "s2-kanban",
+ "url": "http://127.0.0.1:8101/masuk",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/projects/9/board"
+  },
+  {
+   "waitFor": "[data-task-id='576']"
+  },
+  {
+   "drag": "[data-task-id='576'] .task-handle",
+   "to": "[data-kanban-column][data-status=in_progress]",
+   "pauseAfter": 1500
+  },
+  {
+   "waitFor": ".notifikasi .alert-success"
+  },
+  {
+   "drag": "[data-task-id='576'] .task-handle",
+   "to": "[data-kanban-column][data-status=done]",
+   "pauseAfter": 400
+  },
+  {
+   "waitFor": ".notifikasi .alert-danger"
+  },
+  {
+   "hover": ".notifikasi .alert-danger",
+   "zoom": 1.6,
+   "pauseAfter": 2600
+  },
+  {
+   "goto": "/tasks/578"
+  },
+  {
+   "waitFor": "role=heading[name='Materi Iklan']"
+  },
+  {
+   "select": "Putri Maharani",
+   "in": "label=PIC",
+   "zoom": 1.3
+  },
+  {
+   "click": "label[for=as-5]"
+  },
+  {
+   "click": "label[for=as-7]"
+  },
+  {
+   "click": "role=button[name='Simpan pelaksana']",
+   "pauseAfter": 900
+  },
+  {
+   "type": "Brief visual brosur",
+   "into": "#sub-baru",
+   "zoom": 1.3
+  },
+  {
+   "click": "role=button[name='Tambah']",
+   "pauseAfter": 700
+  },
+  {
+   "type": "Desain feed Instagram",
+   "into": "#sub-baru"
+  },
+  {
+   "click": "role=button[name='Tambah']",
+   "pauseAfter": 700
+  },
+  {
+   "hover": "main dl",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  }
+ ]
+}

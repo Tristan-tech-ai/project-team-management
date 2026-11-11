@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tampilkanFlash();
     rapikanAksesibilitas();
     if (document.querySelector('table[data-tabel]')) import('./tabel').then((m) => m.pasangTabel());
-    if (document.querySelector('[data-kanban], [data-centang], [data-ubah-status], [data-isi-durasi]')) {
+    if (document.querySelector('[data-kanban], [data-centang], [data-ubah-status], [data-isi-durasi], [data-isi-hari]')) {
         import('./kanban').then((m) => { m.pasangKanban(); m.pasangChecklist(); });
     }
     if (document.querySelector('[data-kalender]')) import('./kalender').then((m) => m.pasangKalender());

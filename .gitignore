@@ -1,3 +1,4 @@
 .env
 *.log
 /docs/bukti/tmp*
+/docs/video/cursorcam-output/

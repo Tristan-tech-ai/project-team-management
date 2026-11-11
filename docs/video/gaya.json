@@ -1,0 +1,16 @@
+{
+ "background": "#EFE9DD",
+ "padding": 0.05,
+ "radius": 10,
+ "shadow": 0.25,
+ "cursor": {
+  "show": true,
+  "size": 1.2,
+  "ripple": true
+ },
+ "zoom": {
+  "enabled": true,
+  "max": 1.4,
+  "hold": 600
+ }
+}

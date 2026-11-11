@@ -1,0 +1,61 @@
+{
+ "name": "s8-periode-baru",
+ "url": "http://127.0.0.1:8101/masuk",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/projects/2"
+  },
+  {
+   "waitFor": "#periode"
+  },
+  {
+   "select": "Semua periode",
+   "in": "#periode",
+   "showList": true,
+   "pauseAfter": 800
+  },
+  {
+   "click": "role=button[name='Buka periode baru']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "#modal-konfirmasi [data-ya]"
+  },
+  {
+   "pause": 1400
+  },
+  {
+   "click": "#modal-konfirmasi [data-ya]",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "text=Kanban Board"
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 2000
+  },
+  {
+   "select": "Semua periode",
+   "in": "#b-periode",
+   "showList": true,
+   "pauseAfter": 2200
+  }
+ ]
+}

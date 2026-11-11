@@ -1,0 +1,88 @@
+{
+ "name": "s7-rapat-deadline",
+ "url": "http://127.0.0.1:8101/masuk",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/projects/9/activities"
+  },
+  {
+   "waitFor": "form[action$='/activities'] input[name=title]"
+  },
+  {
+   "type": "Rapat tambahan dengan humas sekolah",
+   "into": "form[action$='/activities'] input[name=title]",
+   "zoom": 1.4
+  },
+  {
+   "click": "form[action$='/activities'] button[data-isi-durasi='120']"
+  },
+  {
+   "select": "Menggeser jadwal",
+   "in": "form[action$='/activities'] select[name=impact_type]"
+  },
+  {
+   "click": "label[for=pa-9-7]"
+  },
+  {
+   "click": "label[for=pa-9-5]"
+  },
+  {
+   "click": "text=Butuh geser deadline?",
+   "pauseAfter": 500
+  },
+  {
+   "type": "012920270500P",
+   "into": "form[action$='/activities'] input[name=ajukan_deadline]"
+  },
+  {
+   "type": "Sekolah menambah gelombang pendaftaran kedua",
+   "into": "form[action$='/activities'] input[name=alasan_deadline]"
+  },
+  {
+   "click": "role=button[name='Simpan aktivitas']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "role=button[name='Setujui deadline baru']"
+  },
+  {
+   "hover": "role=button[name='Setujui deadline baru']",
+   "zoom": 1.4,
+   "pauseAfter": 1400
+  },
+  {
+   "click": "role=button[name='Setujui deadline baru']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "text=Disetujui"
+  },
+  {
+   "scroll": {
+    "to": "top"
+   },
+   "zoom": false,
+   "pauseAfter": 600
+  },
+  {
+   "hover": "text=Perubahan jadwal",
+   "zoom": 1.4,
+   "pauseAfter": 2600
+  }
+ ]
+}

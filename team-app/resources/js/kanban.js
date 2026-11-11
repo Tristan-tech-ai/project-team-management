@@ -107,4 +107,15 @@ export function pasangChecklist() {
         const isian = document.querySelector(t.dataset.target);
         if (isian) isian.value = t.dataset.isiDurasi;
     });
+
+    // Isi cepat deadline usulan: hari ini + N hari, pukul 17.00 waktu peramban.
+    document.addEventListener('click', (e) => {
+        const t = e.target.closest('[data-isi-hari]');
+        if (!t) return;
+        const d = new Date();
+        d.setDate(d.getDate() + Number(t.dataset.isiHari));
+        const dua = (n) => String(n).padStart(2, '0');
+        const isian = document.querySelector(t.dataset.target);
+        if (isian) isian.value = `${d.getFullYear()}-${dua(d.getMonth() + 1)}-${dua(d.getDate())}T17:00`;
+    });
 }
