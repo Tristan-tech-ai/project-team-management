@@ -14,7 +14,7 @@ RUN npm run build
 
 # 2. PHP 8.4 + FrankenPHP (server yang disarankan Vercel untuk PHP di container).
 FROM dunglas/frankenphp:1-php8.4-bookworm AS dasar
-RUN install-php-extensions pdo_mysql intl zip bcmath opcache \
+RUN install-php-extensions pdo_mysql gd intl zip bcmath opcache \
  && cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 WORKDIR /app
 
