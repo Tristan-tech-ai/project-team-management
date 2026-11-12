@@ -2,7 +2,7 @@
 
 Rekaman sungguhan Admin App (:8101) dan Team App (:8102) yang berjalan di instalasi bersih (dipasang mengikuti README dari nol, `UatSkenarioSeeder`, Debugbar mati). Bukan animasi: setiap gambar adalah layar aplikasi yang sedang dipakai.
 
-Hasil: `C:/Users/Tristan/Downloads/project-pkl/proposal/ptm-demo.mp4` (4 menit 28 detik, 1920x1080, 30 fps, H.264 + AAC, -15,9 LUFS, puncak -6 dBFS). Berkas video tidak masuk git.
+Hasil v2 (12 November 2026): `docs/video/ptm-demo.mp4` (3 menit 49 detik, 1920x1080, 30 fps, H.264 + AAC, -16 LUFS). Rekaman yang sama dirender ulang tanpa bilah browser dan tanpa riak klik, lalu disusun sebagai film: pembuka masalah kerja agensi, dua aplikasi, tiga peran, cara kerja, studi kasus Campaign Pendaftaran Sekolah, 10 bab berlabel hari dan sudut pandang (Manager Radit, Member Putri di HP), momen sorot yang dibangun ulang dari teks asli rekaman (task dari template, kartu Kanban yang ditolak masuk Selesai, revisi beralasan, cap DITERIMA, garis deadline dengan target awal tetap, 403, 520 task). Rekaman aplikasi 63% dari durasi. Musik: "Podcast Interview Background Music" oleh HitsLab (Pixabay, Pixabay Content License); efek suara CC0. Versi pertama (4 menit 28 detik, rekaman dengan caption polos) digantikan.
 
 ## Alur (satu cerita, berurutan)
 
@@ -30,3 +30,7 @@ Hasil: `C:/Users/Tristan/Downloads/project-pkl/proposal/ptm-demo.mp4` (4 menit 2
 ## Menyunting
 
 `python -I susun.py` (env `PTM_BGM` = skrip musik latar sintetis lokal; opsional `PTM_FONTS`, `PTM_VIDEO_HASIL`, `PTM_VIDEO_KERJA`). Skrip membaca waktu setiap langkah dari log cursorcam (`waktu.py`), memotong login berulang setelah segmen pertama, memperkecil rekaman 88% supaya caption punya pita sendiri di bawah dan tidak menutupi UI, membakar caption bahasa Indonesia (Plus Jakarta Sans, OFL), menambah kartu pembuka dan penutup, menyambung, lalu memberi musik latar sintetis buatan lokal (tanpa lisensi pihak ketiga) yang dinormalkan ke -16 LUFS. Pemeriksaan: ffprobe, ebur128, dan lembar kontak bingkai setiap 9 detik.
+
+## Menyusun v2
+
+Rekaman dirender ulang dengan gaya tanpa bilah browser, tanpa riak, dan tanpa pemangkasan diam (`cursorcam render <folder rekaman> --style gaya-ptm.json`), lalu waktu tiap langkah dibaca dari log cursorcam, dipotong per rentang langkah (login berulang dibuang), dan disusun di HyperFrames bersama momen sorot, lagu, dan efek. Skrip penyusunnya dipakai bersama video Nadi dan disimpan di luar repositori ini; berkas langkah rekaman (`s1` sampai `s10`) tetap di sini sehingga rekaman bisa diulang dari aplikasi.
