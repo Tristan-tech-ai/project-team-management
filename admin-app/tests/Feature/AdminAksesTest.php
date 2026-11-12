@@ -213,6 +213,6 @@ class AdminAksesTest extends TestCase
         $isi = $this->actingAs($manager)->get("/projects/{$p->id}/activities")->assertOk()->getContent();
         $this->assertStringContainsString('Deadline project sekarang: '.\App\Support\Waktu::tanggalJam($p->due_at), $isi);
         $this->assertStringContainsString('data-dasar-project="'.\App\Support\Waktu::untukInput($p->due_at).'"', $isi);
-        $this->assertStringContainsString(e(json_encode([$t->id => \App\Support\Waktu::untukInput($t->refresh()->due_at)])), $isi);
+        $this->assertStringContainsString('&quot;'.$t->id.'&quot;:&quot;'.\App\Support\Waktu::untukInput($t->refresh()->due_at).'&quot;', $isi);
     }
 }
