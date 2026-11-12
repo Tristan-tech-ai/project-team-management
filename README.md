@@ -67,15 +67,62 @@ Jangan menjalankan `migrate:fresh`, `db:wipe`, atau impor SQL ulang pada databas
 
 **Production:** `composer install --no-dev`, `APP_ENV=production`, `APP_DEBUG=false`, `DEBUGBAR_ENABLED=false`, lalu `npm run build`.
 
+## Online (gratis)
+
+Versi yang bisa dicoba langsung:
+
+| Aplikasi | Alamat |
+|---|---|
+| Admin App | https://ptm-admin.vercel.app |
+| Team App | https://ptm-team.vercel.app |
+
+Akun masuk tidak diumumkan di sini; minta ke pemilik repositori.
+
+Susunannya tetap sama dengan petunjuk teknis: satu database MySQL bersama untuk dua aplikasi yang dideploy terpisah, skema dari migrasi + SQL modul yang diimpor satu kali, nama tabel dan kolom tidak berubah. Kode aplikasi tidak diubah; yang ditambahkan hanya `Dockerfile`, `.dockerignore`, dan folder `docker/` di tiap app.
+
+- **Database: TiDB Cloud Starter.** Kompatibel MySQL 8.0, gratis dalam kuota (5 GiB, 50 juta Request Unit per bulan), region AWS Singapura, koneksi wajib TLS. Sebelum online, seluruh tes dijalankan terhadap TiDB (12 November 2026): migrasi dan impor SQL lulus (40 tabel), tes admin 41/41 dan tim 31/31 lulus, dan uji semua menu untuk 3 peran (`docs/alat/asap.mjs`) tanpa galat.
+- **Aplikasi: Vercel Container Runtime** (Beta, tersedia di paket gratis). Image dibangun dari `Dockerfile` tiap app: aset Vite, PHP 8.4 dengan FrankenPHP, `composer install --no-dev` (Debugbar tidak ikut terpasang), `APP_ENV=production`, `APP_DEBUG=false`, `DEBUGBAR_ENABLED=false`, log ke stderr, sesi dan cache di database.
+
+Memasang sendiri:
+
+1. **TiDB Cloud.** Buat instance Starter, buka Connect, buat sandi, lalu buat database `project_team_management` (misalnya `CREATE DATABASE project_team_management;` di SQL Editor).
+2. **Skema dan data awal**, dari `admin-app` lokal dengan env menunjuk ke TiDB (`DB_HOST`, `DB_PORT=4000`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, dan `MYSQL_ATTR_SSL_CA` berisi path berkas CA sistem, misalnya `/etc/ssl/certs/ca-certificates.crt`):
+   ```bash
+   php artisan migrate --force
+   php ../docs/alat/impor-sql.php ../docs/project_team_management_laravel.sql   # satu kali; dilewati bila tabel modul sudah ada
+   php artisan db:seed                                                       # INITIAL_ADMIN_* dan DEMO_SEED_PASSWORD
+   ```
+   phpMyAdmin yang diarahkan ke TiDB juga bisa dipakai untuk impor, asalkan memakai TLS.
+3. **Vercel**, sekali untuk tiap app: Add New Project, impor repositori ini, Root Directory `admin-app` (atau `team-app`), Framework Preset **Container**, region Functions `sin1` (dekat TiDB Singapura). Isi Environment Variables:
+
+   | Variabel | Isi |
+   |---|---|
+   | `APP_KEY` | kunci baru per app (`php artisan key:generate --show`), tipe Sensitive |
+   | `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` | dari TiDB Connect, tipe Sensitive |
+   | `DB_CONNECTION`, `DB_PORT`, `DB_DATABASE` | `mysql`, `4000`, `project_team_management` |
+   | `APP_URL` | alamat app itu sendiri |
+   | `ADMIN_APP_URL`, `TEAM_APP_URL` | alamat kedua app (tautan antar-app) |
+   | `APP_NAME`, `SESSION_COOKIE`, `CACHE_PREFIX` | beda per app, seperti `.env.example` |
+   | `FORCE_HTTPS`, `SESSION_SECURE_COOKIE` | `on`, `true` (Vercel melayani lewat HTTPS) |
+   | `APP_LOCALE`, `APP_FALLBACK_LOCALE` | `id`, `en` |
+
+   Lalu Deploy. Setiap push ke `main` membangun ulang kedua app.
+
+Batasan versi online:
+- Berkas yang diunggah (foto profil, lampiran hasil task) disimpan di penyimpanan sementara container: hilang saat instance diganti dan tidak dibagi antar-app. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk berkas permanen dibutuhkan penyimpanan objek (misalnya disk `s3` Laravel), yang berarti menambah paket.
+- App tidur setelah 5 menit tanpa kunjungan; permintaan pertama sesudahnya sedikit lebih lambat.
+- Image di atas dibangun dan dijalankan oleh Vercel. Untuk menjalankannya dengan Docker di komputer sendiri: `docker build -t ptm-admin admin-app`, lalu `docker run -p 8101:80` dengan variabel yang sama (untuk MySQL lokal tanpa TLS, isi `MYSQL_ATTR_SSL_CA` dengan string kosong).
+
 ## Struktur
 
 ```
 admin-app/      Laravel: manajemen (memegang migrasi schema)
 team-app/       Laravel: aplikasi tim mobile-first (tanpa migrasi)
+  Dockerfile, docker/   image produksi tiap app (Docker dan Vercel)
 docs/
   project_team_management_laravel.sql   schema modul (diimpor satu kali)
   RISET.md      keputusan versi dan arsitektur
-  alat/         skrip uji peramban, impor, sinkron kode domain
+  alat/         skrip uji peramban, impor (phpMyAdmin atau impor-sql.php), sinkron kode domain
   bukti/        hasil uji (UJI.md), audit UI, tangkapan layar, performa
   UAT.pdf       dokumen UAT
   video/        video alur dan langkah rekamannya
