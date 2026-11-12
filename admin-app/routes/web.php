@@ -15,6 +15,7 @@ use App\Http\Controllers\Master\CompanyController;
 use App\Http\Controllers\Master\DivisionController;
 use App\Http\Controllers\Master\MemberController;
 use App\Http\Controllers\Master\PositionController;
+use App\Http\Controllers\Settings\AuditLogController;
 use App\Http\Controllers\Settings\GeneralSettingController;
 use App\Http\Controllers\Settings\MenuController;
 use App\Http\Controllers\Settings\RolePermissionController;
@@ -133,6 +134,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
     Route::put('/settings/menus', [MenuController::class, 'update'])->middleware('can:settings.menus.manage')->name('settings.menus.update');
     Route::get('/settings/general', [GeneralSettingController::class, 'edit'])->middleware('can:settings.system.manage')->name('settings.general');
     Route::put('/settings/general', [GeneralSettingController::class, 'update'])->middleware('can:settings.system.manage')->name('settings.general.update');
+    Route::get('/settings/audit', [AuditLogController::class, 'index'])->middleware('can:settings.system.manage')->name('settings.audit');
 
     // Akun
     Route::get('/akun', [AkunController::class, 'edit'])->name('akun.edit');

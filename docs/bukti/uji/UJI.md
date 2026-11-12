@@ -19,6 +19,7 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 |---|---|---|---|
 | Autentikasi | Tanpa login tidak bisa membuka Admin/Tim; URL langsung ditolak Policy | Lulus | `test_tamu_diarahkan_ke_masuk`, `test_tamu_diarahkan_dan_login_member_berhasil`, e2e langkah Member 403 |
 | Role & menu | Super Admin 9 menu, Member hanya menu berizin; menu tidak memberi akses backend | Lulus | `test_menu_dinamis_sesuai_izin` (9/23, 8/20, 6/10), `test_menu_nonaktif_tersembunyi_tetapi_route_tetap_dilindungi_policy`, `asap-admin.txt` |
+| Audit Super Admin (4.1) | Semua aksi dicatat: setiap POST/PUT/PATCH/DELETE dari kedua app (termasuk masuk, keluar, dan aksi yang ditolak) masuk `audit_logs` dengan pengguna, role, route, isian, status; sandi dan token tidak disimpan; halaman Log Aktivitas hanya Super Admin | Lulus | `AuditLogTest` (5 tes: dicatat tanpa sandi, 403 tetap dicatat dan GET tidak, tamu tidak, pembersih isian, halaman hanya Super Admin), `TimAuditTest` (app team) |
 | Company / Client | Master terpisah, tanpa Client PIC | Lulus | `test_crud_company_oleh_super_admin` (SoftDeletes), form Client tanpa PIC |
 | Keanggotaan | Satu orang di beberapa divisi, anggota unik tidak ganda | Lulus | `test_anggota_unik_tidak_ganda_walau_di_beberapa_divisi`, `test_tambah_anggota_dengan_role_company_divisi_jabatan_lalu_bisa_masuk` |
 | Multi assignee | Task >= 2 anggota; PIC task anggota project/assignee | Lulus | `test_task_dua_pelaksana_dan_pic_termasuk_assignee`, `test_pelaksana_harus_anggota_project`, e2e "task punya 2 pelaksana" |
@@ -67,6 +68,9 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 9. Bukti Debugbar pertama memakai APP_ENV=production; diulang dengan APP_DEBUG=false saja.
 10. Audit axe: kontras lencana hijau, tombol sekunder, label paginasi, tabel bergulir, dan FullCalendar diperbaiki (lihat `../ui/AUDIT.md`).
 11. Saat merekam video, deadline usulan di form aktivitas sulit diisi dan mudah salah hari; ditambah tombol geser cepat +7/+14/+30 hari yang dihitung dari deadline sekarang (task terpilih, lalu project) dan baris "Deadline project sekarang", dijaga `test_form_aktivitas_memberi_dasar_geser_dari_deadline_sekarang`.
+12. Petunjuk Teknis 4.1 meminta semua aksi Super Admin dicatat, sedangkan yang tercatat baru riwayat task (`task_activities`); ditambah tabel `audit_logs` lewat migrasi admin-app, middleware `CatatAksi` di kedua app, dan halaman Log Aktivitas (Pengaturan Sistem) khusus Super Admin.
+13. Tes audit menemukan Simpan di Pengaturan Sistem selalu gagal (500) karena `system_settings.setting_value` bertipe JSON di SQL modul sedangkan nilainya disimpan sebagai teks biasa; model kini memakai cast JSON, dijaga `PengaturanSistemTest`.
+14. Baris per halaman tabel tersimpan di Pengaturan Sistem tetapi tabel selalu 25 baris; kini DataTables membaca nilainya.
 
 ## Uji versi online (12 Nov 2026)
 
@@ -76,6 +80,7 @@ Versi online: Admin App https://ptm-admin.vercel.app dan Team App https://ptm-te
 |---|---|---|
 | Migrasi + impor SQL modul ke TiDB | `php artisan migrate --force` lalu `docs/alat/impor-sql.php` | lulus, 61 pernyataan, 40 tabel |
 | Tes Laravel ke database uji di TiDB (`ptm_test`) | `php artisan test` di kedua app | admin 41/41, tim 31/31 lulus |
+| Tes Laravel setelah log audit dan perbaikan Pengaturan Sistem (13 Nov 2026), ke `ptm_test` | `php artisan migrate --force` lalu `php artisan test` di kedua app | admin 47/47, tim 32/32 lulus (tes audit merah 4/5 sebelum tabel dimigrasi) |
 | Semua menu 3 peran, data database online | `docs/alat/asap.mjs` ke admin-app lokal yang tersambung ke TiDB | 0 gagal |
 | Alur kerja ujung ke ujung, data database online | `docs/alat/e2e-alur.mjs` ke admin-app + team-app lokal yang tersambung ke TiDB ([online-db-alur.txt](online-db-alur.txt)) | 15 lulus, 0 gagal |
 | Pemeriksaan dari luar | `/up` dan `/masuk` kedua app, formulir dan cookie, halaman 404 | 200; formulir memakai https; cookie sesi `secure` dan `httponly`; sesi tercatat di database online; 404 tanpa jejak debug; Debugbar tidak terpasang |

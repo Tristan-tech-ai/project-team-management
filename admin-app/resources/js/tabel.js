@@ -78,7 +78,7 @@ export function pasangTabel() {
             },
             columns: kolom,
             order: el.dataset.urut ? JSON.parse(el.dataset.urut) : [[0, 'asc']],
-            pageLength: 25,
+            pageLength: [10, 25, 50, 100].includes(Number(document.body.dataset.panjangTabel)) ? Number(document.body.dataset.panjangTabel) : 25,
             language: bahasa,
             autoWidth: false,
         });

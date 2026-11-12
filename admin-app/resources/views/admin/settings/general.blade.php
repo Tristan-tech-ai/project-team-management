@@ -1,6 +1,7 @@
 <x-layouts.admin judul="Pengaturan Sistem">
     <div class="kepala-halaman"><div><div class="remah">System Settings</div><h1>Pengaturan Sistem</h1>
-        <p>Berlaku untuk aplikasi Admin dan Tim karena keduanya membaca database yang sama.</p></div></div>
+        <p>Berlaku untuk aplikasi Admin dan Tim karena keduanya membaca database yang sama.</p></div>
+        @if (auth()->user()->isSuperAdmin())<a class="btn btn-outline-secondary" href="{{ route('settings.audit') }}">Log aktivitas</a>@endif</div>
     <form method="post" action="{{ route('settings.general.update') }}" class="kartu" style="max-width:640px">
         @csrf @method('PUT')
         <x-isian nama="timezone" label="Zona waktu" jenis="select" :pilihan="$zona" :nilai="$nilai['timezone'] ?? 'Asia/Makassar'" wajib bantuan="Data disimpan dalam UTC; semua tanggal dan jam ditampilkan di zona ini."/>

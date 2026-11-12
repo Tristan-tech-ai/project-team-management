@@ -8,7 +8,7 @@
     @fonts
     @vite(['resources/css/tata-letak.css', 'resources/js/app.js'])
 </head>
-<body>
+<body data-panjang-tabel="{{ \App\Support\Pengaturan::panjangTabel() }}">
 <a href="#isi" class="lewati">Lewati ke isi</a>
 @php
     $menu = app(\App\Services\MenuService::class)->untuk(auth()->user());

@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['aktif' => \App\Http\Middleware\PastikanAktif::class]);
+        // Petunjuk Teknis 4.1: semua aksi yang mengubah data dicatat ke audit_logs.
+        $middleware->appendToGroup('web', \App\Http\Middleware\CatatAksi::class.':team');
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/');
     })

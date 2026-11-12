@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\ProjectTemplate;
 use App\Models\SystemSetting;
+use App\Support\Pengaturan;
 use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,6 +42,7 @@ class GeneralSettingController extends Controller
                 ['setting_value' => isset($data[$kunci]) ? (string) $data[$kunci] : null, 'description' => $ket, 'updated_by' => $request->user()->id]);
         }
         Waktu::lupakan();
+        Pengaturan::lupakan();
 
         return back()->with('ok', 'Pengaturan sistem tersimpan.');
     }
