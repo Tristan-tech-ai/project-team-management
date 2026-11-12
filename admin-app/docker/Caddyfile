@@ -1,0 +1,14 @@
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:80} {
+	root * /app/public
+	encode zstd gzip
+	php_server {
+		# Di belakang proksi HTTPS (Vercel) isi FORCE_HTTPS=on supaya tautan dan
+		# formulir memakai https; untuk uji lokal di http biarkan off.
+		env HTTPS {$FORCE_HTTPS:off}
+	}
+}
