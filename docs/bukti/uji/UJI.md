@@ -67,3 +67,16 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 9. Bukti Debugbar pertama memakai APP_ENV=production; diulang dengan APP_DEBUG=false saja.
 10. Audit axe: kontras lencana hijau, tombol sekunder, label paginasi, tabel bergulir, dan FullCalendar diperbaiki (lihat `../ui/AUDIT.md`).
 11. Saat merekam video, deadline usulan di form aktivitas sulit diisi dan mudah salah hari; ditambah tombol geser cepat +7/+14/+30 hari yang dihitung dari deadline sekarang (task terpilih, lalu project) dan baris "Deadline project sekarang", dijaga `test_form_aktivitas_memberi_dasar_geser_dari_deadline_sekarang`.
+
+## Uji versi online (12 Nov 2026)
+
+Versi online: Admin App https://ptm-admin.vercel.app dan Team App https://ptm-team.vercel.app (Vercel Container Runtime), database TiDB Cloud Starter (kompatibel MySQL). Kode dan skema sama dengan versi lokal; yang ditambahkan hanya `Dockerfile` dan `docker/` per app.
+
+| Uji | Cara | Hasil |
+|---|---|---|
+| Migrasi + impor SQL modul ke TiDB | `php artisan migrate --force` lalu `docs/alat/impor-sql.php` | lulus, 61 pernyataan, 40 tabel |
+| Tes Laravel ke database uji di TiDB (`ptm_test`) | `php artisan test` di kedua app | admin 41/41, tim 31/31 lulus |
+| Semua menu 3 peran, data database online | `docs/alat/asap.mjs` ke admin-app lokal yang tersambung ke TiDB | 0 gagal |
+| Alur kerja ujung ke ujung, data database online | `docs/alat/e2e-alur.mjs` ke admin-app + team-app lokal yang tersambung ke TiDB ([online-db-alur.txt](online-db-alur.txt)) | 15 lulus, 0 gagal |
+| Pemeriksaan dari luar | `/up` dan `/masuk` kedua app, formulir dan cookie, halaman 404 | 200; formulir memakai https; cookie sesi `secure` dan `httponly`; sesi tercatat di database online; 404 tanpa jejak debug; Debugbar tidak terpasang |
+| Uji langsung di alamat online dengan masuk akun (3 peran + alur kerja) | `asap.mjs` + `e2e-alur.mjs` dengan `E2E_ADMIN=https://ptm-admin.vercel.app` dan `E2E_TIM=https://ptm-team.vercel.app` | menunggu dijalankan pemilik akun demo |
