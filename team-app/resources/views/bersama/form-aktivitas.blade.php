@@ -28,8 +28,16 @@
         <div class="col-12">
             <details class="mb-2"><summary class="fw-semibold">Butuh geser deadline?</summary>
                 <div class="row g-2 mt-1">
+                    @php
+                        // Dasar geser cepat: deadline task terpilih, atau deadline project, atau hari ini bila belum ada.
+                        $tenggatTask = ! empty($tasksPilihan) && count($tasksPilihan)
+                            ? \App\Models\Task::query()->whereIn('id', collect($tasksPilihan)->keys())->whereNotNull('due_at')->get(['id', 'due_at'])
+                                ->mapWithKeys(fn ($t) => [$t->id => \App\Support\Waktu::untukInput($t->due_at)])
+                            : collect();
+                    @endphp
                     <div class="col-sm-6">
-                        <div class="d-flex gap-1 flex-wrap mb-1" aria-label="Isi cepat deadline usulan">@foreach ([7, 14, 30] as $h)<button type="button" class="btn btn-sm btn-outline-secondary" data-isi-hari="{{ $h }}" data-target="#f-ajukan_deadline">+{{ $h }} hari</button>@endforeach</div>
+                        <p class="form-text mt-0 mb-1">Deadline project sekarang: {{ $project->due_at ? \App\Support\Waktu::tanggalJam($project->due_at) : 'belum ada' }}</p>
+                        <div class="d-flex gap-1 flex-wrap mb-1" role="group" aria-label="Geser cepat dari deadline sekarang" data-dasar-project="{{ \App\Support\Waktu::untukInput($project->due_at) }}" data-dasar-task="{{ json_encode($tenggatTask) }}" data-pilih-task="#f-task_id">@foreach ([7, 14, 30] as $h)<button type="button" class="btn btn-sm btn-outline-secondary" data-isi-hari="{{ $h }}" data-target="#f-ajukan_deadline">+{{ $h }} hari</button>@endforeach</div>
                         <x-isian nama="ajukan_deadline" label="Deadline usulan" jenis="datetime-local"/></div>
                     <div class="col-sm-6"><x-isian nama="alasan_deadline" label="Alasan" bantuan="Diajukan ke PIC atau manager. Target awal tidak berubah."/></div>
                 </div>

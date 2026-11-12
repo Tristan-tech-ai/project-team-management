@@ -108,14 +108,27 @@ export function pasangChecklist() {
         if (isian) isian.value = t.dataset.isiDurasi;
     });
 
-    // Isi cepat deadline usulan: hari ini + N hari, pukul 17.00 waktu peramban.
+    // Geser cepat deadline usulan: deadline sekarang (task terpilih, lalu project) + N hari, jam tetap.
+    // Tanpa deadline sama sekali: hari ini + N hari pukul 17.00. Nilai dasar sudah dalam zona tampilan sistem.
     document.addEventListener('click', (e) => {
         const t = e.target.closest('[data-isi-hari]');
         if (!t) return;
-        const d = new Date();
+        const grup = t.closest('[data-dasar-project]');
+        let dasar = grup?.dataset.dasarProject ?? '';
+        const pilih = grup ? document.querySelector(grup.dataset.pilihTask) : null;
+        if (pilih?.value) {
+            try {
+                dasar = JSON.parse(grup.dataset.dasarTask || '{}')[pilih.value] ?? dasar;
+            } catch {
+                // Peta rusak: tetap pakai deadline project.
+            }
+        }
+        const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(dasar);
+        const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5])) : new Date();
+        if (!m) d.setHours(17, 0, 0, 0);
         d.setDate(d.getDate() + Number(t.dataset.isiHari));
         const dua = (n) => String(n).padStart(2, '0');
         const isian = document.querySelector(t.dataset.target);
-        if (isian) isian.value = `${d.getFullYear()}-${dua(d.getMonth() + 1)}-${dua(d.getDate())}T17:00`;
+        if (isian) isian.value = `${d.getFullYear()}-${dua(d.getMonth() + 1)}-${dua(d.getDate())}T${dua(d.getHours())}:${dua(d.getMinutes())}`;
     });
 }

@@ -202,4 +202,17 @@ class AdminAksesTest extends TestCase
         $task = collect($this->getJson('/projects/'.$p->id.'/tasks/data?'.$q)->json('data'))->firstWhere('title', 'Desain');
         $this->assertSame(50, $task['subtask']);
     }
+
+    public function test_form_aktivitas_memberi_dasar_geser_dari_deadline_sekarang(): void
+    {
+        $c = $this->company();
+        $manager = $this->pengguna('manager', $c);
+        $p = $this->project($manager, $manager, $c, [$manager], [], 'one_time', $this->template());
+        $t = Task::query()->where('project_id', $p->id)->whereNull('parent_id')->firstOrFail();
+        $t->update(['due_at' => now()->addDays(3)]);
+        $isi = $this->actingAs($manager)->get("/projects/{$p->id}/activities")->assertOk()->getContent();
+        $this->assertStringContainsString('Deadline project sekarang: '.\App\Support\Waktu::tanggalJam($p->due_at), $isi);
+        $this->assertStringContainsString('data-dasar-project="'.\App\Support\Waktu::untukInput($p->due_at).'"', $isi);
+        $this->assertStringContainsString(e(json_encode([$t->id => \App\Support\Waktu::untukInput($t->refresh()->due_at)])), $isi);
+    }
 }
