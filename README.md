@@ -87,11 +87,11 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 ## Uji
 
 - Database uji: `sh docs/alat/siapkan-db-uji.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
-- Tes: `php artisan test` di masing-masing app (admin 41, tim 31; tes domain identik di keduanya).
+- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 41, tim 31; tes domain identik di keduanya).
 - Uji peramban (kedua app berjalan): `node docs/alat/asap.mjs` (semua menu untuk 3 peran) dan `node docs/alat/e2e-alur.mjs` (alur 17 langkah).
 - Hasil lengkap per skenario dan peran: `docs/bukti/uji/UJI.md`; dokumen UAT: `docs/UAT.pdf`.
 
-README ini diuji dari nol di folder dan database baru (12 November 2026) sampai login dan seluruh uji lulus.
+README ini diuji dari nol di folder dan database baru (12 November 2026) sampai login dan seluruh uji lulus, lalu diuji lagi dari klon repositori publik ini: tes admin 41/41 dan tim 31/31 lulus.
 
 ## Catatan
 
