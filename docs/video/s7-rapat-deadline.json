@@ -18,13 +18,13 @@
    "pauseAfter": 500
   },
   {
-   "goto": "/projects/9/activities"
+   "goto": "/projects/3/activities"
   },
   {
    "waitFor": "form[action$='/activities'] input[name=title]"
   },
   {
-   "type": "Rapat tambahan dengan humas sekolah",
+   "type": "Rapat tambahan dengan pemilik website",
    "into": "form[action$='/activities'] input[name=title]",
    "zoom": 1.4
   },
@@ -36,21 +36,22 @@
    "in": "form[action$='/activities'] select[name=impact_type]"
   },
   {
-   "click": "label[for=pa-9-7]"
+   "click": "label[for=pa-3-5]"
   },
   {
-   "click": "label[for=pa-9-5]"
+   "click": "label[for=pa-3-8]"
   },
   {
    "click": "text=Butuh geser deadline?",
    "pauseAfter": 500
   },
   {
-   "type": "012920270500P",
-   "into": "form[action$='/activities'] input[name=ajukan_deadline]"
+   "click": "button[data-isi-hari='14']",
+   "zoom": 1.4,
+   "pauseAfter": 900
   },
   {
-   "type": "Sekolah menambah gelombang pendaftaran kedua",
+   "type": "Pemilik menambah halaman katalog produk",
    "into": "form[action$='/activities'] input[name=alasan_deadline]"
   },
   {

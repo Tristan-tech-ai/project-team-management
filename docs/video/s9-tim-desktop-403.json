@@ -1,0 +1,89 @@
+{
+ "name": "s9-tim-desktop-403",
+ "url": "http://127.0.0.1:8102/masuk",
+ "allowOrigins": [
+  "http://127.0.0.1:8101"
+ ],
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "putri@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "main"
+  },
+  {
+   "hover": "nav[aria-label='Menu utama'] a[href$='/tasks']",
+   "zoom": 1.4,
+   "pauseAfter": 1200
+  },
+  {
+   "click": "nav[aria-label='Menu utama'] a[href$='/tasks']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "main"
+  },
+  {
+   "scroll": {
+    "to": "bottom"
+   },
+   "zoom": false,
+   "pauseAfter": 1500
+  },
+  {
+   "goto": "http://127.0.0.1:8101/masuk"
+  },
+  {
+   "pause": 500
+  },
+  {
+   "type": "putri@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "main"
+  },
+  {
+   "goto": "http://127.0.0.1:8101/management"
+  },
+  {
+   "waitFor": "h1.h3"
+  },
+  {
+   "hover": "h1.h3",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  },
+  {
+   "goto": "http://127.0.0.1:8101/settings/roles"
+  },
+  {
+   "waitFor": "h1.h3"
+  },
+  {
+   "hover": "h1.h3",
+   "zoom": 1.4,
+   "pauseAfter": 2000
+  }
+ ]
+}

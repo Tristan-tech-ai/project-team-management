@@ -2,3 +2,5 @@
 *.log
 /docs/bukti/tmp*
 /docs/video/cursorcam-output/
+/docs/video/cadangan/
+/docs/video/tmp-susun/

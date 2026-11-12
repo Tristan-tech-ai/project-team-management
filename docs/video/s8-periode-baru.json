@@ -18,7 +18,7 @@
    "pauseAfter": 500
   },
   {
-   "goto": "/projects/2"
+   "goto": "/projects/9"
   },
   {
    "waitFor": "#periode"
@@ -37,25 +37,42 @@
    "waitFor": "#modal-konfirmasi [data-ya]"
   },
   {
-   "pause": 1400
+   "pause": 1600
   },
   {
    "click": "#modal-konfirmasi [data-ya]",
    "pauseAfter": 900
   },
   {
-   "waitFor": "text=Kanban Board"
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "#b-periode",
+   "zoom": 1.4,
+   "pauseAfter": 1600
   },
   {
    "hover": "[data-kanban]",
    "zoom": false,
-   "pauseAfter": 2000
+   "pauseAfter": 1800
   },
   {
-   "select": "Semua periode",
+   "select": "Periode 1 Nov 2026 sampai 30 Nov 2026",
    "in": "#b-periode",
    "showList": true,
-   "pauseAfter": 2200
+   "pauseAfter": 700
+  },
+  {
+   "click": "role=button[name='Saring']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 2600
   }
  ]
 }

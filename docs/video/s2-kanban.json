@@ -18,7 +18,7 @@
    "pauseAfter": 500
   },
   {
-   "goto": "/projects/9/board"
+   "goto": "/projects/9/board?periode=10"
   },
   {
    "waitFor": "[data-task-id='576']"
@@ -60,6 +60,10 @@
   },
   {
    "click": "label[for=as-7]"
+  },
+  {
+   "click": "label[for=as-4]",
+   "pauseAfter": 600
   },
   {
    "click": "role=button[name='Simpan pelaksana']",

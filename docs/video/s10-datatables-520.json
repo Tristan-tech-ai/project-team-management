@@ -1,0 +1,67 @@
+{
+ "name": "s10-datatables-520",
+ "url": "http://127.0.0.1:8101/masuk",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "goto": "/projects/4/tasks"
+  },
+  {
+   "waitFor": ".dt-info"
+  },
+  {
+   "hover": ".dt-info",
+   "zoom": 1.4,
+   "pauseAfter": 1600
+  },
+  {
+   "scroll": {
+    "to": ".dt-paging"
+   },
+   "zoom": false,
+   "pauseAfter": 600
+  },
+  {
+   "click": ".dt-paging button[data-dt-idx='1']",
+   "zoom": 1.4,
+   "pauseAfter": 1400
+  },
+  {
+   "hover": ".dt-info",
+   "zoom": 1.4,
+   "pauseAfter": 1400
+  },
+  {
+   "scroll": {
+    "to": "top"
+   },
+   "zoom": false,
+   "pauseAfter": 500
+  },
+  {
+   "type": "512",
+   "into": ".dt-search input",
+   "zoom": 1.4,
+   "pauseAfter": 1600
+  },
+  {
+   "hover": ".dt-info",
+   "zoom": 1.4,
+   "pauseAfter": 2200
+  }
+ ]
+}
