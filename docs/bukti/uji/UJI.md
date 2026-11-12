@@ -4,13 +4,14 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 
 | Bukti | Isi | Hasil |
 |---|---|---|
-| `phpunit-admin-app.xml` | `php artisan test` admin-app (25 tes domain + 15 tes fitur) | 40 lulus, 0 gagal |
+| `phpunit-admin-app.xml` | `php artisan test` admin-app (25 tes domain + 16 tes fitur) | 41 lulus, 0 gagal |
 | `phpunit-team-app.xml` | `php artisan test` team-app (25 tes domain identik + 6 tes fitur) | 31 lulus, 0 gagal |
 | `e2e-alur.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366 | 17 lulus, 0 gagal |
 | `asap-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin | 53 halaman, 0 gagal |
 | `asap-tim.txt` | Ketiga role membuka setiap menu Tim + board, project, task | 29 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe dan tangkapan 390/1366 | 0 pelanggaran serius |
 | `../performa.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
+| `../../video/ptm-demo.mp4` | Video rekaman 8 skenario 11.3 dalam satu alur (Radit manager, Putri member) | 4 menit 28 detik |
 
 ## Checklist penerimaan 11.2
 
@@ -65,3 +66,4 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 8. Pesan tolak Kanban ke Selesai dibuat menjelaskan jalan yang benar (kirim hasil untuk review).
 9. Bukti Debugbar pertama memakai APP_ENV=production; diulang dengan APP_DEBUG=false saja.
 10. Audit axe: kontras lencana hijau, tombol sekunder, label paginasi, tabel bergulir, dan FullCalendar diperbaiki (lihat `../ui/AUDIT.md`).
+11. Saat merekam video, deadline usulan di form aktivitas sulit diisi dan mudah salah hari; ditambah tombol geser cepat +7/+14/+30 hari yang dihitung dari deadline sekarang (task terpilih, lalu project) dan baris "Deadline project sekarang", dijaga `test_form_aktivitas_memberi_dasar_geser_dari_deadline_sekarang`.
