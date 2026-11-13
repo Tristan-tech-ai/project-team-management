@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Satu aksi yang mengubah data (Petunjuk Teknis 4.1: semua aksi dicatat). Hanya ditambah, tidak diubah. */
+/** One data-changing action (Technical Guide 4.1: every action is logged). Only appended, never updated. */
 class AuditLog extends Model
 {
     public const UPDATED_AT = null;

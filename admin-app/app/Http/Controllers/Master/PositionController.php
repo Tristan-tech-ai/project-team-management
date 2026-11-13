@@ -13,33 +13,33 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
-/** Jabatan tidak punya deleted_at di SQL: dinonaktifkan, tidak dihapus. */
+/** Positions have no deleted_at in the SQL: they are deactivated, not deleted. */
 class PositionController extends Controller
 {
     public function index(): View
     {
         return view('admin.master.index', [
-            'judul' => 'Jabatan', 'ket' => 'Jabatan per company. Jabatan terpisah dari role hak akses.',
-            'data' => route('positions.data'), 'tambah' => auth()->user()->can('positions.manage') ? route('positions.create') : null,
-            'kolom' => [['data' => 'name', 'judul' => 'Jabatan'], ['data' => 'company', 'judul' => 'Company', 'name' => 'company.name'],
-                ['data' => 'description', 'judul' => 'Keterangan'],
-                ['data' => 'status', 'judul' => 'Status', 'render' => 'lencana', 'searchable' => false, 'name' => 'is_active'],
-                ['data' => 'aksi', 'judul' => '', 'render' => 'aksi', 'searchable' => false, 'orderable' => false]],
+            'title' => 'Jabatan', 'description' => 'Jabatan per company. Jabatan terpisah dari role hak akses.',
+            'data' => route('positions.data'), 'add' => auth()->user()->can('positions.manage') ? route('positions.create') : null,
+            'columns' => [['data' => 'name', 'title' => 'Jabatan'], ['data' => 'company', 'title' => 'Company', 'name' => 'company.name'],
+                ['data' => 'description', 'title' => 'Keterangan'],
+                ['data' => 'status', 'title' => 'Status', 'render' => 'badge', 'searchable' => false, 'name' => 'is_active'],
+                ['data' => 'actions', 'title' => '', 'render' => 'actions', 'searchable' => false, 'orderable' => false]],
         ]);
     }
 
     public function data(Request $request): JsonResponse
     {
-        $boleh = $request->user()->can('positions.manage');
+        $can = $request->user()->can('positions.manage');
 
-        return DataTables::eloquent(Scope::batasiCompany(Position::query(), $request->user(), 'positions.company_id')->with('company:id,name')->select('positions.*'))
+        return DataTables::eloquent(Scope::limitToCompanies(Position::query(), $request->user(), 'positions.company_id')->with('company:id,name')->select('positions.*'))
             ->addColumn('company', fn (Position $p) => $p->company?->name)
             ->editColumn('description', fn (Position $p) => $p->description ?? '-')
             ->addColumn('status', fn (Position $p) => $p->is_active ? 'Aktif' : 'Nonaktif')
-            ->addColumn('status_kelas', fn (Position $p) => $p->is_active ? 'ok' : 'netral')
-            ->addColumn('aksi', fn (Position $p) => $boleh ? [
+            ->addColumn('status_class', fn (Position $p) => $p->is_active ? 'ok' : 'neutral')
+            ->addColumn('actions', fn (Position $p) => $can ? [
                 ['label' => 'Ubah', 'url' => route('positions.edit', $p)],
-                ['label' => $p->is_active ? 'Nonaktifkan' : 'Aktifkan', 'url' => route('positions.toggle', $p), 'metode' => 'PATCH'],
+                ['label' => $p->is_active ? 'Nonaktifkan' : 'Aktifkan', 'url' => route('positions.toggle', $p), 'method' => 'PATCH'],
             ] : [])
             ->toJson();
     }
@@ -61,14 +61,14 @@ class PositionController extends Controller
     public function edit(Position $position): View
     {
         $this->authorize('positions.manage');
-        abort_unless(Scope::bolehCompany(request()->user(), $position->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $position->company_id), 403);
 
         return $this->form($position);
     }
 
     public function update(PositionRequest $request, Position $position): RedirectResponse
     {
-        abort_unless(Scope::bolehCompany(request()->user(), $position->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $position->company_id), 403);
         $position->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('positions.index')->with('ok', 'Perubahan jabatan tersimpan.');
@@ -77,7 +77,7 @@ class PositionController extends Controller
     public function toggle(Position $position): RedirectResponse
     {
         $this->authorize('positions.manage');
-        abort_unless(Scope::bolehCompany(request()->user(), $position->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $position->company_id), 403);
         $position->update(['is_active' => ! $position->is_active]);
 
         return back()->with('ok', $position->is_active ? "Jabatan {$position->name} aktif lagi." : "Jabatan {$position->name} dinonaktifkan.");
@@ -85,6 +85,6 @@ class PositionController extends Controller
 
     private function form(Position $position): View
     {
-        return view('admin.master.position', ['position' => $position, 'companies' => Scope::batasiCompany(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->pluck('name', 'id')]);
+        return view('admin.master.position', ['position' => $position, 'companies' => Scope::limitToCompanies(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->pluck('name', 'id')]);
     }
 }

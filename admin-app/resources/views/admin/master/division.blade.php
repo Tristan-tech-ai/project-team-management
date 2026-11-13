@@ -1,13 +1,13 @@
-<x-layouts.admin :judul="$division->exists ? 'Ubah divisi' : 'Tambah divisi'">
-    <div class="kepala-halaman"><div><div class="remah"><a href="{{ route('divisions.index') }}">Divisi</a></div>
+<x-layouts.admin :title="$division->exists ? 'Ubah divisi' : 'Tambah divisi'">
+    <div class="page-header"><div><div class="crumb"><a href="{{ route('divisions.index') }}">Divisi</a></div>
         <h1>{{ $division->exists ? 'Ubah divisi '.$division->name : 'Tambah divisi' }}</h1></div></div>
-    <form method="post" action="{{ $division->exists ? route('divisions.update', $division) : route('divisions.store') }}" class="kartu" style="max-width:760px">
-        @csrf @if ($division->exists) @method('PUT') @endif
+    <form method="post" action="{{ $division->exists ? route('divisions.update', $division) : route('divisions.store') }}" class="panel" style="max-width:760px">
+        @csrf @if($division->exists) @method('PUT') @endif
         <div class="row g-3">
-            <div class="col-md-6"><x-isian nama="company_id" label="Company" jenis="select" :pilihan="$companies" :nilai="$division->company_id" kosong="Pilih company" wajib/></div>
-            <div class="col-md-6"><x-isian nama="name" label="Nama divisi" :nilai="$division->name" wajib/></div>
-            <div class="col-md-6"><x-isian nama="lead_user_id" label="Kepala divisi" jenis="select" :pilihan="$users" :nilai="$division->lead_user_id" kosong="Belum ada" bantuan="Harus anggota aktif company ini."/></div>
-            <div class="col-12"><x-isian nama="description" label="Keterangan" jenis="textarea" :nilai="$division->description"/></div>
+            <div class="col-md-6"><x-field name="company_id" label="Company" type="select" :options="$companies" :value="$division->company_id" empty="Pilih company" required/></div>
+            <div class="col-md-6"><x-field name="name" label="Nama divisi" :value="$division->name" required/></div>
+            <div class="col-md-6"><x-field name="lead_user_id" label="Kepala divisi" type="select" :options="$users" :value="$division->lead_user_id" empty="Belum ada" help="Harus anggota aktif company ini."/></div>
+            <div class="col-12"><x-field name="description" label="Keterangan" type="textarea" :value="$division->description"/></div>
         </div>
         <div class="form-check mb-3"><input type="hidden" name="is_active" value="0">
             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $division->is_active))>

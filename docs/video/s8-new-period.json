@@ -1,0 +1,78 @@
+{
+ "name": "s8-new-period",
+ "url": "http://127.0.0.1:8101/login",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/projects/9"
+  },
+  {
+   "waitFor": "#period"
+  },
+  {
+   "select": "Semua periode",
+   "in": "#period",
+   "showList": true,
+   "pauseAfter": 800
+  },
+  {
+   "click": "role=button[name='Buka periode baru']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "#confirm-modal [data-confirm-yes]"
+  },
+  {
+   "pause": 1600
+  },
+  {
+   "click": "#confirm-modal [data-confirm-yes]",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "#b-period",
+   "zoom": 1.4,
+   "pauseAfter": 1600
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 1800
+  },
+  {
+   "select": "Periode 1 Nov 2026 sampai 30 Nov 2026",
+   "in": "#b-period",
+   "showList": true,
+   "pauseAfter": 700
+  },
+  {
+   "click": "role=button[name='Saring']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 2600
+  }
+ ]
+}

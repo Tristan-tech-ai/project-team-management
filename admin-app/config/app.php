@@ -54,7 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    // Alamat aplikasi pasangan (admin-app <-> team-app), dipakai untuk tautan silang.
+    // URL of the paired app (admin-app <-> team-app), used for cross links.
     'team_url' => env('TEAM_APP_URL', 'http://127.0.0.1:8102'),
     'admin_url' => env('ADMIN_APP_URL', 'http://127.0.0.1:8101'),
 

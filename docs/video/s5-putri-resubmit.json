@@ -1,0 +1,69 @@
+{
+ "name": "s5-putri-resubmit",
+ "url": "http://127.0.0.1:8102/login",
+ "viewport": "phone",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "putri@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/"
+  },
+  {
+   "waitFor": "text=Perlu revisi"
+  },
+  {
+   "pause": 1800
+  },
+  {
+   "click": ".alert-warning a",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "role=heading[name='Materi Iklan']"
+  },
+  {
+   "scroll": {
+    "to": "#submit-result"
+   },
+   "pauseAfter": 1600
+  },
+  {
+   "click": "#checklist li:nth-child(2) [data-check-subtask]",
+   "pauseAfter": 1000
+  },
+  {
+   "type": "https://drive.example.test/brosur-ppdb-v2",
+   "into": "label=Tautan hasil"
+  },
+  {
+   "type": "Sudah ditambah jadwal gelombang 2 dan logo.",
+   "into": "label=Catatan singkat"
+  },
+  {
+   "click": "role=button[name='Kirim untuk Review']",
+   "pauseAfter": 800
+  },
+  {
+   "waitFor": "text=Menunggu PIC atau manager meninjau hasil."
+  },
+  {
+   "scroll": {
+    "to": "top"
+   },
+   "pauseAfter": 1600
+  }
+ ]
+}

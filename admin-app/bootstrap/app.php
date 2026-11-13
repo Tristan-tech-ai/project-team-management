@@ -12,9 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['aktif' => \App\Http\Middleware\PastikanAktif::class]);
-        // Petunjuk Teknis 4.1: semua aksi yang mengubah data dicatat ke audit_logs.
-        $middleware->appendToGroup('web', \App\Http\Middleware\CatatAksi::class.':admin');
+        $middleware->alias(['active' => \App\Http\Middleware\EnsureUserIsActive::class]);
+        // Technical Guide 4.1: every data-changing action is logged to audit_logs.
+        $middleware->appendToGroup('web', \App\Http\Middleware\LogUserActions::class.':admin');
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/');
     })

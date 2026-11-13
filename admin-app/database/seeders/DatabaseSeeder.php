@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    // Petunjuk Teknis 10.4: Initial selalu, Demo hanya pada environment local.
+    // Technical Guide 10.4: Initial always, Demo only in the local environment.
     public function run(): void
     {
         $this->call(InitialWorkspaceSeeder::class);

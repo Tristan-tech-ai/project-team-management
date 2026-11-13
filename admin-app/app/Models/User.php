@@ -17,8 +17,8 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
-    /** Izin yang sudah dibaca dalam satu request (null = belum dibaca). */
-    private ?array $izinCache = null;
+    /** Permissions already read within one request (null = not read yet). */
+    private ?array $permissionCache = null;
 
     private ?array $roleCache = null;
 
@@ -56,7 +56,7 @@ class User extends Authenticatable
         return $this->hasMany(ProjectMember::class, 'user_id');
     }
 
-    /** Slug role milik pengguna (super_admin, manager, member). */
+    /** Role slugs of the user (super_admin, manager, member). */
     public function roleSlugs(): array
     {
         return $this->roleCache ??= DB::table('user_roles')
@@ -75,10 +75,10 @@ class User extends Authenticatable
         return $this->hasRole('super_admin');
     }
 
-    /** Slug permission dari roles -> role_permissions -> permissions (SQL sumber). */
+    /** Permission slugs from roles -> role_permissions -> permissions (source SQL). */
     public function permissionSlugs(): array
     {
-        return $this->izinCache ??= DB::table('user_roles')
+        return $this->permissionCache ??= DB::table('user_roles')
             ->join('role_permissions', 'role_permissions.role_id', '=', 'user_roles.role_id')
             ->join('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
             ->where('user_roles.user_id', $this->id)
@@ -90,28 +90,28 @@ class User extends Authenticatable
         return $this->isSuperAdmin() || in_array($slug, $this->permissionSlugs(), true);
     }
 
-    /** Pengguna aktif = punya profil aktif (user_profiles.is_active = 1). */
+    /** Active user = has an active profile (user_profiles.is_active = 1). */
     public function isActive(): bool
     {
         return (bool) DB::table('user_profiles')->where('user_id', $this->id)->value('is_active');
     }
 
-    /** ID company tempat pengguna menjadi anggota aktif. */
+    /** IDs of the companies where the user is an active member. */
     public function activeCompanyIds(): array
     {
         return DB::table('company_members')->where('user_id', $this->id)->where('is_active', 1)->pluck('company_id')->all();
     }
 
-    public function lupakanIzin(): void
+    public function forgetPermissions(): void
     {
-        $this->izinCache = null;
+        $this->permissionCache = null;
         $this->roleCache = null;
     }
 
-    public function inisial(): string
+    public function initials(): string
     {
-        $bagian = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+        $section = preg_split('/\s+/', trim((string) $this->name)) ?: [];
 
-        return mb_strtoupper(mb_substr($bagian[0] ?? '?', 0, 1).mb_substr($bagian[1] ?? '', 0, 1));
+        return mb_strtoupper(mb_substr($section[0] ?? '?', 0, 1).mb_substr($section[1] ?? '', 0, 1));
     }
 }

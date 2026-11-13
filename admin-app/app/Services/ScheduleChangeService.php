@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Perubahan deadline (Petunjuk Teknis 8.4): pengajuan pending -> approved/rejected oleh PIC berizin atau Manager.
- * Hanya approved yang mengubah due_at, di dalam transaksi dengan kunci baris, dan mencatat applied_at.
- * baseline_due_at TIDAK pernah diubah. Menambah rapat/kegiatan tidak otomatis menggeser deadline.
+ * Deadline changes (Technical Guide 8.4): pending request -> approved/rejected by an authorized PIC or a Manager.
+ * Only approved requests change due_at, inside a transaction with a row lock, and record applied_at.
+ * baseline_due_at is NEVER changed. Adding a meeting/activity never shifts the deadline automatically.
  */
 class ScheduleChangeService
 {
-    public function ajukan(Project $project, ?Task $task, ?ProjectActivity $activity, Carbon $usulan, string $alasan, User $oleh): ScheduleChangeRequest
+    public function propose(Project $project, ?Task $task, ?ProjectActivity $activity, Carbon $proposal, string $reason, User $by): ScheduleChangeRequest
     {
         if ($task && (int) $task->project_id !== (int) $project->id) {
             throw ValidationException::withMessages(['task_id' => 'Task bukan milik project ini.']);
@@ -33,55 +33,55 @@ class ScheduleChangeService
             throw ValidationException::withMessages(['proposed_due_at' => 'Masih ada pengajuan yang menunggu keputusan untuk '.($task ? 'task' : 'project').' ini.']);
         }
 
-        return DB::transaction(function () use ($project, $task, $activity, $usulan, $alasan, $oleh, $target) {
+        return DB::transaction(function () use ($project, $task, $activity, $proposal, $reason, $by, $target) {
             $r = ScheduleChangeRequest::create([
-                'project_id' => $project->id, 'task_id' => $task?->id, 'project_activity_id' => $activity?->id, 'requested_by' => $oleh->id,
-                'previous_due_at' => $target->due_at, 'proposed_due_at' => $usulan, 'reason' => $alasan, 'status' => 'pending', 'requested_at' => now(),
+                'project_id' => $project->id, 'task_id' => $task?->id, 'project_activity_id' => $activity?->id, 'requested_by' => $by->id,
+                'previous_due_at' => $target->due_at, 'proposed_due_at' => $proposal, 'reason' => $reason, 'status' => 'pending', 'requested_at' => now(),
             ]);
             if ($task) {
-                TaskActivity::create(['task_id' => $task->id, 'user_id' => $oleh->id, 'activity_type' => 'schedule_requested',
-                    'description' => 'Pengajuan geser deadline: '.$alasan, 'old_value' => $task->due_at?->toIso8601String(), 'new_value' => $usulan->toIso8601String()]);
+                TaskActivity::create(['task_id' => $task->id, 'user_id' => $by->id, 'activity_type' => 'schedule_requested',
+                    'description' => 'Pengajuan geser deadline: '.$reason, 'old_value' => $task->due_at?->toIso8601String(), 'new_value' => $proposal->toIso8601String()]);
             }
 
             return $r;
         });
     }
 
-    public function bolehPutuskan(User $user, ScheduleChangeRequest $r): bool
+    public function canDecide(User $user, ScheduleChangeRequest $r): bool
     {
         $r->loadMissing(['project', 'task']);
 
         return $r->task ? Gate::forUser($user)->allows('approveSchedule', $r->task) : Gate::forUser($user)->allows('approveSchedule', $r->project);
     }
 
-    public function putuskan(ScheduleChangeRequest $r, bool $setuju, ?string $catatan, User $oleh): ScheduleChangeRequest
+    public function decide(ScheduleChangeRequest $r, bool $approve, ?string $notes, User $by): ScheduleChangeRequest
     {
-        if (! $this->bolehPutuskan($oleh, $r)) {
+        if (! $this->canDecide($by, $r)) {
             throw ValidationException::withMessages(['decision' => 'Kamu tidak berizin memutuskan perubahan jadwal ini.']);
         }
-        if (! $setuju && mb_strlen(trim((string) $catatan)) < 5) {
+        if (! $approve && mb_strlen(trim((string) $notes)) < 5) {
             throw ValidationException::withMessages(['decision_note' => 'Tulis alasan penolakan (minimal 5 karakter).']);
         }
 
-        return DB::transaction(function () use ($r, $setuju, $catatan, $oleh) {
+        return DB::transaction(function () use ($r, $approve, $notes, $by) {
             $k = ScheduleChangeRequest::query()->lockForUpdate()->findOrFail($r->id);
             if ($k->status !== 'pending') {
                 throw ValidationException::withMessages(['decision' => 'Pengajuan ini sudah diputuskan.']);
             }
-            $k->update(['status' => $setuju ? 'approved' : 'rejected', 'decided_by' => $oleh->id, 'decision_note' => $catatan, 'decided_at' => now()]);
-            if ($setuju) {
+            $k->update(['status' => $approve ? 'approved' : 'rejected', 'decided_by' => $by->id, 'decision_note' => $notes, 'decided_at' => now()]);
+            if ($approve) {
                 $target = $k->task_id ? Task::query()->lockForUpdate()->findOrFail($k->task_id) : Project::query()->lockForUpdate()->findOrFail($k->project_id);
-                // Baseline tetap: bila baseline belum pernah diisi, target lama menjadi baseline supaya deviasi tetap terbaca.
-                $ubah = ['due_at' => $k->proposed_due_at];
+                // The baseline stays: when no baseline was ever set, the old target becomes the baseline so the deviation stays readable.
+                $update = ['due_at' => $k->proposed_due_at];
                 if ($target->baseline_due_at === null && $k->previous_due_at !== null) {
-                    $ubah['baseline_due_at'] = $k->previous_due_at;
+                    $update['baseline_due_at'] = $k->previous_due_at;
                 }
-                $target->update($ubah);
+                $target->update($update);
                 $k->update(['applied_at' => now()]);
             }
             if ($k->task_id) {
-                TaskActivity::create(['task_id' => $k->task_id, 'user_id' => $oleh->id, 'activity_type' => $setuju ? 'schedule_approved' : 'schedule_rejected',
-                    'description' => ($setuju ? 'Deadline baru disetujui' : 'Pengajuan deadline ditolak').($catatan ? ': '.$catatan : ''),
+                TaskActivity::create(['task_id' => $k->task_id, 'user_id' => $by->id, 'activity_type' => $approve ? 'schedule_approved' : 'schedule_rejected',
+                    'description' => ($approve ? 'Deadline baru disetujui' : 'Pengajuan deadline ditolak').($notes ? ': '.$notes : ''),
                     'old_value' => $k->previous_due_at?->toIso8601String(), 'new_value' => $k->proposed_due_at?->toIso8601String()]);
             }
 

@@ -17,14 +17,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Petunjuk Teknis 2.3: jangan pernah migrate:fresh / db:wipe pada database bersama yang berisi data.
+        // Technical Guide 2.3: never run migrate:fresh / db:wipe on the shared database that holds data.
         DB::prohibitDestructiveCommands();
 
         Paginator::useBootstrapFive();
 
-        // RBAC dari SQL sumber: super_admin lolos semua (cadangan Gate::before seperti catatan SQL),
-        // kemampuan bertitik (projects.view, tasks.review, ...) adalah slug permission dari role_permissions.
-        // Kemampuan policy (viewAny, update, ...) tidak bertitik dan diteruskan ke Policy yang juga memeriksa scope.
+        // RBAC from the source SQL: super_admin passes everything (Gate::before fallback, as the SQL notes say),
+        // dotted abilities (projects.view, tasks.review, ...) are permission slugs from role_permissions.
+        // Policy abilities (viewAny, update, ...) have no dot and go to the Policy, which also checks the scope.
         Gate::before(function (User $user, string $ability) {
             if ($user->isSuperAdmin()) {
                 return true;

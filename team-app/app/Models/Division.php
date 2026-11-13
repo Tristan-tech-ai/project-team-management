@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `divisions`).
+// Generated from project_team_management_laravel.sql (table `divisions`).
 
 namespace App\Models;
 

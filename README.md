@@ -7,7 +7,7 @@ Sistem manajemen project dan tim untuk agensi (developer, content creator, digit
 
 | Admin: ringkasan | Admin: Kanban project | Tim di HP: beranda |
 |---|---|---|
-| ![Dashboard admin](docs/bukti/ui/admin-1366-dashboard.png) | ![Kanban](docs/bukti/ui/admin-1366-projects_7_board.png) | ![Beranda tim di HP](docs/bukti/ui/tim-390-beranda.png) |
+| ![Dashboard admin](docs/evidence/ui/admin-1366-dashboard.png) | ![Kanban](docs/evidence/ui/admin-1366-projects_1_board.png) | ![Beranda tim di HP](docs/evidence/ui/team-390-home.png) |
 
 Video alur kerja (rekaman aplikasi yang berjalan, bukan animasi): [`docs/video/ptm-demo.mp4`](docs/video/ptm-demo.mp4).
 
@@ -25,12 +25,15 @@ Aturan penting yang dijaga di server, bukan hanya di tampilan:
 - Data tanpa `deleted_at` (divisi, jabatan, anggota, keanggotaan) dinonaktifkan, tidak dihapus. Perintah perusak database (`migrate:fresh`, `db:wipe`) diblokir di kode.
 - DataTables memuat data dari server (baris per halaman dari Pengaturan Sistem, bawaan 25; cari dan urut di server); diuji dengan 520 task.
 - **Satu aturan cakupan data** (`App\Services\Scope`) untuk daftar, filter (Company, Client, PIC, pelaksana, divisi), data master, detail, dan Kanban di kedua app: Super Admin semua, Manager company tempat ia anggota aktif, Member project yang ia ikuti. Data di luar cakupan tidak muncul di pilihan filter, dan URL langsung ke data itu dijawab 403.
-- **Satu penyimpanan berkas untuk dua app.** Lampiran hasil task dan foto profil disimpan di storage `admin-app` (disk `bersama`, folder `admin-app/storage/app/private`), termasuk yang diunggah lewat Team App, sehingga terbuka di kedua app. Bila kedua app dipasang di folder atau server berbeda, isi `PTM_STORAGE_ROOT` di kedua `.env` dengan folder bersama yang sama.
+- **Satu penyimpanan berkas untuk dua app.** Lampiran hasil task dan foto profil disimpan di storage `admin-app` (disk `shared`, folder `admin-app/storage/app/private`), termasuk yang diunggah lewat Team App, sehingga terbuka di kedua app. Bila kedua app dipasang di folder atau server berbeda, isi `PTM_STORAGE_ROOT` di kedua `.env` dengan folder bersama yang sama.
 - **Log aktivitas**: setiap aksi yang mengubah data di kedua app tercatat (`audit_logs`) tanpa kata sandi; dilihat Super Admin di Pengaturan Sistem.
+- **Pencarian global** di kepala Admin App: project, task, dan anggota dalam satu halaman, masing-masing dengan cakupan data yang sama seperti halaman aslinya (Member hanya menemukan rekan satu project, berdasarkan nama).
+- **Timeline project** (Activities project): task selesai, rapat, kunjungan, revisi, hambatan, dan usulan perubahan deadline dalam satu urutan waktu, dengan kartu Kondisi Jadwal (target awal, target baru, status) seperti prototipe petunjuk teknis.
+- **Ukuran tampilan mengikuti tabel 6.1 petunjuk teknis**: area klik minimal 44 x 44 px di HP dan 40 x 40 px di desktop, ukuran huruf, padding, dan kartu diukur otomatis di setiap halaman (`docs/tools/ui-audit.mjs`).
 
 ## Teknologi
 
-Laravel 13 (PHP 8.3+), MySQL 8.4 (Docker) + phpMyAdmin, Bootstrap 5.3.8, jQuery 3.7.1, Yajra DataTables (datatables.net 2.3), SortableJS 1.15.7, FullCalendar 6.1.22, ikon Lucide (ISC), Laravel Debugbar (hanya pengembangan). Versi pustaka dikunci karena perintah pasang "terbaru" kini memasang versi mayor lain (catatan di `docs/RISET.md`).
+Laravel 13 (PHP 8.3+), MySQL 8.4 (Docker) + phpMyAdmin, Bootstrap 5.3.8, jQuery 3.7.1, Yajra DataTables (datatables.net 2.3), SortableJS 1.15.7, FullCalendar 6.1.22, ikon Lucide (ISC), Laravel Debugbar (hanya pengembangan). Versi pustaka dikunci karena perintah pasang "terbaru" kini memasang versi mayor lain (catatan di `docs/RESEARCH.md`).
 
 ## Memasang dari nol
 
@@ -55,14 +58,14 @@ cd project-team-management
    php artisan key:generate    # APP_KEY kedua app harus berbeda
    ```
    Isi `DB_PASSWORD` di kedua `.env` sama dengan `MYSQL_PASSWORD`.
-3. **Skema.** Hanya di `admin-app`: `php artisan migrate`. Team App tidak punya folder `database` (tanpa migrasi, seeder, dan factory), dan `migrate`/`db:seed` di Team App ditolak dengan pesan. Lalu impor `docs/project_team_management_laravel.sql` **satu kali** ke database `project_team_management` lewat phpMyAdmin (menu Import), atau `node docs/alat/impor-phpmyadmin.mjs` (menolak bila tabel modul sudah ada).
+3. **Skema.** Hanya di `admin-app`: `php artisan migrate`. Team App tidak punya folder `database` (tanpa migrasi, seeder, dan factory), dan `migrate`/`db:seed` di Team App ditolak dengan pesan. Lalu impor `docs/project_team_management_laravel.sql` **satu kali** ke database `project_team_management` lewat phpMyAdmin (menu Import), atau `node docs/tools/import-phpmyadmin.mjs` (menolak bila tabel modul sudah ada).
 4. **Data awal.** Di `admin-app/.env` isi `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD` (minimal 12 karakter), dan untuk lokal `DEMO_SEED_PASSWORD`, lalu `php artisan db:seed` di `admin-app`.
 5. **Jalankan.** `npm run build` di kedua app, lalu:
    ```bash
    cd admin-app && php artisan serve --port=8101   # http://127.0.0.1:8101
    cd team-app  && php artisan serve --port=8102   # http://127.0.0.1:8102
    ```
-6. **Data contoh UAT (opsional, lokal saja, ditolak di production):** `php artisan db:seed --class=UatSkenarioSeeder` di `admin-app`. Isinya tim agensi sintetis: manager `radit@example.test`, member `ayu`, `binda`, `putri`, `dika`, `raka` (semua `@example.test`, sandi = `DEMO_SEED_PASSWORD` yang kamu isi), client SMA Harapan Bangsa dan Kopi Senja, project berulang, project berkelanjutan, dan arsip 520 task.
+6. **Data contoh UAT (opsional, lokal saja, ditolak di production):** `php artisan db:seed --class=UatScenarioSeeder` di `admin-app`. Isinya tim agensi sintetis: manager `radit@example.test`, member `ayu`, `binda`, `putri`, `dika`, `raka` (semua `@example.test`, sandi = `DEMO_SEED_PASSWORD` yang kamu isi), client SMA Harapan Bangsa dan Kopi Senja, project berulang, project berkelanjutan, dan arsip 520 task.
 
 Masuk sebagai Super Admin dengan `INITIAL_ADMIN_EMAIL` di Admin App; manager dan member masuk di Admin App atau Team App sesuai perannya.
 
@@ -83,7 +86,7 @@ Akun masuk tidak diumumkan di sini; minta ke pemilik repositori.
 
 Susunannya tetap sama dengan petunjuk teknis: satu database MySQL bersama untuk dua aplikasi yang dideploy terpisah, skema dari migrasi + SQL modul yang diimpor satu kali, nama tabel dan kolom tidak berubah. Kode aplikasi tidak diubah; yang ditambahkan hanya `Dockerfile`, `.dockerignore`, dan folder `docker/` di tiap app.
 
-- **Database: TiDB Cloud Starter.** Kompatibel MySQL 8.0, gratis dalam kuota (5 GiB, 50 juta Request Unit per bulan), region AWS Singapura, koneksi wajib TLS. Sebelum online, seluruh tes dijalankan terhadap TiDB (12 November 2026): migrasi dan impor SQL lulus (40 tabel), tes admin 41/41 dan tim 31/31 lulus, uji semua menu untuk 3 peran (`docs/alat/asap.mjs`) tanpa galat, dan alur kerja ujung ke ujung (`docs/alat/e2e-alur.mjs`) 15/15 lulus; setelah log audit ditambahkan (13 November 2026) tes admin 47/47 dan tim 32/32 lulus. Rinciannya di [docs/bukti/uji/UJI.md](docs/bukti/uji/UJI.md#uji-versi-online-12-nov-2026).
+- **Database: TiDB Cloud Starter.** Kompatibel MySQL 8.0, gratis dalam kuota (5 GiB, 50 juta Request Unit per bulan), region AWS Singapura, koneksi wajib TLS. Sebelum online, seluruh tes dijalankan terhadap TiDB (12 November 2026): migrasi dan impor SQL lulus (40 tabel), tes admin 41/41 dan tim 31/31 lulus, uji semua menu untuk 3 peran (`docs/tools/smoke-test.mjs`) tanpa galat, dan alur kerja ujung ke ujung (`docs/tools/e2e-flow.mjs`) 15/15 lulus; setelah log audit ditambahkan (13 November 2026) tes admin 47/47 dan tim 32/32 lulus. Rinciannya di [docs/evidence/tests/TESTING.md](docs/evidence/tests/TESTING.md#uji-versi-online-12-nov-2026).
 - **Aplikasi: Vercel Container Runtime** (Beta, tersedia di paket gratis). Image dibangun dari `Dockerfile` tiap app: aset Vite, PHP 8.4 dengan FrankenPHP, `composer install --no-dev` (Debugbar tidak ikut terpasang), `APP_ENV=production`, `APP_DEBUG=false`, `DEBUGBAR_ENABLED=false`, log ke stderr, sesi dan cache di database.
 
 Memasang sendiri:
@@ -92,7 +95,7 @@ Memasang sendiri:
 2. **Skema dan data awal**, dari `admin-app` lokal dengan env menunjuk ke TiDB (`DB_HOST`, `DB_PORT=4000`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, dan `MYSQL_ATTR_SSL_CA` berisi path berkas CA sistem, misalnya `/etc/ssl/certs/ca-certificates.crt`):
    ```bash
    php artisan migrate --force
-   php ../docs/alat/impor-sql.php ../docs/project_team_management_laravel.sql   # satu kali; dilewati bila tabel modul sudah ada
+   php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql   # satu kali; dilewati bila tabel modul sudah ada
    php artisan db:seed                                                       # INITIAL_ADMIN_* dan DEMO_SEED_PASSWORD
    ```
    phpMyAdmin yang diarahkan ke TiDB juga bisa dipakai untuk impor, asalkan memakai TLS.
@@ -112,7 +115,7 @@ Memasang sendiri:
    Lalu Deploy. Setiap push ke `main` membangun ulang kedua app.
 
 Batasan versi online:
-- Di versi online kedua app berjalan di dua container terpisah dengan penyimpanan sementara, jadi berkas yang diunggah (foto profil, lampiran hasil task) hilang saat instance diganti dan berkas dari Team App online belum terbuka di Admin App online. Di instalasi biasa (kedua app di satu server, sesuai petunjuk teknis) berkas sudah bersama lewat disk `bersama`. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk versi online dibutuhkan penyimpanan objek bersama (misalnya disk `s3` Laravel), yang berarti menambah paket.
+- Di versi online kedua app berjalan di dua container terpisah dengan penyimpanan sementara, jadi berkas yang diunggah (foto profil, lampiran hasil task) hilang saat instance diganti dan berkas dari Team App online belum terbuka di Admin App online. Di instalasi biasa (kedua app di satu server, sesuai petunjuk teknis) berkas sudah bersama lewat disk `shared`. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk versi online dibutuhkan penyimpanan objek bersama (misalnya disk `s3` Laravel), yang berarti menambah paket.
 - App tidur setelah 5 menit tanpa kunjungan; permintaan pertama sesudahnya sedikit lebih lambat.
 - Image di atas dibangun dan dijalankan oleh Vercel. Untuk menjalankannya dengan Docker di komputer sendiri: `docker build -t ptm-admin admin-app`, lalu `docker run -p 8101:80` dengan variabel yang sama (untuk MySQL lokal tanpa TLS, isi `MYSQL_ATTR_SSL_CA` dengan string kosong).
 
@@ -124,22 +127,22 @@ team-app/       Laravel: aplikasi tim mobile-first (tanpa migrasi dan seeder; be
   Dockerfile, docker/   image produksi tiap app (Docker dan Vercel)
 docs/
   project_team_management_laravel.sql   schema modul (diimpor satu kali)
-  RISET.md      keputusan versi dan arsitektur
-  alat/         skrip uji peramban, impor (phpMyAdmin atau impor-sql.php), sinkron kode domain
-  bukti/        hasil uji (UJI.md), audit UI, tangkapan layar, performa
+  RESEARCH.md      keputusan versi dan arsitektur
+  tools/         skrip uji peramban, impor (phpMyAdmin atau import-sql.php), sinkron kode domain (sync-domain.php)
+  evidence/     hasil uji (tests/TESTING.md), audit UI, tangkapan layar, performa
   UAT.pdf       dokumen UAT
   video/        video alur dan langkah rekamannya
 docker-compose.yml   MySQL 8.4 + phpMyAdmin
 ```
 
-Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `admin-app` lalu disalin ke `team-app` dengan `php docs/alat/sinkron-domain.php`. Tes `tests/Domain/DomainSamaTest` gagal bila salinannya berbeda.
+Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `admin-app` lalu disalin ke `team-app` dengan `php docs/tools/sync-domain.php`. Tes `tests/Domain/SharedDomainTest` gagal bila salinannya berbeda.
 
 ## Uji
 
-- Database uji: `sh docs/alat/siapkan-db-uji.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
-- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 41, tim 31; tes domain identik di keduanya).
-- Uji peramban (kedua app berjalan): `node docs/alat/asap.mjs` (semua menu untuk 3 peran) dan `node docs/alat/e2e-alur.mjs` (alur 17 langkah).
-- Hasil lengkap per skenario dan peran: `docs/bukti/uji/UJI.md`; dokumen UAT: `docs/UAT.pdf`.
+- Database uji: `sh docs/tools/prepare-test-db.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
+- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 63, tim 40; tes domain identik di keduanya).
+- Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), dan `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1).
+- Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 
 README ini diuji dari nol di folder dan database baru (12 November 2026) sampai login dan seluruh uji lulus, lalu diuji lagi dari klon repositori publik ini: tes admin 41/41 dan tim 31/31 lulus.
 

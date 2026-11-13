@@ -1,6 +1,7 @@
 .env
 *.log
-/docs/bukti/tmp*
+/docs/evidence/tmp*
 /docs/video/cursorcam-output/
-/docs/video/cadangan/
-/docs/video/tmp-susun/
+/docs/video/backup/
+/docs/video/tmp-compose/
+__pycache__/

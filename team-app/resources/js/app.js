@@ -1,20 +1,22 @@
 import * as bootstrap from 'bootstrap';
-import { pasangKonfirmasi, rapikanAksesibilitas, tampilkanFlash } from './inti';
+import { initConfirmations, fixAccessibility, showFlashMessages } from './core';
 
 window.bootstrap = bootstrap;
 
+// Heavy modules (DataTables + jQuery, SortableJS, FullCalendar) are loaded only on pages that use them.
 document.addEventListener('DOMContentLoaded', () => {
-    pasangKonfirmasi(bootstrap.Modal);
-    tampilkanFlash();
-    rapikanAksesibilitas();
-    if (document.querySelector('table[data-tabel]')) import('./tabel').then((m) => m.pasangTabel());
-    if (document.querySelector('[data-kanban], [data-centang], [data-ubah-status], [data-isi-durasi], [data-isi-hari]')) {
-        import('./kanban').then((m) => { m.pasangKanban(); m.pasangChecklist(); });
+    initConfirmations(bootstrap.Modal);
+    showFlashMessages();
+    fixAccessibility();
+    if (document.querySelector('table[data-table]')) import('./table').then((m) => m.initTables());
+    if (document.querySelector('[data-kanban], [data-check-subtask], [data-change-status], [data-fill-duration], [data-fill-days]')) {
+        import('./kanban').then((m) => { m.initKanban(); m.initChecklist(); });
     }
-    if (document.querySelector('[data-kalender]')) import('./kalender').then((m) => m.pasangKalender());
-    const buka = document.querySelector('[data-buka-modal]');
-    if (buka) {
-        const m = document.getElementById(buka.dataset.bukaModal);
-        if (m) new bootstrap.Modal(m).show();
+    if (document.querySelector('[data-calendar]')) import('./calendar').then((m) => m.initCalendar());
+    // Reopen the Quick Add modal when server validation fails, so typed input is not lost.
+    const reopen = document.querySelector('[data-open-modal]');
+    if (reopen) {
+        const modal = document.getElementById(reopen.dataset.openModal);
+        if (modal) new bootstrap.Modal(modal).show();
     }
 });

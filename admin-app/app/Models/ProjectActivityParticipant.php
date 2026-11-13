@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `project_activity_participants`).
+// Generated from project_team_management_laravel.sql (table `project_activity_participants`).
 
 namespace App\Models;
 

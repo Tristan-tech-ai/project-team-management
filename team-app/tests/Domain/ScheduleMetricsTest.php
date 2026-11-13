@@ -11,91 +11,91 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
-/** LV-04 dan LV-05: perubahan deadline dengan baseline tetap, aktivitas tidak menggeser deadline, overdue dinamis, KPI. */
+/** LV-04 and LV-05: deadline changes keep the baseline, activities do not shift deadlines, dynamic overdue, KPIs. */
 class ScheduleMetricsTest extends TestCase
 {
-    use DatabaseTransactions, Pembantu;
+    use DatabaseTransactions, BuildsTestData;
 
-    public function test_hanya_pengajuan_disetujui_mengubah_deadline_dan_baseline_tetap(): void
+    public function test_only_approved_requests_change_deadline_and_baseline_stays(): void
     {
         $c = $this->company();
-        $manager = $this->pengguna('manager', $c);
-        $member = $this->pengguna('member', $c);
+        $manager = $this->user('manager', $c);
+        $member = $this->user('member', $c);
         $p = $this->project($manager, $manager, $c, [$member], [], 'one_time', $this->template());
         $task = Task::query()->where('project_id', $p->id)->where('title', 'Rilis')->firstOrFail();
         $baseline = $task->baseline_due_at->copy();
 
-        $rapat = ProjectActivity::create(['project_id' => $p->id, 'task_id' => $task->id, 'created_by' => $member->id, 'activity_type' => 'meeting',
+        $meeting = ProjectActivity::create(['project_id' => $p->id, 'task_id' => $task->id, 'created_by' => $member->id, 'activity_type' => 'meeting',
             'title' => 'Rapat klien tambahan', 'status' => 'done', 'occurred_at' => now(), 'duration_minutes' => 120, 'impact_type' => 'delay']);
-        $this->assertTrue($task->refresh()->due_at->equalTo($baseline), 'aktivitas tidak boleh menggeser deadline otomatis');
+        $this->assertTrue($task->refresh()->due_at->equalTo($baseline), 'an activity must not move the deadline automatically');
 
         $svc = app(ScheduleChangeService::class);
-        $r = $svc->ajukan($p, $task, $rapat, now()->addDays(20), 'Klien minta revisi alur', $member);
+        $r = $svc->propose($p, $task, $meeting, now()->addDays(20), 'Klien minta revisi alur', $member);
         $this->assertSame('pending', $r->status);
         $this->assertTrue($task->refresh()->due_at->equalTo($baseline));
-        // Pengajuan ganda untuk task yang sama ditolak sampai diputuskan.
+        // A second request for the same task is refused until the first one is decided.
         try {
-            $svc->ajukan($p, $task, null, now()->addDays(25), 'Lagi', $member);
-            $this->fail('pengajuan ganda seharusnya ditolak');
+            $svc->propose($p, $task, null, now()->addDays(25), 'Lagi', $member);
+            $this->fail('a second request must be refused');
         } catch (ValidationException) {
         }
-        // Member tidak bisa memutuskan.
+        // A Member cannot decide.
         try {
-            $svc->putuskan($r, true, null, $member);
-            $this->fail('member seharusnya tidak bisa memutuskan');
+            $svc->decide($r, true, null, $member);
+            $this->fail('a member must not be able to decide');
         } catch (ValidationException) {
         }
-        $r = $svc->putuskan($r, true, null, $manager);
+        $r = $svc->decide($r, true, null, $manager);
         $task->refresh();
         $this->assertSame('approved', $r->status);
         $this->assertNotNull($r->applied_at);
         $this->assertTrue($task->due_at->equalTo($r->proposed_due_at));
-        $this->assertTrue($task->baseline_due_at->equalTo($baseline), 'baseline_due_at tidak boleh berubah');
+        $this->assertTrue($task->baseline_due_at->equalTo($baseline), 'baseline_due_at must not change');
         $this->assertTrue($r->previous_due_at->equalTo($baseline));
     }
 
-    public function test_penolakan_wajib_alasan_dan_tidak_mengubah_deadline(): void
+    public function test_rejection_requires_reason_and_keeps_deadline(): void
     {
         $c = $this->company();
-        $manager = $this->pengguna('manager', $c);
+        $manager = $this->user('manager', $c);
         $p = $this->project($manager, $manager, $c);
         $svc = app(ScheduleChangeService::class);
-        $r = $svc->ajukan($p, null, null, now()->addDays(30), 'Tambah ruang lingkup', $manager);
+        $r = $svc->propose($p, null, null, now()->addDays(30), 'Tambah ruang lingkup', $manager);
         try {
-            $svc->putuskan($r, false, '', $manager);
-            $this->fail('penolakan tanpa alasan seharusnya ditolak');
+            $svc->decide($r, false, '', $manager);
+            $this->fail('a rejection without a reason must be refused');
         } catch (ValidationException) {
         }
         $due = $p->refresh()->due_at->copy();
-        $r = $svc->putuskan($r, false, 'Ruang lingkup tetap', $manager);
+        $r = $svc->decide($r, false, 'Ruang lingkup tetap', $manager);
         $this->assertSame('rejected', $r->status);
         $this->assertNull($r->applied_at);
         $this->assertTrue($p->refresh()->due_at->equalTo($due));
     }
 
-    public function test_overdue_dinamis_dan_kpi_membedakan_anggota_unik_dari_penugasan(): void
+    public function test_dynamic_overdue_and_kpi_separate_unique_members_from_assignments(): void
     {
         $c = $this->company();
-        $manager = $this->pengguna('manager', $c);
-        $a = $this->pengguna('member', $c);
+        $manager = $this->user('manager', $c);
+        $a = $this->user('member', $c);
         $p = $this->project($manager, $manager, $c, [$a], [], 'one_time', $this->template());
-        $utama = Task::query()->where('project_id', $p->id)->whereNull('parent_id')->get();
-        foreach ($utama as $t) {
+        $main = Task::query()->where('project_id', $p->id)->whereNull('parent_id')->get();
+        foreach ($main as $t) {
             DB::table('task_assignees')->insertOrIgnore(['task_id' => $t->id, 'user_id' => $a->id, 'created_at' => now(), 'updated_at' => now()]);
         }
-        Task::query()->whereKey($utama[0]->id)->update(['due_at' => now()->subDay()]);
-        Task::query()->whereKey($utama[1]->id)->update(['due_at' => now()->subDay(), 'status' => 'done', 'completed_at' => now()]);
+        Task::query()->whereKey($main[0]->id)->update(['due_at' => now()->subDay()]);
+        Task::query()->whereKey($main[1]->id)->update(['due_at' => now()->subDay(), 'status' => 'done', 'completed_at' => now()]);
 
         $k = app(ManagementMetricsService::class)->kpi($manager);
         $this->assertSame(1, Task::query()->where('project_id', $p->id)->whereNull('parent_id')->where('status', '!=', 'done')->where('due_at', '<', now())->count());
-        $this->assertGreaterThanOrEqual(1, $k['terlambat']);
-        $baris = app(ManagementMetricsService::class)->monitoring($manager)->firstWhere('id', $p->id);
-        $this->assertSame(2, (int) $baris->anggota);
-        $this->assertSame(1, (int) $baris->task_terlambat);
-        $this->assertSame('delayed', $baris->kondisi);
-        $this->assertSame(33, $baris->progres);
-        $hitung = \App\Services\ProjectTeamService::hitung($p);
-        $this->assertSame(2, $hitung['orang']);
-        $this->assertSame(6, $hitung['penugasan']);
+        $this->assertGreaterThanOrEqual(1, $k['overdue']);
+        $rows = app(ManagementMetricsService::class)->monitoring($manager)->firstWhere('id', $p->id);
+        $this->assertSame(2, (int) $rows->members);
+        $this->assertSame(1, (int) $rows->overdue_tasks);
+        $this->assertSame('delayed', $rows->condition);
+        $this->assertSame(33, $rows->progress);
+        $counts = \App\Services\ProjectTeamService::counts($p);
+        $this->assertSame(2, $counts['people']);
+        $this->assertSame(6, $counts['assignments']);
     }
 }

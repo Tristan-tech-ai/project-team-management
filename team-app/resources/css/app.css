@@ -1,5 +1,5 @@
-/* Design system PTM (Petunjuk Teknis bagian 06): putih/off-white, biru untuk aksi, merah terlambat,
-   kuning perhatian/review, hijau selesai; Inter / system sans; status selalu ditulis, bukan warna saja. */
+/* PTM design system (Technical Guide section 06): white/off-white, blue for actions, red for overdue,
+   yellow for attention/review, green for done; Inter / system sans; status is always written, never colour only. */
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 
@@ -10,31 +10,31 @@
     --ptm-line: #e3e8f0;
     --ptm-ink: #142033;
     --ptm-ink-2: #5a6678;
-    --ptm-aksi: #2557d6;
-    --ptm-aksi-gelap: #1c46b3;
-    --ptm-aksi-lembut: #eaf0fd;
-    --ptm-telat: #b42318;
-    --ptm-telat-lembut: #fdecea;
+    --ptm-action: #2557d6;
+    --ptm-action-dark: #1c46b3;
+    --ptm-action-soft: #eaf0fd;
+    --ptm-late: #b42318;
+    --ptm-late-soft: #fdecea;
     --ptm-review: #8a5700;
-    --ptm-review-lembut: #fff4d6;
-    --ptm-selesai: #17713f;
-    --ptm-selesai-lembut: #e6f4ec;
+    --ptm-review-soft: #fff4d6;
+    --ptm-done: #17713f;
+    --ptm-done-soft: #e6f4ec;
     --ptm-sidebar: #13213d;
     --ptm-sidebar-2: #1d2e52;
     --ptm-radius: 14px;
-    --ptm-radius-kecil: 8px;
+    --ptm-radius-sm: 8px;
 
     --bs-body-font-family: var(--ptm-font);
     --bs-body-color: var(--ptm-ink);
     --bs-body-bg: var(--ptm-bg);
     --bs-secondary-color: var(--ptm-ink-2);
     --bs-border-color: var(--ptm-line);
-    --bs-primary: var(--ptm-aksi);
+    --bs-primary: var(--ptm-action);
     --bs-primary-rgb: 37, 87, 214;
-    --bs-link-color: var(--ptm-aksi);
+    --bs-link-color: var(--ptm-action);
     --bs-link-color-rgb: 37, 87, 214;
-    --bs-link-hover-color: var(--ptm-aksi-gelap);
-    --bs-border-radius: var(--ptm-radius-kecil);
+    --bs-link-hover-color: var(--ptm-action-dark);
+    --bs-border-radius: var(--ptm-radius-sm);
     --bs-focus-ring-color: rgba(37, 87, 214, .35);
 }
 
@@ -48,94 +48,121 @@ h2, .h2 { font-size: 1.15rem; font-weight: 650; }
        transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease; }
 .btn:active { transform: scale(.98); }
 @media (min-width: 992px) { .btn { min-height: 40px; } }
-.btn-sm { min-height: 36px; --bs-btn-padding-y: .3rem; --bs-btn-padding-x: .7rem; }
-.btn-primary { --bs-btn-bg: var(--ptm-aksi); --bs-btn-border-color: var(--ptm-aksi); --bs-btn-hover-bg: var(--ptm-aksi-gelap); --bs-btn-hover-border-color: var(--ptm-aksi-gelap);
-               --bs-btn-active-bg: var(--ptm-aksi-gelap); --bs-btn-disabled-bg: var(--ptm-aksi); }
-.btn-outline-primary { --bs-btn-color: var(--ptm-aksi); --bs-btn-border-color: var(--ptm-aksi); --bs-btn-hover-bg: var(--ptm-aksi); --bs-btn-hover-border-color: var(--ptm-aksi); }
+/* Click area of at least 44 x 44 px on phones and 40 x 40 px on desktop (Technical Guide 6.1), small buttons included. */
+.btn-sm { min-height: 44px; min-width: 44px; --bs-btn-padding-y: .3rem; --bs-btn-padding-x: .7rem; }
+@media (min-width: 992px) { .btn-sm { min-height: 40px; min-width: 40px; } }
+.btn-primary { --bs-btn-bg: var(--ptm-action); --bs-btn-border-color: var(--ptm-action); --bs-btn-hover-bg: var(--ptm-action-dark); --bs-btn-hover-border-color: var(--ptm-action-dark);
+               --bs-btn-active-bg: var(--ptm-action-dark); --bs-btn-disabled-bg: var(--ptm-action); }
+.btn-outline-primary { --bs-btn-color: var(--ptm-action); --bs-btn-border-color: var(--ptm-action); --bs-btn-hover-bg: var(--ptm-action); --bs-btn-hover-border-color: var(--ptm-action); }
 .form-control, .form-select { min-height: 44px; border-color: #cfd6e2; }
 @media (min-width: 992px) { .form-control, .form-select { min-height: 40px; } }
 .form-label { font-weight: 600; font-size: .9rem; margin-bottom: .3rem; }
 .form-text { color: var(--ptm-ink-2); }
 .form-check-input { width: 1.25em; height: 1.25em; }
-.ikon { flex: none; vertical-align: -.2em; }
 
-.kartu { background: var(--ptm-surface); border: 1px solid var(--ptm-line); border-radius: var(--ptm-radius); padding: 16px; }
-@media (min-width: 992px) { .kartu { padding: 20px 24px; } }
-.kartu-judul { font-size: 1.05rem; font-weight: 650; margin: 0 0 .75rem; }
-.teks-2 { color: var(--ptm-ink-2); }
-.angka { font-variant-numeric: tabular-nums; }
-.kpi-nilai { font-size: 2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+/* Technical Guide 6.1: every click area is at least 44 x 44 px on phones and 40 x 40 px on desktop.
+   Links, labels of checkboxes, disclosure summaries, table sort headers, and calendar controls all follow --ptm-hit. */
+:root { --ptm-hit: 44px; }
+@media (min-width: 992px) { :root { --ptm-hit: 40px; } }
+:where(.content-area, .app-main, .toast-area) a:not(.btn):not(.panel):not(.page-link):not(.fc-event):not(.fc-daygrid-day-number):not(.fc-col-header-cell-cushion):not(.fc-daygrid-more-link) {
+    display: inline-flex; align-items: center; min-height: var(--ptm-hit); min-width: var(--ptm-hit); }
+.form-check { display: flex; align-items: center; gap: .5rem; min-height: var(--ptm-hit); padding-left: 0; }
+.form-check .form-check-input { float: none; margin: 0; flex: none; }
+.form-check-label, input[type=checkbox] + label, input[type=radio] + label { display: inline-flex; align-items: center; min-height: var(--ptm-hit); cursor: pointer; }
+summary { min-height: var(--ptm-hit); line-height: 1.5; padding-block: calc((var(--ptm-hit) - 1.5em) / 2); cursor: pointer; }
+.skip-link { display: inline-flex; align-items: center; min-height: var(--ptm-hit); }
+.check-hit { display: inline-flex; align-items: center; justify-content: center; min-width: var(--ptm-hit); min-height: var(--ptm-hit); margin: 0; cursor: pointer; }
+.form-control, .form-select { min-width: var(--ptm-hit); }
+.page-link { min-width: var(--ptm-hit); min-height: var(--ptm-hit); display: inline-flex; align-items: center; justify-content: center; }
+.checklist .form-check-input { width: 1.5rem; height: 1.5rem; }
+.icon { flex: none; vertical-align: -.2em; }
 
-/* Status: lencana selalu bertulisan. */
-.lencana { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
-.lencana-backlog { background: #eef1f5; color: #3d4757; }
-.lencana-in_progress, .lencana-active, .lencana-info { background: var(--ptm-aksi-lembut); color: var(--ptm-aksi-gelap); }
-.lencana-review, .lencana-pending, .lencana-on_hold, .lencana-risk { background: var(--ptm-review-lembut); color: var(--ptm-review); }
-.lencana-done, .lencana-approved, .lencana-completed, .lencana-ok { background: var(--ptm-selesai-lembut); color: var(--ptm-selesai); }
-.lencana-telat, .lencana-rejected, .lencana-revision, .lencana-cancelled, .lencana-blocked { background: var(--ptm-telat-lembut); color: var(--ptm-telat); }
-.lencana-planned, .lencana-netral { background: #eef1f5; color: #3d4757; }
+.panel { background: var(--ptm-surface); border: 1px solid var(--ptm-line); border-radius: var(--ptm-radius); padding: 16px; }
+@media (min-width: 992px) { .panel { padding: 20px 24px; } }
+.panel-title { font-size: 1.15rem; font-weight: 650; margin: 0 0 .75rem; }
+@media (min-width: 992px) { .panel-title { font-size: 1.25rem; } }
+.muted { color: var(--ptm-ink-2); }
+.numeric { font-variant-numeric: tabular-nums; }
+.kpi-value { font-size: 2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 
-.progres { height: 8px; background: #e6eaf1; border-radius: 999px; overflow: hidden; }
-.progres > span { display: block; height: 100%; background: var(--ptm-selesai); border-radius: 999px; }
+/* Status: a pill always carries text. */
+.pill { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+.pill-backlog { background: #eef1f5; color: #3d4757; }
+.pill-in_progress, .pill-active, .pill-info { background: var(--ptm-action-soft); color: var(--ptm-action-dark); }
+.pill-review, .pill-pending, .pill-on_hold, .pill-risk { background: var(--ptm-review-soft); color: var(--ptm-review); }
+.pill-done, .pill-approved, .pill-completed, .pill-ok { background: var(--ptm-done-soft); color: var(--ptm-done); }
+.pill-late, .pill-rejected, .pill-revision, .pill-cancelled, .pill-blocked { background: var(--ptm-late-soft); color: var(--ptm-late); }
+.pill-planned, .pill-neutral { background: #eef1f5; color: #3d4757; }
 
-/* Tabel administratif: garis, bukan zebra; angka rata kanan. */
+.meter { height: 8px; background: #e6eaf1; border-radius: 999px; overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--ptm-done); border-radius: 999px; }
+
+/* Administrative tables: lines, not zebra stripes; numbers right-aligned. */
 .table { --bs-table-bg: transparent; margin-bottom: 0; }
 .table > :not(caption) > * > * { padding: .7rem .75rem; border-bottom-color: var(--ptm-line); }
 .table thead th { font-size: .8rem; font-weight: 600; color: var(--ptm-ink-2); border-bottom-width: 1px; white-space: nowrap; }
-.table td.angka, .table th.angka { text-align: right; }
-div.dt-container .dt-search input, div.dt-container .dt-length select { min-height: 38px; }
-div.dt-container .dt-paging .page-link { min-width: 38px; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; }
+.table td.numeric, .table th.numeric { text-align: right; }
+div.dt-container .dt-search input, div.dt-container .dt-length select { min-height: var(--ptm-hit); }
+div.dt-container .dt-paging .page-link { min-width: var(--ptm-hit); min-height: var(--ptm-hit); display: inline-flex; align-items: center; justify-content: center; }
+.table thead th { height: var(--ptm-hit); }
 
-.alert { border-radius: var(--ptm-radius-kecil); }
-.notifikasi { position: fixed; z-index: 1080; right: 16px; bottom: 16px; max-width: min(420px, calc(100vw - 32px)); }
-@media (max-width: 991.98px) { .notifikasi { bottom: 88px; } }
+.alert { border-radius: var(--ptm-radius-sm); }
+.toast-area { position: fixed; z-index: 1080; right: 16px; bottom: 16px; max-width: min(420px, calc(100vw - 32px)); }
+@media (max-width: 991.98px) { .toast-area { bottom: 88px; } }
 
-.lewati { position: absolute; left: -999px; top: 8px; z-index: 2000; background: #fff; padding: .5rem 1rem; border-radius: 8px; }
-.lewati:focus { left: 8px; }
+.skip-link { position: absolute; left: -999px; top: 8px; z-index: 2000; background: #fff; padding: .5rem 1rem; border-radius: 8px; }
+.skip-link:focus { left: 8px; }
 :focus-visible { outline: 3px solid rgba(37, 87, 214, .55); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
-/* Kanban empat kolom (prototype 7.2). */
+/* Four-column Kanban (prototype 7.2). */
 .kanban { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); gap: 16px; overflow-x: auto; padding-bottom: 4px; }
 @media (max-width: 991.98px) { .kanban { grid-template-columns: 1fr; } }
-.kanban-kolom { background: #eef2f8; border-radius: var(--ptm-radius); padding: 14px; min-height: 160px; }
-.kanban-isi { display: flex; flex-direction: column; gap: 10px; min-height: 80px; }
-.kartu-task { position: relative; background: #fff; border: 1px solid var(--ptm-line); border-radius: 12px; padding: 14px; }
-.kartu-task .judul-task { font-weight: 650; color: var(--ptm-ink); text-decoration: none; display: block; line-height: 1.3; }
-.kartu-task .judul-task:hover { color: var(--ptm-aksi); text-decoration: underline; }
-.kartu-task.sedang-simpan { opacity: .6; }
-.kartu-bayang { opacity: .4; }
-.task-handle { cursor: grab; color: var(--ptm-ink-2); padding: 2px; border-radius: 6px; }
+.kanban-column { background: #eef2f8; border-radius: var(--ptm-radius); padding: 14px; min-height: 160px; }
+.kanban-body { display: flex; flex-direction: column; gap: 10px; min-height: 80px; }
+.task-card { position: relative; background: #fff; border: 1px solid var(--ptm-line); border-radius: 14px; padding: 16px; }
+@media (min-width: 992px) { .task-card { padding: 18px; } }
+.task-card .task-title { font-weight: 650; color: var(--ptm-ink); text-decoration: none; display: block; line-height: 1.3; }
+.task-card .task-title:hover { color: var(--ptm-action); text-decoration: underline; }
+.task-card.is-saving { opacity: .6; }
+.card-ghost { opacity: .4; }
+.task-handle { cursor: grab; color: var(--ptm-ink-2); border-radius: 8px; min-width: var(--ptm-hit); min-height: var(--ptm-hit); display: inline-flex; align-items: center; justify-content: center; }
 .task-handle:hover { background: #eef1f5; }
 .min-w-0 { min-width: 0; }
 
-/* Kalender: warna kejadian, selalu bersama teks judul. */
+/* Calendar: event colours, always together with the title text. */
 .fc { --fc-border-color: var(--ptm-line); --fc-today-bg-color: #f3f7ff; font-size: .9rem; }
-.fc .fc-button-primary { background: var(--ptm-aksi); border-color: var(--ptm-aksi); }
+.fc .fc-button-primary { background: var(--ptm-action); border-color: var(--ptm-action); }
+.fc .fc-button { min-height: var(--ptm-hit); min-width: var(--ptm-hit); }
+.fc a.fc-event, .fc .fc-daygrid-more-link { min-height: var(--ptm-hit); display: flex; align-items: center; }
+.fc .fc-list-event-title a { display: inline-flex; align-items: center; min-height: var(--ptm-hit); }
 .fc-event { border: 0; padding: 1px 4px; }
-.ev-deadline, .fc-event.ev-deadline { background: var(--ptm-aksi-lembut) !important; color: var(--ptm-aksi-gelap) !important; }
-.ev-telat, .fc-event.ev-telat { background: var(--ptm-telat-lembut) !important; color: var(--ptm-telat) !important; }
-.ev-aktivitas, .fc-event.ev-aktivitas { background: #efe9fb !important; color: #4b2b91 !important; }
-.ev-publikasi, .fc-event.ev-publikasi { background: var(--ptm-review-lembut) !important; color: var(--ptm-review) !important; }
-.ev-selesai, .fc-event.ev-selesai { background: var(--ptm-selesai-lembut) !important; color: var(--ptm-selesai) !important; }
+.ev-deadline, .fc-event.ev-deadline { background: var(--ptm-action-soft) !important; color: var(--ptm-action-dark) !important; }
+.ev-late, .fc-event.ev-late { background: var(--ptm-late-soft) !important; color: var(--ptm-late) !important; }
+.ev-activity, .fc-event.ev-activity { background: #efe9fb !important; color: #4b2b91 !important; }
+.ev-publication, .fc-event.ev-publication { background: var(--ptm-review-soft) !important; color: var(--ptm-review) !important; }
+.ev-done, .fc-event.ev-done { background: var(--ptm-done-soft) !important; color: var(--ptm-done) !important; }
 .fc-event .fc-event-title, .fc-event .fc-event-time { color: inherit; }
-.tanda { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
 .timeline { list-style: none; padding: 0; margin: 0; }
 .timeline li { position: relative; padding: 0 0 16px 22px; border-left: 2px solid var(--ptm-line); margin-left: 6px; }
-.timeline li::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--ptm-aksi); }
-.timeline li.dampak::before { border-color: var(--ptm-review); }
-.timeline li.hambat::before { border-color: var(--ptm-telat); }
+/* Prototype 7.3: filled dot per kind; blue activity, green finished task, amber deadline request or impact, red blocker. */
+.timeline li::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--ptm-action); border: 2px solid var(--ptm-action); }
+.timeline li.done::before { background: var(--ptm-done); border-color: var(--ptm-done); }
+.timeline li.impact::before, .timeline li.schedule::before { background: var(--ptm-review); border-color: var(--ptm-review); }
+.timeline li.blocked::before { background: var(--ptm-late); border-color: var(--ptm-late); }
 
-/* LV-06 audit axe: kontras tombol sekunder dan toolbar kalender (AA 4,5:1). */
+/* LV-06 axe audit: contrast of secondary buttons and the calendar toolbar (AA 4.5:1). */
 .btn-outline-secondary { --bs-btn-color: #3d4757; --bs-btn-border-color: #8b95a5; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #3d4757; --bs-btn-hover-border-color: #3d4757;
     --bs-btn-active-bg: #2c3442; --bs-btn-active-border-color: #2c3442; --bs-btn-disabled-color: #5a6678; }
 .btn-light { --bs-btn-color: #142033; }
-.fc { --fc-button-bg-color: var(--ptm-aksi); --fc-button-border-color: var(--ptm-aksi); --fc-button-text-color: #fff;
-    --fc-button-hover-bg-color: var(--ptm-aksi-gelap); --fc-button-hover-border-color: var(--ptm-aksi-gelap);
+.fc { --fc-button-bg-color: var(--ptm-action); --fc-button-border-color: var(--ptm-action); --fc-button-text-color: #fff;
+    --fc-button-hover-bg-color: var(--ptm-action-dark); --fc-button-hover-border-color: var(--ptm-action-dark);
     --fc-button-active-bg-color: #163a94; --fc-button-active-border-color: #163a94; }
 .fc .fc-button-primary:disabled { opacity: 1; background-color: #3d4757; border-color: #3d4757; color: #fff; }
 .fc .fc-toolbar-title { font-size: 1.15rem; font-weight: 650; color: var(--ptm-ink); }
+@media (min-width: 992px) { .fc .fc-toolbar-title { font-size: 1.25rem; } }
 .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: var(--ptm-ink); text-decoration: none; }
 .fc .fc-day-other .fc-daygrid-day-number { color: #5a6678; opacity: 1; }
 .fc .fc-day-other .fc-daygrid-day-top { opacity: 1; }

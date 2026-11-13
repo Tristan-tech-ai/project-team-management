@@ -1,0 +1,49 @@
+{
+ "name": "s4-radit-revision",
+ "url": "http://127.0.0.1:8101/login",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/tasks/review"
+  },
+  {
+   "waitFor": "text=Draf brosur dan caption, mohon dicek."
+  },
+  {
+   "hover": "text=Draf brosur dan caption, mohon dicek.",
+   "zoom": 1.5,
+   "pauseAfter": 1800
+  },
+  {
+   "type": "Tambahkan jadwal pendaftaran gelombang 2 dan logo sekolah.",
+   "into": "label=Alasan revisi",
+   "zoom": 1.4
+  },
+  {
+   "click": "role=button[name='Revisi']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "text=Riwayat review"
+  },
+  {
+   "hover": "text=Tambahkan jadwal pendaftaran gelombang 2 dan logo sekolah.",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  }
+ ]
+}

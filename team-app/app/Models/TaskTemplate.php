@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `task_templates`).
+// Generated from project_team_management_laravel.sql (table `task_templates`).
 
 namespace App\Models;
 

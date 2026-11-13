@@ -14,38 +14,38 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
-/** Divisi tidak punya deleted_at di SQL, jadi tidak dihapus: dinonaktifkan supaya riwayat project tetap utuh. */
+/** Divisions have no deleted_at in the SQL, so they are not deleted: they are deactivated so project history stays intact. */
 class DivisionController extends Controller
 {
     public function index(): View
     {
         return view('admin.master.index', [
-            'judul' => 'Divisi', 'ket' => 'Divisi per company beserta kepala divisinya. Satu orang boleh di beberapa divisi.',
-            'data' => route('divisions.data'), 'tambah' => auth()->user()->can('divisions.manage') ? route('divisions.create') : null,
-            'kolom' => [['data' => 'name', 'judul' => 'Divisi'], ['data' => 'company', 'judul' => 'Company', 'name' => 'company.name'],
-                ['data' => 'lead', 'judul' => 'Kepala divisi', 'name' => 'lead.name'],
-                ['data' => 'anggota', 'judul' => 'Anggota', 'searchable' => false, 'orderable' => false, 'kelas' => 'angka'],
-                ['data' => 'status', 'judul' => 'Status', 'render' => 'lencana', 'searchable' => false, 'name' => 'is_active'],
-                ['data' => 'aksi', 'judul' => '', 'render' => 'aksi', 'searchable' => false, 'orderable' => false]],
+            'title' => 'Divisi', 'description' => 'Divisi per company beserta kepala divisinya. Satu orang boleh di beberapa divisi.',
+            'data' => route('divisions.data'), 'add' => auth()->user()->can('divisions.manage') ? route('divisions.create') : null,
+            'columns' => [['data' => 'name', 'title' => 'Divisi'], ['data' => 'company', 'title' => 'Company', 'name' => 'company.name'],
+                ['data' => 'lead', 'title' => 'Kepala divisi', 'name' => 'lead.name'],
+                ['data' => 'members', 'title' => 'Anggota', 'searchable' => false, 'orderable' => false, 'cssClass' => 'numeric'],
+                ['data' => 'status', 'title' => 'Status', 'render' => 'badge', 'searchable' => false, 'name' => 'is_active'],
+                ['data' => 'actions', 'title' => '', 'render' => 'actions', 'searchable' => false, 'orderable' => false]],
         ]);
     }
 
     public function data(Request $request): JsonResponse
     {
-        $boleh = $request->user()->can('divisions.manage');
-        $q = Scope::batasiCompany(Division::query(), $request->user(), 'divisions.company_id')->with(['company:id,name', 'lead:id,name'])
-            ->select('divisions.*')->withCount(['memberships as anggota_aktif' => fn ($m) => $m->where('is_active', 1)]);
+        $can = $request->user()->can('divisions.manage');
+        $q = Scope::limitToCompanies(Division::query(), $request->user(), 'divisions.company_id')->with(['company:id,name', 'lead:id,name'])
+            ->select('divisions.*')->withCount(['memberships as active_members' => fn ($m) => $m->where('is_active', 1)]);
 
         return DataTables::eloquent($q)
             ->addColumn('company', fn (Division $d) => $d->company?->name)
             ->addColumn('lead', fn (Division $d) => $d->lead?->name ?? '-')
-            ->addColumn('anggota', fn (Division $d) => $d->anggota_aktif)
+            ->addColumn('members', fn (Division $d) => $d->active_members)
             ->addColumn('status', fn (Division $d) => $d->is_active ? 'Aktif' : 'Nonaktif')
-            ->addColumn('status_kelas', fn (Division $d) => $d->is_active ? 'ok' : 'netral')
-            ->addColumn('aksi', fn (Division $d) => $boleh ? [
+            ->addColumn('status_class', fn (Division $d) => $d->is_active ? 'ok' : 'neutral')
+            ->addColumn('actions', fn (Division $d) => $can ? [
                 ['label' => 'Ubah', 'url' => route('divisions.edit', $d)],
-                ['label' => $d->is_active ? 'Nonaktifkan' : 'Aktifkan', 'url' => route('divisions.toggle', $d), 'metode' => 'PATCH',
-                    'konfirmasi' => $d->is_active ? "Nonaktifkan divisi {$d->name}? Riwayat project tetap tersimpan." : null],
+                ['label' => $d->is_active ? 'Nonaktifkan' : 'Aktifkan', 'url' => route('divisions.toggle', $d), 'method' => 'PATCH',
+                    'confirmation' => $d->is_active ? "Nonaktifkan divisi {$d->name}? Riwayat project tetap tersimpan." : null],
             ] : [])
             ->toJson();
     }
@@ -67,14 +67,14 @@ class DivisionController extends Controller
     public function edit(Division $division): View
     {
         $this->authorize('divisions.manage');
-        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $division->company_id), 403);
 
         return $this->form($division);
     }
 
     public function update(DivisionRequest $request, Division $division): RedirectResponse
     {
-        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $division->company_id), 403);
         $division->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('divisions.index')->with('ok', 'Perubahan divisi tersimpan.');
@@ -83,7 +83,7 @@ class DivisionController extends Controller
     public function toggle(Division $division): RedirectResponse
     {
         $this->authorize('divisions.manage');
-        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
+        abort_unless(Scope::canAccessCompany(request()->user(), $division->company_id), 403);
         $division->update(['is_active' => ! $division->is_active]);
 
         return back()->with('ok', $division->is_active ? "Divisi {$division->name} aktif lagi." : "Divisi {$division->name} dinonaktifkan.");
@@ -93,8 +93,8 @@ class DivisionController extends Controller
     {
         return view('admin.master.division', [
             'division' => $division,
-            'companies' => Scope::batasiCompany(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'users' => Scope::anggotaMaster(request()->user())->orderBy('name')->pluck('name', 'id'),
+            'companies' => Scope::limitToCompanies(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            'users' => Scope::masterMembers(request()->user())->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 }

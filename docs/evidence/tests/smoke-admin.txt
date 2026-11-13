@@ -1,0 +1,61 @@
+
+== super_admin: 9 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates, Management, Master Data, System Settings), 23 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Menunggu Review /tasks/review 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+ok   200 Management Overview /management 
+ok   200 Monitoring Project /management/projects 
+ok   200 Monitoring Divisi & Anggota /management/teams 
+ok   200 Laporan Operasional /management/reports 
+ok   200 Company /master/companies 
+ok   200 Client /master/clients 
+ok   200 Divisi /master/divisions 
+ok   200 Jabatan /master/positions 
+ok   200 Anggota Tim /master/members 
+ok   200 Roles & Permissions /settings/roles 
+ok   200 Menu Management /settings/menus 
+ok   200 Pengaturan Sistem /settings/general 
+
+== manager: 8 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates, Management, Master Data), 20 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Menunggu Review /tasks/review 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+ok   200 Management Overview /management 
+ok   200 Monitoring Project /management/projects 
+ok   200 Monitoring Divisi & Anggota /management/teams 
+ok   200 Laporan Operasional /management/reports 
+ok   200 Company /master/companies 
+ok   200 Client /master/clients 
+ok   200 Divisi /master/divisions 
+ok   200 Jabatan /master/positions 
+ok   200 Anggota Tim /master/members 
+
+== member: 6 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates), 10 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+
+gagal: 0

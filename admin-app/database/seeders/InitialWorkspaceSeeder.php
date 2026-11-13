@@ -17,7 +17,7 @@ class InitialWorkspaceSeeder extends Seeder
             );
         }
         DB::transaction(function () use ($email, $password) {
-            // Role, permission, dan menu SUDAH dibuat oleh SQL awal.
+            // Roles, permissions, and menus are ALREADY created by the initial SQL.
             $roleId = DB::table('roles')
                 ->where('slug', 'super_admin')->value('id');
             if (!$roleId) {
@@ -68,7 +68,7 @@ class InitialWorkspaceSeeder extends Seeder
                      'created_at' => now()]
                 );
             }
-            // Template utama; idempotent berdasarkan nama.
+            // Main template; idempotent by name.
             foreach ([
                 'Website Development' => [
                     'Analisis Kebutuhan', 'Desain UI/UX',
@@ -112,7 +112,7 @@ class InitialWorkspaceSeeder extends Seeder
                     }
                 }
             }
-            // Template task mandiri, masing-masing dengan checklist subtask.
+            // Standalone task templates, each with a subtask checklist.
             foreach ([
                 'Desain Feed Instagram' => [
                     'Brief desain', 'Desain awal', 'Review', 'Export final',

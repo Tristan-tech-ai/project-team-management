@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `schedule_change_requests`).
+// Generated from project_team_management_laravel.sql (table `schedule_change_requests`).
 
 namespace App\Models;
 

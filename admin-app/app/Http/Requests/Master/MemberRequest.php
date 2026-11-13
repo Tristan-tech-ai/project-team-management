@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator;
 
-/** Anggota tim = users + profil + role + keanggotaan company dan divisi (dengan jabatan per divisi). */
+/** Team member = users + profile + role + company and division memberships (with a position per division). */
 class MemberRequest extends FormRequest
 {
     public function authorize(): bool
@@ -25,37 +25,37 @@ class MemberRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:180', Rule::unique('users', 'email')->ignore($user?->id)],
             'password' => [$user ? 'nullable' : 'required', 'string', Password::min(12)->letters()->numbers()],
-            'role' => ['required', Rule::exists('roles', 'slug'), function (string $a, mixed $v, \Closure $gagal) {
+            'role' => ['required', Rule::exists('roles', 'slug'), function (string $a, mixed $v, \Closure $failed) {
                 if ($v === 'super_admin' && ! $this->user()->isSuperAdmin()) {
-                    $gagal('Hanya Super Admin yang bisa memberi role Super Admin.');
+                    $failed('Hanya Super Admin yang bisa memberi role Super Admin.');
                 }
             }],
             'phone' => ['nullable', 'string', 'max:30'],
             'is_active' => ['boolean'],
             'companies' => ['array'],
-            'companies.*' => ['integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::aturanCompany($this->user())],
-            'divisi' => ['array'],
-            'divisi.*.ikut' => ['nullable', 'boolean'],
-            'divisi.*.position_id' => ['nullable', 'integer', 'exists:positions,id'],
+            'companies.*' => ['integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::companyRule($this->user())],
+            'divisions' => ['array'],
+            'divisions.*.included' => ['nullable', 'boolean'],
+            'divisions.*.position_id' => ['nullable', 'integer', 'exists:positions,id'],
         ];
     }
 
-    /** Divisi dan jabatan harus berasal dari company yang dipilih untuk anggota ini. */
+    /** Divisions and positions must belong to the companies selected for this member. */
     public function after(): array
     {
         return [function (Validator $v) {
             $companies = array_map('intval', (array) $this->input('companies', []));
-            foreach ((array) $this->input('divisi', []) as $divisionId => $isi) {
-                if (empty($isi['ikut'])) {
+            foreach ((array) $this->input('divisions', []) as $divisionId => $content) {
+                if (empty($content['included'])) {
                     continue;
                 }
                 $div = DB::table('divisions')->where('id', (int) $divisionId)->first();
                 if (! $div || ! in_array((int) $div->company_id, $companies, true)) {
-                    $v->errors()->add('divisi', 'Divisi yang dipilih harus milik company anggota ini.');
+                    $v->errors()->add('divisions', 'Divisi yang dipilih harus milik company anggota ini.');
                     break;
                 }
-                if (! empty($isi['position_id']) && ! DB::table('positions')->where('id', (int) $isi['position_id'])->where('company_id', $div->company_id)->exists()) {
-                    $v->errors()->add('divisi', 'Jabatan harus dari company yang sama dengan divisinya.');
+                if (! empty($content['position_id']) && ! DB::table('positions')->where('id', (int) $content['position_id'])->where('company_id', $div->company_id)->exists()) {
+                    $v->errors()->add('divisions', 'Jabatan harus dari company yang sama dengan divisinya.');
                     break;
                 }
             }

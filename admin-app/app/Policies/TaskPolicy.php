@@ -17,36 +17,36 @@ class TaskPolicy
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.view') && Scope::bisaLihat($user, $task->project);
+        return $user->hasPermission('tasks.view') && Scope::canView($user, $task->project);
     }
 
-    /** Ubah isi task: pengelola project atau pelaksana task (PIC/assignee). */
+    /** Update task content: the project manager or a task assignee (PIC/assignee). */
     public function update(User $user, Task $task): bool
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.update') && (Scope::pengelola($user, $task->project) || Scope::pelaksana($user, $task));
+        return $user->hasPermission('tasks.update') && (Scope::isManager($user, $task->project) || Scope::isAssignee($user, $task));
     }
 
     public function assign(User $user, Task $task): bool
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.assign') && (Scope::pengelola($user, $task->project) || (int) $task->pic_user_id === (int) $user->id);
+        return $user->hasPermission('tasks.assign') && (Scope::isManager($user, $task->project) || (int) $task->pic_user_id === (int) $user->id);
     }
 
     public function moveStatus(User $user, Task $task): bool
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.move_status') && (Scope::pengelola($user, $task->project) || Scope::pelaksana($user, $task));
+        return $user->hasPermission('tasks.move_status') && (Scope::isManager($user, $task->project) || Scope::isAssignee($user, $task));
     }
 
     public function submit(User $user, Task $task): bool
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.submit') && (Scope::pelaksana($user, $task) || Scope::pengelola($user, $task->project));
+        return $user->hasPermission('tasks.submit') && (Scope::isAssignee($user, $task) || Scope::isManager($user, $task->project));
     }
 
     public function review(User $user, Task $task): bool
@@ -58,13 +58,13 @@ class TaskPolicy
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.delete') && Scope::pengelola($user, $task->project);
+        return $user->hasPermission('tasks.delete') && Scope::isManager($user, $task->project);
     }
 
     public function approveSchedule(User $user, Task $task): bool
     {
         $task->loadMissing('project');
 
-        return $user->hasPermission('tasks.approve_schedule') && (Scope::pengelola($user, $task->project) || (int) $task->pic_user_id === (int) $user->id);
+        return $user->hasPermission('tasks.approve_schedule') && (Scope::isManager($user, $task->project) || (int) $task->pic_user_id === (int) $user->id);
     }
 }

@@ -10,14 +10,14 @@ use App\Models\ProjectActivity;
 use App\Models\TaskSubmission;
 use App\Services\ManagementMetricsService;
 use App\Services\Scope;
-use App\Support\Kode;
-use App\Support\Waktu;
+use App\Support\Codes;
+use App\Support\Dates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** Management: Overview, Monitoring Project, Monitoring Divisi & Anggota, Laporan Operasional + export CSV. */
+/** Management: Overview, Project Monitoring, Division & Member Monitoring, Operational Report + CSV export. */
 class ManagementController extends Controller
 {
     public function __construct(private ManagementMetricsService $m) {}
@@ -30,9 +30,9 @@ class ManagementController extends Controller
 
         return view('admin.management.index', [
             'kpi' => $this->m->kpi($u), 'monitor' => $monitor->whereNotIn('status', ['completed', 'cancelled'])->take(8),
-            'kondisi' => $monitor->countBy('kondisi'),
+            'condition' => $monitor->countBy('condition'),
             'review' => TaskSubmission::query()->where('status', 'pending')->whereIn('task_id', Scope::tasks($u)->select('tasks.id'))->with(['task:id,title,project_id', 'submitter:id,name'])->oldest('submitted_at')->limit(5)->get(),
-            'operasional' => ProjectActivity::query()->whereIn('project_id', Scope::projects($u)->select('projects.id'))->with(['project:id,name'])->latest('id')->limit(5)->get(),
+            'operations' => ProjectActivity::query()->whereIn('project_id', Scope::projects($u)->select('projects.id'))->with(['project:id,name'])->latest('id')->limit(5)->get(),
         ]);
     }
 
@@ -41,7 +41,7 @@ class ManagementController extends Controller
         abort_unless($request->user()->hasPermission('management.view'), 403);
         $filter = $request->only(['project_type', 'status', 'company_id', 'client_id']);
 
-        return view('admin.management.projects', ['baris' => $this->m->monitoring($request->user(), $filter), 'filter' => $filter,
+        return view('admin.management.projects', ['rows' => $this->m->monitoring($request->user(), $filter), 'filter' => $filter,
             'companies' => Scope::filterCompanies($request->user()), 'clients' => Scope::filterClients($request->user())]);
     }
 
@@ -50,66 +50,66 @@ class ManagementController extends Controller
         abort_unless($request->user()->hasPermission('management.view'), 403);
         $div = $request->integer('division_id') ?: null;
 
-        return view('admin.management.teams', ['divisi' => $this->m->perDivisi($request->user()), 'orang' => $this->m->bebanAnggota($request->user(), $div),
-            'pilihanDivisi' => Scope::filterDivisi($request->user()), 'divDipilih' => $div]);
+        return view('admin.management.teams', ['divisions' => $this->m->perDivision($request->user()), 'people' => $this->m->memberWorkload($request->user(), $div),
+            'divisionOptions' => Scope::filterDivisions($request->user()), 'selectedDivision' => $div]);
     }
 
     public function reports(Request $request): View
     {
         abort_unless($request->user()->hasPermission('management.view'), 403);
-        [$dari, $sampai] = $this->rentang($request);
+        [$from, $until] = $this->range($request);
 
         return view('admin.management.reports', [
-            'dari' => $dari, 'sampai' => $sampai,
-            'jejak' => $this->m->jejakJadwal($request->user(), $dari->copy()->utc(), $sampai->copy()->utc()),
-            'aktivitas' => ProjectActivity::query()->whereIn('project_id', Scope::projects($request->user())->select('projects.id'))
-                ->whereBetween('created_at', [$dari->copy()->utc(), $sampai->copy()->utc()])->with(['project:id,name', 'participants:id,name'])->latest('id')->limit(100)->get(),
-            'bolehExport' => $request->user()->hasPermission('management.export'),
+            'from' => $from, 'until' => $until,
+            'trail' => $this->m->scheduleTrail($request->user(), $from->copy()->utc(), $until->copy()->utc()),
+            'activities' => ProjectActivity::query()->whereIn('project_id', Scope::projects($request->user())->select('projects.id'))
+                ->whereBetween('created_at', [$from->copy()->utc(), $until->copy()->utc()])->with(['project:id,name', 'participants:id,name'])->latest('id')->limit(100)->get(),
+            'canExport' => $request->user()->hasPermission('management.export'),
         ]);
     }
 
-    /** Export CSV (Excel membaca UTF-8 BOM). Nilai diawali = + - @ dinetralkan agar tidak dieksekusi sebagai rumus. */
+    /** CSV export (Excel reads UTF-8 BOM). Values starting with = + - @ are neutralized so they never run as formulas. */
     public function export(Request $request): StreamedResponse
     {
         abort_unless($request->user()->hasPermission('management.export'), 403);
-        $jenis = $request->validate(['jenis' => ['required', 'in:monitoring,jadwal,anggota']])['jenis'];
-        [$dari, $sampai] = $this->rentang($request);
+        $kind = $request->validate(['kind' => ['required', 'in:monitoring,schedule,members']])['kind'];
+        [$from, $until] = $this->range($request);
         $u = $request->user();
-        $baris = match ($jenis) {
+        $rows = match ($kind) {
             'monitoring' => array_merge([['Kode', 'Project', 'Tipe', 'Status', 'Company', 'Client', 'PIC', 'Task utama', 'Selesai', 'Progress %', 'Terlambat', 'Anggota unik', 'Divisi', 'Target awal', 'Deadline terbaru', 'Kondisi']],
-                $this->m->monitoring($u)->map(fn ($p) => [$p->code, $p->name, Kode::label(Kode::PROJECT_TYPE, $p->project_type), Kode::label(Kode::PROJECT_STATUS, $p->status), $p->company, $p->client ?? '-', $p->pic,
-                    $p->task_utama, $p->task_selesai, $p->progres, $p->task_terlambat, $p->anggota, $p->divisi,
-                    Waktu::tanggal($p->baseline_due_at ? Carbon::parse($p->baseline_due_at) : null), Waktu::tanggal($p->due_at ? Carbon::parse($p->due_at) : null),
-                    ManagementMetricsService::KONDISI[$p->kondisi] ?? $p->kondisi])->all()),
-            'jadwal' => array_merge([['Project', 'Task', 'Target awal', 'Deadline sebelum', 'Deadline usulan', 'Alasan', 'Aktivitas terkait', 'Status', 'Pengaju', 'Diajukan', 'Pemutus', 'Diputuskan']],
-                $this->m->jejakJadwal($u, $dari->copy()->utc(), $sampai->copy()->utc())->map(fn ($s) => [$s->project, $s->task ?? '(project)', $this->tgl($s->baseline), $this->tgl($s->previous_due_at),
-                    $this->tgl($s->proposed_due_at), $s->reason, $s->aktivitas ?? '-', Kode::label(Kode::SCHEDULE_STATUS, $s->status), $s->pengaju, $this->tgl($s->requested_at), $s->pemutus ?? '-', $this->tgl($s->decided_at)])->all()),
-            'anggota' => array_merge([['Anggota', 'Project', 'Task aktif', 'Terlambat', 'Selesai', 'Menit kerja', 'Menit aktivitas']],
-                $this->m->bebanAnggota($u)->map(fn ($o) => [$o->name, $o->project, $o->aktif, $o->terlambat, $o->selesai, $o->menit_kerja, $o->menit_aktivitas])->all()),
+                $this->m->monitoring($u)->map(fn ($p) => [$p->code, $p->name, Codes::label(Codes::PROJECT_TYPE, $p->project_type), Codes::label(Codes::PROJECT_STATUS, $p->status), $p->company, $p->client ?? '-', $p->pic,
+                    $p->main_tasks, $p->done_tasks, $p->progress, $p->overdue_tasks, $p->members, $p->divisions,
+                    Dates::date($p->baseline_due_at ? Carbon::parse($p->baseline_due_at) : null), Dates::date($p->due_at ? Carbon::parse($p->due_at) : null),
+                    ManagementMetricsService::CONDITIONS[$p->condition] ?? $p->condition])->all()),
+            'schedule' => array_merge([['Project', 'Task', 'Target awal', 'Deadline sebelum', 'Deadline usulan', 'Alasan', 'Aktivitas terkait', 'Status', 'Pengaju', 'Diajukan', 'Pemutus', 'Diputuskan']],
+                $this->m->scheduleTrail($u, $from->copy()->utc(), $until->copy()->utc())->map(fn ($s) => [$s->project, $s->task ?? '(project)', $this->dateValue($s->baseline), $this->dateValue($s->previous_due_at),
+                    $this->dateValue($s->proposed_due_at), $s->reason, $s->activities ?? '-', Codes::label(Codes::SCHEDULE_STATUS, $s->status), $s->requester, $this->dateValue($s->requested_at), $s->decider ?? '-', $this->dateValue($s->decided_at)])->all()),
+            'members' => array_merge([['Anggota', 'Project', 'Task aktif', 'Terlambat', 'Selesai', 'Menit kerja', 'Menit aktivitas']],
+                $this->m->memberWorkload($u)->map(fn ($o) => [$o->name, $o->project, $o->active, $o->overdue, $o->done, $o->work_minutes, $o->activity_minutes])->all()),
         };
-        $nama = 'laporan-'.$jenis.'-'.now()->setTimezone(Waktu::zona())->format('Ymd-His').'.csv';
+        $name = 'laporan-'.$kind.'-'.now()->setTimezone(Dates::zone())->format('Ymd-His').'.csv';
 
-        return response()->streamDownload(function () use ($baris) {
+        return response()->streamDownload(function () use ($rows) {
             $f = fopen('php://output', 'w');
             fwrite($f, "\xEF\xBB\xBF");
-            foreach ($baris as $b) {
+            foreach ($rows as $b) {
                 fputcsv($f, array_map(fn ($v) => is_string($v) && $v !== '' && in_array($v[0], ['=', '+', '-', '@', "\t", "\r"], true) ? "'".$v : $v, $b), ';');
             }
             fclose($f);
-        }, $nama, ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'no-store']);
+        }, $name, ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'no-store']);
     }
 
-    private function tgl($v): string
+    private function dateValue($v): string
     {
-        return $v ? Waktu::tanggalJam(Carbon::parse($v)) : '-';
+        return $v ? Dates::dateTime(Carbon::parse($v)) : '-';
     }
 
-    private function rentang(Request $request): array
+    private function range(Request $request): array
     {
-        $zona = Waktu::zona();
-        $dari = $request->filled('dari') ? Carbon::parse($request->input('dari'), $zona)->startOfDay() : now($zona)->startOfMonth();
-        $sampai = $request->filled('sampai') ? Carbon::parse($request->input('sampai'), $zona)->endOfDay() : now($zona)->endOfDay();
+        $zone = Dates::zone();
+        $from = $request->filled('from') ? Carbon::parse($request->input('from'), $zone)->startOfDay() : now($zone)->startOfMonth();
+        $until = $request->filled('until') ? Carbon::parse($request->input('until'), $zone)->endOfDay() : now($zone)->endOfDay();
 
-        return [$dari, $sampai];
+        return [$from, $until];
     }
 }

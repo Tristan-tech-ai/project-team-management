@@ -1,134 +1,134 @@
-// Kanban (Petunjuk Teknis 9.4): SortableJS di desktop, dropdown status di HP, endpoint sama PATCH /tasks/{id}/status.
-// Status baru hanya dianggap berhasil setelah API menjawab; bila ditolak, kartu dikembalikan ke posisi semula + pesan.
+// Kanban (Technical Guide 9.4): SortableJS on desktop, status dropdown on phones, same endpoint PATCH /tasks/{id}/status.
+// A new status only counts as saved after the API answers; when it is refused, the card goes back to its place with a message.
 import Sortable from 'sortablejs';
-import { kirimJson, notifikasi } from './inti';
+import { sendJson, notify } from './core';
 
-function perbaruiHitungan(papan) {
-    papan.querySelectorAll('[data-kanban-column]').forEach((kol) => {
-        const n = kol.querySelectorAll('[data-task-id]').length;
-        const lencana = papan.querySelector(`[data-hitung="${kol.dataset.status}"]`);
-        if (lencana) lencana.textContent = String(n);
-        const kosong = kol.querySelector('.kanban-kosong');
-        if (kosong) kosong.hidden = n > 0;
+function updateCounts(board) {
+    board.querySelectorAll('[data-kanban-column]').forEach((column) => {
+        const n = column.querySelectorAll('[data-task-id]').length;
+        const badge = board.querySelector(`[data-count="${column.dataset.status}"]`);
+        if (badge) badge.textContent = String(n);
+        const empty = column.querySelector('.kanban-empty');
+        if (empty) empty.hidden = n > 0;
     });
 }
 
-function urlStatus(kartu) {
-    return kartu.querySelector('[data-ubah-status]')?.dataset.ubahStatus ?? `/tasks/${kartu.dataset.taskId}/status`;
+function statusUrl(card) {
+    return card.querySelector('[data-change-status]')?.dataset.changeStatus ?? `/tasks/${card.dataset.taskId}/status`;
 }
 
-export function pasangKanban() {
-    document.querySelectorAll('[data-kanban]').forEach((papan) => {
-        papan.querySelectorAll('[data-kanban-column]').forEach((kol) => {
-            new Sortable(kol, {
+export function initKanban() {
+    document.querySelectorAll('[data-kanban]').forEach((board) => {
+        board.querySelectorAll('[data-kanban-column]').forEach((column) => {
+            new Sortable(column, {
                 group: 'tasks',
                 animation: 150,
                 handle: '.task-handle',
                 draggable: '[data-task-id]',
-                ghostClass: 'kartu-bayang',
+                ghostClass: 'card-ghost',
                 onEnd: async (e) => {
                     if (e.from === e.to) return;
-                    const kartu = e.item;
-                    const ke = e.to.dataset.status;
-                    kartu.classList.add('sedang-simpan');
+                    const card = e.item;
+                    const target = e.to.dataset.status;
+                    card.classList.add('is-saving');
                     try {
-                        const hasil = await kirimJson(urlStatus(kartu), 'PATCH', { status: ke });
-                        kartu.dataset.status = hasil.status;
-                        const pilih = kartu.querySelector('[data-ubah-status]');
-                        if (pilih) pilih.value = hasil.status;
-                        notifikasi(hasil.message);
+                        const result = await sendJson(statusUrl(card), 'PATCH', { status: target });
+                        card.dataset.status = result.status;
+                        const select = card.querySelector('[data-change-status]');
+                        if (select) select.value = result.status;
+                        notify(result.message);
                     } catch (err) {
-                        // Kembalikan kartu ke kolom dan urutan asal.
-                        const acuan = e.from.querySelectorAll('[data-task-id]')[e.oldDraggableIndex] ?? e.from.querySelector('.kanban-kosong');
-                        e.from.insertBefore(kartu, acuan ?? null);
-                        notifikasi(err.message, 'error');
+                        // Put the card back into its original column and position.
+                        const anchor = e.from.querySelectorAll('[data-task-id]')[e.oldDraggableIndex] ?? e.from.querySelector('.kanban-empty');
+                        e.from.insertBefore(card, anchor ?? null);
+                        notify(err.message, 'error');
                     } finally {
-                        kartu.classList.remove('sedang-simpan');
-                        perbaruiHitungan(papan);
+                        card.classList.remove('is-saving');
+                        updateCounts(board);
                     }
                 },
             });
         });
     });
 
-    // Dropdown status (HP atau saat seret gagal): endpoint yang sama.
+    // Status dropdown (phones, or when dragging fails): same endpoint.
     document.addEventListener('change', async (e) => {
-        const pilih = e.target;
-        if (!(pilih instanceof HTMLSelectElement) || !pilih.dataset.ubahStatus) return;
-        const kartu = pilih.closest('[data-task-id]');
-        const lama = kartu?.dataset.status ?? pilih.dataset.lama;
-        pilih.disabled = true;
+        const select = e.target;
+        if (!(select instanceof HTMLSelectElement) || !select.dataset.changeStatus) return;
+        const card = select.closest('[data-task-id]');
+        const previous = card?.dataset.status ?? select.dataset.previous;
+        select.disabled = true;
         try {
-            const hasil = await kirimJson(pilih.dataset.ubahStatus, 'PATCH', { status: pilih.value });
-            notifikasi(hasil.message);
-            const papan = kartu?.closest('[data-kanban]');
-            const tujuan = papan?.querySelector(`[data-kanban-column][data-status="${hasil.status}"]`);
-            if (kartu && tujuan) {
-                kartu.dataset.status = hasil.status;
-                tujuan.prepend(kartu);
-                perbaruiHitungan(papan);
-            } else if (kartu) {
-                kartu.dataset.status = hasil.status;
+            const result = await sendJson(select.dataset.changeStatus, 'PATCH', { status: select.value });
+            notify(result.message);
+            const board = card?.closest('[data-kanban]');
+            const destination = board?.querySelector(`[data-kanban-column][data-status="${result.status}"]`);
+            if (card && destination) {
+                card.dataset.status = result.status;
+                destination.prepend(card);
+                updateCounts(board);
+            } else if (card) {
+                card.dataset.status = result.status;
             }
         } catch (err) {
-            pilih.value = lama;
-            notifikasi(err.message, 'error');
+            select.value = previous;
+            notify(err.message, 'error');
         } finally {
-            pilih.disabled = false;
+            select.disabled = false;
         }
     });
 }
 
-// Checklist subtask dicentang langsung tanpa membuka halaman edit (Petunjuk Teknis 6.3).
-export function pasangChecklist() {
+// Subtask checklist items are ticked directly without opening an edit page (Technical Guide 6.3).
+export function initChecklist() {
     document.addEventListener('change', async (e) => {
-        const kotak = e.target;
-        if (!(kotak instanceof HTMLInputElement) || !kotak.dataset.centang) return;
-        const label = kotak.closest('form')?.querySelector('label');
-        kotak.disabled = true;
+        const box = e.target;
+        if (!(box instanceof HTMLInputElement) || !box.dataset.checkSubtask) return;
+        const label = box.closest('form')?.querySelector('label');
+        box.disabled = true;
         try {
-            const hasil = await kirimJson(kotak.dataset.centang, 'PATCH', { selesai: kotak.checked });
-            label?.classList.toggle('text-decoration-line-through', hasil.selesai);
-            label?.classList.toggle('teks-2', hasil.selesai);
-            document.querySelectorAll('[data-checklist-jumlah]').forEach((el) => { el.textContent = hasil.jumlah; });
-            document.querySelectorAll('[data-checklist-progres]').forEach((el) => { el.style.width = `${hasil.progres}%`; });
-            notifikasi(hasil.message);
+            const result = await sendJson(box.dataset.checkSubtask, 'PATCH', { done: box.checked });
+            label?.classList.toggle('text-decoration-line-through', result.done);
+            label?.classList.toggle('muted', result.done);
+            document.querySelectorAll('[data-checklist-count]').forEach((el) => { el.textContent = result.total; });
+            document.querySelectorAll('[data-checklist-progress]').forEach((el) => { el.style.width = `${result.progress}%`; });
+            notify(result.message);
         } catch (err) {
-            kotak.checked = !kotak.checked;
-            notifikasi(err.message, 'error');
+            box.checked = !box.checked;
+            notify(err.message, 'error');
         } finally {
-            kotak.disabled = false;
+            box.disabled = false;
         }
     });
 
     document.addEventListener('click', (e) => {
-        const t = e.target.closest('[data-isi-durasi]');
+        const t = e.target.closest('[data-fill-duration]');
         if (!t) return;
-        const isian = document.querySelector(t.dataset.target);
-        if (isian) isian.value = t.dataset.isiDurasi;
+        const field = document.querySelector(t.dataset.target);
+        if (field) field.value = t.dataset.fillDuration;
     });
 
-    // Geser cepat deadline usulan: deadline sekarang (task terpilih, lalu project) + N hari, jam tetap.
-    // Tanpa deadline sama sekali: hari ini + N hari pukul 17.00. Nilai dasar sudah dalam zona tampilan sistem.
+    // Quick deadline shift for a proposal: current deadline (selected task, else project) + N days, same time of day.
+    // Without any deadline: today + N days at 17:00. Base values are already in the system display time zone.
     document.addEventListener('click', (e) => {
-        const t = e.target.closest('[data-isi-hari]');
+        const t = e.target.closest('[data-fill-days]');
         if (!t) return;
-        const grup = t.closest('[data-dasar-project]');
-        let dasar = grup?.dataset.dasarProject ?? '';
-        const pilih = grup ? document.querySelector(grup.dataset.pilihTask) : null;
-        if (pilih?.value) {
+        const group = t.closest('[data-base-project]');
+        let base = group?.dataset.baseProject ?? '';
+        const select = group ? document.querySelector(group.dataset.selectTask) : null;
+        if (select?.value) {
             try {
-                dasar = JSON.parse(grup.dataset.dasarTask || '{}')[pilih.value] ?? dasar;
+                base = JSON.parse(group.dataset.baseTask || '{}')[select.value] ?? base;
             } catch {
-                // Peta rusak: tetap pakai deadline project.
+                // Broken map: keep the project deadline.
             }
         }
-        const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(dasar);
+        const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(base);
         const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5])) : new Date();
         if (!m) d.setHours(17, 0, 0, 0);
-        d.setDate(d.getDate() + Number(t.dataset.isiHari));
-        const dua = (n) => String(n).padStart(2, '0');
-        const isian = document.querySelector(t.dataset.target);
-        if (isian) isian.value = `${d.getFullYear()}-${dua(d.getMonth() + 1)}-${dua(d.getDate())}T${dua(d.getHours())}:${dua(d.getMinutes())}`;
+        d.setDate(d.getDate() + Number(t.dataset.fillDays));
+        const pad = (n) => String(n).padStart(2, '0');
+        const field = document.querySelector(t.dataset.target);
+        if (field) field.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     });
 }

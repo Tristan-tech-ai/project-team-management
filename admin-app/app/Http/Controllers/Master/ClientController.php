@@ -17,28 +17,28 @@ class ClientController extends Controller
     public function index(): View
     {
         return view('admin.master.index', [
-            'judul' => 'Client', 'ket' => 'Klien project. Project internal boleh tanpa client. PIC project selalu anggota tim internal.',
-            'data' => route('clients.data'), 'tambah' => auth()->user()->can('clients.manage') ? route('clients.create') : null,
-            'kolom' => [['data' => 'code', 'judul' => 'Kode'], ['data' => 'name', 'judul' => 'Nama'], ['data' => 'email', 'judul' => 'Email'],
-                ['data' => 'phone', 'judul' => 'Telepon'],
-                ['data' => 'project', 'judul' => 'Project', 'searchable' => false, 'orderable' => false, 'kelas' => 'angka'],
-                ['data' => 'status', 'judul' => 'Status', 'render' => 'lencana', 'searchable' => false, 'name' => 'is_active'],
-                ['data' => 'aksi', 'judul' => '', 'render' => 'aksi', 'searchable' => false, 'orderable' => false]],
+            'title' => 'Client', 'description' => 'Klien project. Project internal boleh tanpa client. PIC project selalu anggota tim internal.',
+            'data' => route('clients.data'), 'add' => auth()->user()->can('clients.manage') ? route('clients.create') : null,
+            'columns' => [['data' => 'code', 'title' => 'Kode'], ['data' => 'name', 'title' => 'Nama'], ['data' => 'email', 'title' => 'Email'],
+                ['data' => 'phone', 'title' => 'Telepon'],
+                ['data' => 'project', 'title' => 'Project', 'searchable' => false, 'orderable' => false, 'cssClass' => 'numeric'],
+                ['data' => 'status', 'title' => 'Status', 'render' => 'badge', 'searchable' => false, 'name' => 'is_active'],
+                ['data' => 'actions', 'title' => '', 'render' => 'actions', 'searchable' => false, 'orderable' => false]],
         ]);
     }
 
     public function data(Request $request): JsonResponse
     {
-        $bolehUbah = $request->user()->can('clients.manage');
+        $canEdit = $request->user()->can('clients.manage');
 
-        // Cakupan: selain Super Admin hanya client dari project yang terlihat olehnya.
+        // Scope: apart from the Super Admin, only clients of projects the user can see.
         return DataTables::eloquent(Scope::clients($request->user())->select('clients.*')->withCount('projects'))
             ->addColumn('project', fn (Client $c) => $c->projects_count)
             ->addColumn('status', fn (Client $c) => $c->is_active ? 'Aktif' : 'Nonaktif')
-            ->addColumn('status_kelas', fn (Client $c) => $c->is_active ? 'ok' : 'netral')
-            ->addColumn('aksi', fn (Client $c) => $bolehUbah ? [
+            ->addColumn('status_class', fn (Client $c) => $c->is_active ? 'ok' : 'neutral')
+            ->addColumn('actions', fn (Client $c) => $canEdit ? [
                 ['label' => 'Ubah', 'url' => route('clients.edit', $c)],
-                ['label' => 'Hapus', 'url' => route('clients.destroy', $c), 'metode' => 'DELETE', 'konfirmasi' => "Hapus {$c->name}? Project lama tetap ada tanpa client."],
+                ['label' => 'Hapus', 'url' => route('clients.destroy', $c), 'method' => 'DELETE', 'confirmation' => "Hapus {$c->name}? Project lama tetap ada tanpa client."],
             ] : [])
             ->toJson();
     }

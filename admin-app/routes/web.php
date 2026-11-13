@@ -4,12 +4,13 @@ use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ManagementController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\TemplateController;
-use App\Http\Controllers\AkunController;
-use App\Http\Controllers\Auth\MasukController;
-use App\Http\Controllers\Bersama\OperasionalController;
-use App\Http\Controllers\Bersama\TaskAksiController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Shared\OperationsController;
+use App\Http\Controllers\Shared\TaskActionController;
 use App\Http\Controllers\Master\ClientController;
 use App\Http\Controllers\Master\CompanyController;
 use App\Http\Controllers\Master\DivisionController;
@@ -21,15 +22,17 @@ use App\Http\Controllers\Settings\MenuController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use Illuminate\Support\Facades\Route;
 
-// Admin App (desktop-first). Setiap route diperiksa izinnya di server (can:/Policy); menu hanya navigasi.
+// Admin App (desktop-first). Every route checks its permission on the server (can:/Policy); the menu is navigation only.
 Route::middleware('guest')->group(function () {
-    Route::get('/masuk', [MasukController::class, 'create'])->name('login');
-    Route::post('/masuk', [MasukController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1');
 });
 
-Route::middleware(['auth', 'aktif'])->group(function () {
-    Route::post('/keluar', [MasukController::class, 'destroy'])->name('logout');
-    Route::get('/', fn () => redirect()->route('dashboard.index'))->name('beranda');
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/', fn () => redirect()->route('dashboard.index'))->name('home');
+    // Global search in the header (prototypes 7.1-7.3); each group follows the user's data scope.
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
 
     // 1. Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('can:dashboard.view')->name('dashboard.index');
@@ -39,7 +42,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
         Route::get('/projects/data', [ProjectController::class, 'data'])->name('projects.data');
         Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
-        Route::get('/projects/pratinjau-template', [ProjectController::class, 'preview'])->name('projects.preview');
+        Route::get('/projects/template-preview', [ProjectController::class, 'preview'])->name('projects.preview');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
         Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
         Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
@@ -52,44 +55,45 @@ Route::middleware(['auth', 'aktif'])->group(function () {
         Route::put('/projects/{project}/team', [ProjectController::class, 'updateTeam'])->name('projects.team.update');
         Route::get('/projects/{project}/activities', [ProjectController::class, 'activities'])->name('projects.activities');
         Route::get('/projects/{project}/calendar', [ProjectController::class, 'calendar'])->name('projects.calendar');
-        Route::post('/projects/{project}/periods', [ProjectController::class, 'periode'])->name('projects.periods.store');
-        Route::post('/projects/{project}/tasks', [TaskAksiController::class, 'store'])->name('projects.tasks.store');
-        Route::post('/projects/{project}/activities', [OperasionalController::class, 'aktivitas'])->name('projects.activities.store');
+        Route::post('/projects/{project}/periods', [ProjectController::class, 'period'])->name('projects.periods.store');
+        Route::post('/projects/{project}/tasks', [TaskActionController::class, 'store'])->name('projects.tasks.store');
+        Route::post('/projects/{project}/activities', [OperationsController::class, 'activities'])->name('projects.activities.store');
     });
 
     // 3. Tasks
     Route::middleware('can:tasks.view')->group(function () {
         Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::get('/tasks/data', [TaskController::class, 'data'])->name('tasks.data');
-        Route::get('/tasks/saya', [TaskController::class, 'mine'])->name('tasks.mine');
-        Route::get('/tasks/saya/data', [TaskController::class, 'mineData'])->name('tasks.mine.data');
+        Route::get('/tasks/mine', [TaskController::class, 'mine'])->name('tasks.mine');
+        Route::get('/tasks/mine/data', [TaskController::class, 'mineData'])->name('tasks.mine.data');
         Route::get('/tasks/review', [TaskController::class, 'review'])->middleware('can:tasks.review')->name('tasks.review');
+        Route::get('/tasks/create', [TaskController::class, 'create'])->middleware('can:tasks.create')->name('tasks.create');
         Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
-        Route::put('/tasks/{task}', [TaskAksiController::class, 'update'])->name('tasks.update');
-        Route::delete('/tasks/{task}', [TaskAksiController::class, 'destroy'])->name('tasks.destroy');
-        Route::patch('/tasks/{task}/status', [TaskAksiController::class, 'status'])->name('tasks.status');
-        Route::put('/tasks/{task}/assignees', [TaskAksiController::class, 'assignees'])->name('tasks.assignees');
-        Route::post('/tasks/{task}/subtasks', [TaskAksiController::class, 'subtask'])->name('tasks.subtasks.store');
-        Route::patch('/subtasks/{subtask}/toggle', [TaskAksiController::class, 'toggle'])->name('subtasks.toggle');
-        Route::post('/tasks/{task}/submissions', [TaskAksiController::class, 'submit'])->name('tasks.submissions.store');
-        Route::post('/submissions/{submission}/review', [TaskAksiController::class, 'review'])->name('submissions.review');
-        Route::post('/tasks/{task}/waktu', [TaskAksiController::class, 'waktu'])->name('tasks.time.store');
-        Route::get('/lampiran/{attachment}', [TaskAksiController::class, 'unduh'])->name('attachments.show');
+        Route::put('/tasks/{task}', [TaskActionController::class, 'update'])->name('tasks.update');
+        Route::delete('/tasks/{task}', [TaskActionController::class, 'destroy'])->name('tasks.destroy');
+        Route::patch('/tasks/{task}/status', [TaskActionController::class, 'status'])->name('tasks.status');
+        Route::put('/tasks/{task}/assignees', [TaskActionController::class, 'assignees'])->name('tasks.assignees');
+        Route::post('/tasks/{task}/subtasks', [TaskActionController::class, 'subtask'])->name('tasks.subtasks.store');
+        Route::patch('/subtasks/{subtask}/toggle', [TaskActionController::class, 'toggle'])->name('subtasks.toggle');
+        Route::post('/tasks/{task}/submissions', [TaskActionController::class, 'submit'])->name('tasks.submissions.store');
+        Route::post('/submissions/{submission}/review', [TaskActionController::class, 'review'])->name('submissions.review');
+        Route::post('/tasks/{task}/time-entries', [TaskActionController::class, 'time'])->name('tasks.time.store');
+        Route::get('/attachments/{attachment}', [TaskActionController::class, 'download'])->name('attachments.show');
     });
 
     // 4. Calendar
     Route::get('/calendar', fn () => view('admin.calendar'))->middleware('can:calendar.view')->name('calendar.index');
-    Route::get('/calendar/events', [OperasionalController::class, 'events'])->middleware('can:calendar.view')->name('calendar.events');
+    Route::get('/calendar/events', [OperationsController::class, 'events'])->middleware('can:calendar.view')->name('calendar.events');
 
     // 5. Activities
     Route::middleware('can:activities.view')->group(function () {
         Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
         Route::get('/activities/data', [ActivityController::class, 'data'])->name('activities.data');
-        Route::get('/activities/rapat-kunjungan', [ActivityController::class, 'meetings'])->name('activities.meetings');
-        Route::get('/activities/hambatan-perubahan', [ActivityController::class, 'impacts'])->name('activities.impacts');
+        Route::get('/activities/meetings-visits', [ActivityController::class, 'meetings'])->name('activities.meetings');
+        Route::get('/activities/impacts', [ActivityController::class, 'impacts'])->name('activities.impacts');
     });
-    Route::post('/schedule-changes', [OperasionalController::class, 'ajukanJadwal'])->name('schedule-changes.store');
-    Route::post('/schedule-changes/{scheduleChange}/decision', [OperasionalController::class, 'putuskanJadwal'])->name('schedule-changes.decision');
+    Route::post('/schedule-changes', [OperationsController::class, 'proposeSchedule'])->name('schedule-changes.store');
+    Route::post('/schedule-changes/{scheduleChange}/decision', [OperationsController::class, 'decideSchedule'])->name('schedule-changes.decision');
 
     // 6. Templates
     Route::middleware('can:templates.view')->group(function () {
@@ -118,10 +122,10 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 
     // 8. Master Data
     foreach ([['companies', CompanyController::class, 'company'], ['clients', ClientController::class, 'client'], ['divisions', DivisionController::class, 'division'],
-        ['positions', PositionController::class, 'position'], ['members', MemberController::class, 'member']] as [$nama, $kelas, $param]) {
-        Route::middleware("can:{$nama}.view")->group(function () use ($nama, $kelas, $param) {
-            Route::get("/master/{$nama}/data", [$kelas, 'data'])->name("{$nama}.data");
-            Route::resource("master/{$nama}", $kelas)->except(['show'])->names($nama)->parameters(["master/{$nama}" => $param]);
+        ['positions', PositionController::class, 'position'], ['members', MemberController::class, 'member']] as [$name, $controller, $param]) {
+        Route::middleware("can:{$name}.view")->group(function () use ($name, $controller, $param) {
+            Route::get("/master/{$name}/data", [$controller, 'data'])->name("{$name}.data");
+            Route::resource("master/{$name}", $controller)->except(['show'])->names($name)->parameters(["master/{$name}" => $param]);
         });
     }
     Route::patch('/master/divisions/{division}/toggle', [DivisionController::class, 'toggle'])->middleware('can:divisions.manage')->name('divisions.toggle');
@@ -136,9 +140,9 @@ Route::middleware(['auth', 'aktif'])->group(function () {
     Route::put('/settings/general', [GeneralSettingController::class, 'update'])->middleware('can:settings.system.manage')->name('settings.general.update');
     Route::get('/settings/audit', [AuditLogController::class, 'index'])->middleware('can:settings.system.manage')->name('settings.audit');
 
-    // Akun
-    Route::get('/akun', [AkunController::class, 'edit'])->name('akun.edit');
-    Route::get('/akun/foto/{user}', [AkunController::class, 'foto'])->name('akun.foto');
-    Route::put('/akun', [AkunController::class, 'update'])->name('akun.update');
-    Route::put('/akun/password', [AkunController::class, 'password'])->name('akun.password');
+    // Account
+    Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
+    Route::get('/account/photo/{user}', [AccountController::class, 'photo'])->name('account.photo');
+    Route::put('/account', [AccountController::class, 'update'])->name('account.update');
+    Route::put('/account/password', [AccountController::class, 'password'])->name('account.password');
 });

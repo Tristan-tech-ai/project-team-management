@@ -7,110 +7,110 @@ use App\Models\TaskActivity;
 use App\Models\TaskAttachment;
 use App\Models\TaskSubmission;
 use App\Models\User;
-use App\Support\Berkas;
+use App\Support\Files;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Alur status task (Petunjuk Teknis 8.2 dan 8.3). Semua perubahan memakai DB transaction dan dicatat di task_activities.
- * Backend yang menentukan perpindahan: anggota tidak bisa melewati Review atau menandai Selesai tanpa persetujuan.
- *   backlog -> in_progress (Mulai)            : pelaksana atau pengelola
- *   in_progress -> backlog                    : pelaksana atau pengelola
- *   in_progress -> review                     : hanya lewat kirimHasil (link/berkas + catatan)
- *   review -> done                            : reviewer, menerima hasil yang menunggu
- *   review -> in_progress                     : reviewer, wajib catatan revisi
- *   done -> in_progress (buka kembali)        : reviewer; completed_at/completed_by dikosongkan
+ * Task status flow (Technical Guide 8.2 and 8.3). Every change uses a DB transaction and is logged in task_activities.
+ * The backend decides the moves: members cannot skip Review or mark Done without approval.
+ *   backlog -> in_progress (Start)            : assignee or project manager
+ *   in_progress -> backlog                    : assignee or project manager
+ *   in_progress -> review                     : only through submitResult (link/file + note)
+ *   review -> done                            : reviewer, approving the pending result
+ *   review -> in_progress                     : reviewer, revision note required
+ *   done -> in_progress (reopen)              : reviewer; completed_at/completed_by are cleared
  */
 class TaskWorkflowService
 {
-    public const BOLEH = [
+    public const ALLOWED = [
         'backlog' => ['in_progress'],
         'in_progress' => ['backlog', 'review'],
         'review' => ['done', 'in_progress'],
         'done' => ['in_progress'],
     ];
 
-    /** Satu aksi utama per status (Petunjuk Teknis 6.3). */
-    public static function aksiUtama(Task $task): ?array
+    /** One primary action per status (Technical Guide 6.3). */
+    public static function primaryAction(Task $task): ?array
     {
         return match ($task->status) {
-            'backlog' => ['ke' => 'in_progress', 'label' => 'Mulai'],
-            'in_progress' => ['ke' => 'review', 'label' => 'Kirim untuk Review'],
-            'review' => ['ke' => 'done', 'label' => 'Terima atau revisi'],
+            'backlog' => ['to' => 'in_progress', 'label' => 'Mulai'],
+            'in_progress' => ['to' => 'review', 'label' => 'Kirim untuk Review'],
+            'review' => ['to' => 'done', 'label' => 'Terima atau revisi'],
             default => null,
         };
     }
 
-    public function pindah(Task $task, string $ke, User $user, ?string $catatan = null): Task
+    public function move(Task $task, string $to, User $user, ?string $notes = null): Task
     {
-        if (! array_key_exists($ke, self::BOLEH)) {
+        if (! array_key_exists($to, self::ALLOWED)) {
             throw ValidationException::withMessages(['status' => 'Status tidak dikenal.']);
         }
         if ($task->parent_id !== null) {
             throw ValidationException::withMessages(['status' => 'Subtask dicentang lewat checklist, bukan dipindah kolom.']);
         }
 
-        return DB::transaction(function () use ($task, $ke, $user, $catatan) {
+        return DB::transaction(function () use ($task, $to, $user, $notes) {
             /** @var Task $t */
             $t = Task::query()->lockForUpdate()->findOrFail($task->id);
-            $dari = $t->status;
-            if ($dari === $ke) {
+            $from = $t->status;
+            if ($from === $to) {
                 return $t;
             }
-            if (! in_array($ke, self::BOLEH[$dari] ?? [], true)) {
-                $saran = $ke === 'done' ? ' Kirim hasil untuk review dulu; Selesai hanya lewat persetujuan PIC atau manager.' : '';
-                throw ValidationException::withMessages(['status' => 'Task tidak bisa pindah dari '.\App\Support\Kode::label(\App\Support\Kode::TASK_STATUS, $dari).' ke '.\App\Support\Kode::label(\App\Support\Kode::TASK_STATUS, $ke).'.'.$saran]);
+            if (! in_array($to, self::ALLOWED[$from] ?? [], true)) {
+                $suggestion = $to === 'done' ? ' Kirim hasil untuk review dulu; Selesai hanya lewat persetujuan PIC atau manager.' : '';
+                throw ValidationException::withMessages(['status' => 'Task tidak bisa pindah dari '.\App\Support\Codes::label(\App\Support\Codes::TASK_STATUS, $from).' ke '.\App\Support\Codes::label(\App\Support\Codes::TASK_STATUS, $to).'.'.$suggestion]);
             }
             $reviewer = Gate::forUser($user)->allows('review', $t);
-            if ($ke === 'review') {
+            if ($to === 'review') {
                 throw ValidationException::withMessages(['status' => 'Kirim hasil dulu lewat tombol Kirim untuk Review (tautan atau berkas dan catatan singkat).']);
             }
-            if (in_array($dari, ['review', 'done'], true) || $ke === 'done') {
+            if (in_array($from, ['review', 'done'], true) || $to === 'done') {
                 if (! $reviewer) {
                     throw ValidationException::withMessages(['status' => 'Hanya PIC atau manager yang berizin review yang bisa menerima, merevisi, atau membuka kembali task.']);
                 }
-                if ($dari === 'review' && $ke === 'done') {
+                if ($from === 'review' && $to === 'done') {
                     $sub = $t->submissions()->where('status', 'pending')->latest('id')->first();
                     if (! $sub) {
                         throw ValidationException::withMessages(['status' => 'Belum ada hasil yang menunggu review.']);
                     }
 
-                    return $this->putuskan($sub, 'approved', $user, $catatan);
+                    return $this->decide($sub, 'approved', $user, $notes);
                 }
-                if ($dari === 'review' && $ke === 'in_progress') {
+                if ($from === 'review' && $to === 'in_progress') {
                     $sub = $t->submissions()->where('status', 'pending')->latest('id')->first();
                     if ($sub) {
-                        return $this->putuskan($sub, 'revision', $user, $catatan);
+                        return $this->decide($sub, 'revision', $user, $notes);
                     }
                 }
             } elseif (! Gate::forUser($user)->allows('moveStatus', $t)) {
                 throw ValidationException::withMessages(['status' => 'Kamu tidak memegang task ini.']);
             }
-            $ubah = ['status' => $ke];
-            if ($ke !== 'done') {
-                $ubah['completed_at'] = null;
-                $ubah['completed_by'] = null;
+            $update = ['status' => $to];
+            if ($to !== 'done') {
+                $update['completed_at'] = null;
+                $update['completed_by'] = null;
             }
-            if ($ke === 'in_progress' && $t->start_at === null) {
-                $ubah['start_at'] = now();
+            if ($to === 'in_progress' && $t->start_at === null) {
+                $update['start_at'] = now();
             }
-            $t->update($ubah);
-            $this->catat($t, $user, 'status_changed', $dari === 'done' ? 'Task dibuka kembali' : 'Status diubah', $dari, $ke);
+            $t->update($update);
+            $this->log($t, $user, 'status_changed', $from === 'done' ? 'Task dibuka kembali' : 'Status diubah', $from, $to);
 
             return $t->refresh();
         });
     }
 
-    /** Kirim hasil: link dan/atau berkas + catatan; task masuk Review. Riwayat submission tidak dihapus. */
-    public function kirimHasil(Task $task, User $user, ?string $tautan, ?UploadedFile $berkas, ?string $catatan): TaskSubmission
+    /** Submit a result: a link and/or a file + a note; the task moves to Review. Submission history is never deleted. */
+    public function submitResult(Task $task, User $user, ?string $link, ?UploadedFile $file, ?string $notes): TaskSubmission
     {
-        if (! $tautan && ! $berkas) {
+        if (! $link && ! $file) {
             throw ValidationException::withMessages(['external_url' => 'Isi tautan hasil atau unggah berkas.']);
         }
 
-        return DB::transaction(function () use ($task, $user, $tautan, $berkas, $catatan) {
+        return DB::transaction(function () use ($task, $user, $link, $file, $notes) {
             $t = Task::query()->lockForUpdate()->findOrFail($task->id);
             if (! in_array($t->status, ['in_progress', 'backlog'], true)) {
                 throw ValidationException::withMessages(['status' => 'Hasil hanya bisa dikirim saat task Antrian atau Dikerjakan.']);
@@ -118,36 +118,36 @@ class TaskWorkflowService
             if ($t->submissions()->where('status', 'pending')->exists()) {
                 throw ValidationException::withMessages(['status' => 'Masih ada hasil yang menunggu review.']);
             }
-            $sub = TaskSubmission::create(['task_id' => $t->id, 'submitted_by' => $user->id, 'submission_note' => $catatan, 'status' => 'pending', 'submitted_at' => now()]);
-            if ($tautan) {
-                TaskAttachment::create(['task_id' => $t->id, 'task_submission_id' => $sub->id, 'uploaded_by' => $user->id, 'external_url' => $tautan, 'original_name' => null]);
+            $sub = TaskSubmission::create(['task_id' => $t->id, 'submitted_by' => $user->id, 'submission_note' => $notes, 'status' => 'pending', 'submitted_at' => now()]);
+            if ($link) {
+                TaskAttachment::create(['task_id' => $t->id, 'task_submission_id' => $sub->id, 'uploaded_by' => $user->id, 'external_url' => $link, 'original_name' => null]);
             }
-            if ($berkas) {
-                // Disk bersama: berkas dari Team App tersimpan di storage admin-app dan terbaca di kedua app.
-                $path = $berkas->store('lampiran/task-'.$t->id, Berkas::DISK);
+            if ($file) {
+                // Shared disk: files from the Team App are stored in admin-app storage and readable in both apps.
+                $path = $file->store('attachments/task-'.$t->id, Files::DISK);
                 if ($path === false) {
-                    throw ValidationException::withMessages(['berkas' => 'Berkas gagal disimpan. Coba unggah lagi.']);
+                    throw ValidationException::withMessages(['file' => 'Berkas gagal disimpan. Coba unggah lagi.']);
                 }
                 TaskAttachment::create(['task_id' => $t->id, 'task_submission_id' => $sub->id, 'uploaded_by' => $user->id,
-                    'original_name' => mb_substr($berkas->getClientOriginalName(), 0, 255), 'storage_disk' => Berkas::DISK, 'storage_path' => $path,
-                    'mime_type' => $berkas->getMimeType(), 'file_size_bytes' => $berkas->getSize()]);
+                    'original_name' => mb_substr($file->getClientOriginalName(), 0, 255), 'storage_disk' => Files::DISK, 'storage_path' => $path,
+                    'mime_type' => $file->getMimeType(), 'file_size_bytes' => $file->getSize()]);
             }
-            $dari = $t->status;
+            $from = $t->status;
             $t->update(['status' => 'review', 'completed_at' => null, 'completed_by' => null, 'start_at' => $t->start_at ?? now()]);
-            $this->catat($t, $user, 'submitted', 'Hasil dikirim untuk review', $dari, 'review', ['submission_id' => $sub->id]);
+            $this->log($t, $user, 'submitted', 'Hasil dikirim untuk review', $from, 'review', ['submission_id' => $sub->id]);
 
             return $sub;
         });
     }
 
-    /** Terima (approved -> done) atau revisi (revision -> in_progress, catatan wajib). */
-    public function putuskan(TaskSubmission $sub, string $keputusan, User $user, ?string $catatan): Task
+    /** Approve (approved -> done) or request a revision (revision -> in_progress, note required). */
+    public function decide(TaskSubmission $sub, string $decision, User $user, ?string $notes): Task
     {
-        if ($keputusan === 'revision' && mb_strlen(trim((string) $catatan)) < 5) {
+        if ($decision === 'revision' && mb_strlen(trim((string) $notes)) < 5) {
             throw ValidationException::withMessages(['review_note' => 'Tulis alasan revisi (minimal 5 karakter) supaya pelaksana tahu yang perlu diperbaiki.']);
         }
 
-        return DB::transaction(function () use ($sub, $keputusan, $user, $catatan) {
+        return DB::transaction(function () use ($sub, $decision, $user, $notes) {
             $s = TaskSubmission::query()->lockForUpdate()->findOrFail($sub->id);
             $t = Task::query()->lockForUpdate()->findOrFail($s->task_id);
             if (! Gate::forUser($user)->allows('review', $t)) {
@@ -156,51 +156,51 @@ class TaskWorkflowService
             if ($s->status !== 'pending' || $t->status !== 'review') {
                 throw ValidationException::withMessages(['review_note' => 'Hasil ini sudah diputuskan.']);
             }
-            $s->update(['status' => $keputusan, 'review_note' => $catatan, 'reviewed_by' => $user->id, 'reviewed_at' => now()]);
-            if ($keputusan === 'approved') {
+            $s->update(['status' => $decision, 'review_note' => $notes, 'reviewed_by' => $user->id, 'reviewed_at' => now()]);
+            if ($decision === 'approved') {
                 $t->update(['status' => 'done', 'completed_at' => now(), 'completed_by' => $user->id]);
-                $this->catat($t, $user, 'approved', 'Hasil diterima, task selesai', 'review', 'done', ['submission_id' => $s->id]);
+                $this->log($t, $user, 'approved', 'Hasil diterima, task selesai', 'review', 'done', ['submission_id' => $s->id]);
             } else {
                 $t->update(['status' => 'in_progress', 'completed_at' => null, 'completed_by' => null]);
-                $this->catat($t, $user, 'revision_requested', 'Diminta revisi: '.$catatan, 'review', 'in_progress', ['submission_id' => $s->id]);
+                $this->log($t, $user, 'revision_requested', 'Diminta revisi: '.$notes, 'review', 'in_progress', ['submission_id' => $s->id]);
             }
 
             return $t->refresh();
         });
     }
 
-    /** Checklist subtask: centang langsung, satu tingkat. Subtask selesai mengisi completed_at/by. */
-    public function centang(Task $subtask, User $user, bool $selesai): Task
+    /** Subtask checklist: ticked in place, one level deep. A done subtask fills completed_at/by. */
+    public function toggleSubtask(Task $subtask, User $user, bool $done): Task
     {
         if ($subtask->parent_id === null) {
             throw ValidationException::withMessages(['status' => 'Ini task utama, bukan checklist.']);
         }
 
-        return DB::transaction(function () use ($subtask, $user, $selesai) {
+        return DB::transaction(function () use ($subtask, $user, $done) {
             $s = Task::query()->lockForUpdate()->findOrFail($subtask->id);
-            $induk = Task::query()->findOrFail($s->parent_id);
-            if (! (Gate::forUser($user)->allows('moveStatus', $induk) || Gate::forUser($user)->allows('update', $induk))) {
+            $parent = Task::query()->findOrFail($s->parent_id);
+            if (! (Gate::forUser($user)->allows('moveStatus', $parent) || Gate::forUser($user)->allows('update', $parent))) {
                 throw ValidationException::withMessages(['status' => 'Hanya pelaksana task atau pengelola project yang bisa mencentang checklist.']);
             }
-            $ke = $selesai ? 'done' : 'backlog';
-            if ($s->status !== $ke) {
-                $s->update(['status' => $ke, 'completed_at' => $selesai ? now() : null, 'completed_by' => $selesai ? $user->id : null]);
-                $this->catat($induk, $user, 'subtask_toggled', ($selesai ? 'Checklist selesai: ' : 'Checklist dibuka: ').$s->title, null, null, ['subtask_id' => $s->id]);
+            $to = $done ? 'done' : 'backlog';
+            if ($s->status !== $to) {
+                $s->update(['status' => $to, 'completed_at' => $done ? now() : null, 'completed_by' => $done ? $user->id : null]);
+                $this->log($parent, $user, 'subtask_toggled', ($done ? 'Checklist selesai: ' : 'Checklist dibuka: ').$s->title, null, null, ['subtask_id' => $s->id]);
             }
 
             return $s->refresh();
         });
     }
 
-    public function catat(Task $task, User $user, string $jenis, string $ket, ?string $lama = null, ?string $baru = null, array $meta = []): void
+    public function log(Task $task, User $user, string $kind, string $description, ?string $old = null, ?string $new = null, array $meta = []): void
     {
-        TaskActivity::create(['task_id' => $task->id, 'user_id' => $user->id, 'activity_type' => $jenis, 'description' => mb_substr($ket, 0, 1000),
-            'old_value' => $lama, 'new_value' => $baru, 'metadata' => $meta ?: null]);
+        TaskActivity::create(['task_id' => $task->id, 'user_id' => $user->id, 'activity_type' => $kind, 'description' => mb_substr($description, 0, 1000),
+            'old_value' => $old, 'new_value' => $new, 'metadata' => $meta ?: null]);
     }
 
-    /** Progress task = subtask selesai / jumlah subtask (Petunjuk Teknis 3.2). */
-    public static function progresTask(int $selesai, int $total): int
+    /** Task progress = done subtasks / total subtasks (Technical Guide 3.2). */
+    public static function taskProgress(int $done, int $total): int
     {
-        return $total === 0 ? 0 : (int) round($selesai * 100 / $total);
+        return $total === 0 ? 0 : (int) round($done * 100 / $total);
     }
 }

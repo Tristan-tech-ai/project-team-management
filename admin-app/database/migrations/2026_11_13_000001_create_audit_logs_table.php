@@ -5,10 +5,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Petunjuk Teknis 4.1: Super Admin "semua aksi dicatat". Setiap aksi yang mengubah data (POST, PUT, PATCH, DELETE)
- * dari Admin App dan Team App dicatat di sini oleh middleware CatatAksi; isian rahasia (kata sandi, token) tidak disimpan.
- * Tabel baru lewat migrasi admin-app (Petunjuk Teknis 2.3: perubahan schema berikutnya lewat migrasi admin-app);
- * tabel dari SQL modul tidak diubah.
+ * Technical Guide 4.1: Super Admin "every action is logged". Every data-changing action (POST, PUT, PATCH, DELETE)
+ * from the Admin App and the Team App is written here by the LogUserActions middleware; secret fields (passwords, tokens) are never stored.
+ * New table through an admin-app migration (Technical Guide 2.3: later schema changes go through admin-app migrations);
+ * tables from the module SQL are not changed.
  */
 return new class extends Migration
 {

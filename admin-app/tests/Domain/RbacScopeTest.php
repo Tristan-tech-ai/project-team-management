@@ -10,21 +10,21 @@ use Tests\TestCase;
 
 class RbacScopeTest extends TestCase
 {
-    use DatabaseTransactions, Pembantu;
+    use DatabaseTransactions, BuildsTestData;
 
-    public function test_izin_role_sesuai_sql_sumber(): void
+    public function test_role_permissions_match_source_sql(): void
     {
         $n = fn ($r) => DB::table('role_permissions')->join('roles', 'roles.id', '=', 'role_permissions.role_id')->where('roles.slug', $r)->count();
         $this->assertSame(39, DB::table('permissions')->count());
         $this->assertSame([39, 27, 11], [$n('super_admin'), $n('manager'), $n('member')]);
     }
 
-    public function test_gate_memeriksa_permission_di_server(): void
+    public function test_gate_checks_permissions_on_the_server(): void
     {
         $c = $this->company();
-        $admin = $this->pengguna('super_admin', $c);
-        $manager = $this->pengguna('manager', $c);
-        $member = $this->pengguna('member', $c);
+        $admin = $this->user('super_admin', $c);
+        $manager = $this->user('manager', $c);
+        $member = $this->user('member', $c);
         $this->assertTrue(Gate::forUser($admin)->allows('settings.roles.manage'));
         $this->assertTrue(Gate::forUser($manager)->allows('projects.create'));
         $this->assertFalse(Gate::forUser($manager)->allows('settings.menus.manage'));
@@ -35,36 +35,36 @@ class RbacScopeTest extends TestCase
         $this->assertFalse(Gate::forUser($member)->allows('tasks.review'));
     }
 
-    public function test_member_tidak_melihat_project_asing_dan_manager_melihat_company_sendiri(): void
+    public function test_member_cannot_see_foreign_projects_and_manager_sees_own_company(): void
     {
         $c = $this->company();
-        $lain = $this->company('Company Lain');
-        $manager = $this->pengguna('manager', $c);
-        $member = $this->pengguna('member', $c);
-        $orangLain = $this->pengguna('manager', $lain);
-        $milikMember = $this->project($manager, $manager, $c, [$member]);
-        $tanpaMember = $this->project($manager, $manager, $c);
-        $asing = $this->project($orangLain, $orangLain, $lain);
+        $other = $this->company('Company Lain');
+        $manager = $this->user('manager', $c);
+        $member = $this->user('member', $c);
+        $otherPerson = $this->user('manager', $other);
+        $ownedByMember = $this->project($manager, $manager, $c, [$member]);
+        $withoutMember = $this->project($manager, $manager, $c);
+        $foreign = $this->project($otherPerson, $otherPerson, $other);
 
-        $lihatMember = Scope::projects($member)->pluck('id')->all();
-        $this->assertContains($milikMember->id, $lihatMember);
-        $this->assertNotContains($tanpaMember->id, $lihatMember);
-        $this->assertNotContains($asing->id, $lihatMember);
-        $this->assertFalse($member->can('view', $asing));
+        $memberView = Scope::projects($member)->pluck('id')->all();
+        $this->assertContains($ownedByMember->id, $memberView);
+        $this->assertNotContains($withoutMember->id, $memberView);
+        $this->assertNotContains($foreign->id, $memberView);
+        $this->assertFalse($member->can('view', $foreign));
 
-        $lihatManager = Scope::projects($manager)->pluck('id')->all();
-        $this->assertContains($tanpaMember->id, $lihatManager);
-        $this->assertNotContains($asing->id, $lihatManager);
-        $this->assertFalse($manager->can('update', $asing));
+        $managerView = Scope::projects($manager)->pluck('id')->all();
+        $this->assertContains($withoutMember->id, $managerView);
+        $this->assertNotContains($foreign->id, $managerView);
+        $this->assertFalse($manager->can('update', $foreign));
     }
 
-    public function test_member_tidak_bisa_menyetujui_deadline_tanpa_izin_eksplisit(): void
+    public function test_member_cannot_approve_deadline_without_explicit_permission(): void
     {
         $c = $this->company();
-        $manager = $this->pengguna('manager', $c);
-        $member = $this->pengguna('member', $c);
+        $manager = $this->user('manager', $c);
+        $member = $this->user('member', $c);
         $p = $this->project($manager, $member, $c, [$manager]);
-        // Member menjadi PIC project pun tetap tidak punya projects.approve_schedule.
+        // A Member who becomes the project PIC still does not get projects.approve_schedule.
         $this->assertFalse($member->can('approveSchedule', $p));
         $this->assertTrue($manager->can('approveSchedule', $p));
     }

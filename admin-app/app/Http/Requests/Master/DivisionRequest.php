@@ -20,7 +20,7 @@ class DivisionRequest extends FormRequest
         $id = $this->route('division')?->id;
 
         return [
-            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::aturanCompany($this->user())],
+            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::companyRule($this->user())],
             'name' => ['required', 'string', 'max:150', Rule::unique('divisions', 'name')->where('company_id', $this->integer('company_id'))->ignore($id)],
             'lead_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -28,7 +28,7 @@ class DivisionRequest extends FormRequest
         ];
     }
 
-    /** Kepala divisi harus anggota aktif company yang sama. */
+    /** The division lead must be an active member of the same company. */
     public function after(): array
     {
         return [function (Validator $v) {

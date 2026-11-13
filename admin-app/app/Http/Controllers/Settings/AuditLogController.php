@@ -7,19 +7,19 @@ use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Log aktivitas: semua aksi yang mengubah data dari kedua app (Petunjuk Teknis 4.1), hanya untuk Super Admin. */
+/** Activity log: every data-changing action from both apps (Technical Guide 4.1), Super Admin only. */
 class AuditLogController extends Controller
 {
     public function index(Request $request): View
     {
         abort_unless($request->user()?->isSuperAdmin(), 403);
-        $cari = mb_substr(trim((string) $request->query('cari', '')), 0, 100);
-        $pola = '%'.addcslashes($cari, '\\%_').'%';
+        $keyword = mb_substr(trim((string) $request->query('keyword', '')), 0, 100);
+        $pattern = '%'.addcslashes($keyword, '\\%_').'%';
         $log = AuditLog::query()->with('user:id,name,email')
-            ->when($cari !== '', fn ($q) => $q->where(fn ($w) => $w->where('route', 'like', $pola)->orWhere('path', 'like', $pola)
-                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $pola)->orWhere('email', 'like', $pola))))
+            ->when($keyword !== '', fn ($q) => $q->where(fn ($w) => $w->where('route', 'like', $pattern)->orWhere('path', 'like', $pattern)
+                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $pattern)->orWhere('email', 'like', $pattern))))
             ->orderByDesc('id')->paginate(50)->withQueryString();
 
-        return view('admin.settings.audit', ['log' => $log, 'cari' => $cari]);
+        return view('admin.settings.audit', ['log' => $log, 'keyword' => $keyword]);
     }
 }

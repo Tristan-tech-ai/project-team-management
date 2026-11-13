@@ -1,0 +1,37 @@
+
+== super_admin: 4 menu induk (Beranda, Tasks, Kalender, Profil), 10 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Review Task /review 
+ok   200 Profil /account 
+ok   200 /projects/1 /projects/1 
+ok   200 /projects/1/board /projects/1/board 
+ok   200 /tasks/1 /tasks/1 
+
+== manager: 4 menu induk (Beranda, Tasks, Kalender, Profil), 10 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Review Task /review 
+ok   200 Profil /account 
+ok   200 /projects/1 /projects/1 
+ok   200 /projects/1/board /projects/1/board 
+ok   200 /tasks/1 /tasks/1 
+
+== member: 4 menu induk (Beranda, Tasks, Kalender, Profil), 9 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Profil /account 
+ok   200 /projects/1 /projects/1 
+ok   200 /projects/1/board /projects/1/board 
+ok   200 /tasks/1 /tasks/1 
+
+gagal: 0

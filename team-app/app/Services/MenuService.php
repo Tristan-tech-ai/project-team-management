@@ -8,35 +8,35 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Menu dinamis dari tabel menu_items (Petunjuk Teknis 4.2): hanya navigasi, bukan pengganti keamanan backend.
- * Submenu tampil bila aktif, route_name terdaftar di Laravel, dan pengguna punya permission-nya;
- * menu induk tampil bila setidaknya satu submenunya tampil.
+ * Dynamic menu from the menu_items table (Technical Guide 4.2): navigation only, never a replacement for backend security.
+ * A submenu shows when it is active, its route_name is registered in Laravel, and the user has its permission;
+ * a parent menu shows when at least one of its submenus shows.
  */
 class MenuService
 {
     /** @return array<int, array{slug:string,title:string,icon:?string,children:array<int,array{slug:string,title:string,route:string,url:string}>}> */
-    public function untuk(User $user): array
+    public function for(User $user): array
     {
-        $semua = MenuItem::query()->with('permission:id,slug')->where('is_active', 1)
+        $all = MenuItem::query()->with('permission:id,slug')->where('is_active', 1)
             ->orderBy('sort_order')->orderBy('id')->get();
         $gate = Gate::forUser($user);
-        $hasil = [];
-        foreach ($semua->whereNull('parent_id') as $induk) {
-            $anak = [];
-            foreach ($semua->where('parent_id', $induk->id) as $m) {
+        $result = [];
+        foreach ($all->whereNull('parent_id') as $parent) {
+            $children = [];
+            foreach ($all->where('parent_id', $parent->id) as $m) {
                 if (! $m->route_name || ! Route::has($m->route_name)) {
                     continue;
                 }
                 if ($m->permission && ! $gate->allows($m->permission->slug)) {
                     continue;
                 }
-                $anak[] = ['slug' => $m->slug, 'title' => $m->title, 'route' => $m->route_name, 'url' => route($m->route_name)];
+                $children[] = ['slug' => $m->slug, 'title' => $m->title, 'route' => $m->route_name, 'url' => route($m->route_name)];
             }
-            if ($anak !== []) {
-                $hasil[] = ['slug' => $induk->slug, 'title' => $induk->title, 'icon' => $induk->icon, 'children' => $anak];
+            if ($children !== []) {
+                $result[] = ['slug' => $parent->slug, 'title' => $parent->title, 'icon' => $parent->icon, 'children' => $children];
             }
         }
 
-        return $hasil;
+        return $result;
     }
 }

@@ -12,20 +12,20 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Menu Management: urutan, ikon, nama, aktif/nonaktif, permission (Petunjuk Teknis 5.1).
- * route_name sengaja tidak bisa diubah dari layar (dokumen 01: editor menu tidak mengubah route PHP; 4.2: route harus terdaftar).
+ * Menu Management: order, icon, name, active/inactive, permission (Technical Guide 5.1).
+ * route_name deliberately cannot be changed from the screen (section 01: the menu editor does not change PHP routes; 4.2: routes must be registered).
  */
 class MenuController extends Controller
 {
     public function index(): View
     {
-        $semua = MenuItem::query()->with('permission:id,slug,name')->orderBy('sort_order')->orderBy('id')->get();
+        $all = MenuItem::query()->with('permission:id,slug,name')->orderBy('sort_order')->orderBy('id')->get();
 
         return view('admin.settings.menus', [
-            'induk' => $semua->whereNull('parent_id')->values(),
-            'anak' => $semua->whereNotNull('parent_id')->groupBy('parent_id'),
+            'parent' => $all->whereNull('parent_id')->values(),
+            'children' => $all->whereNotNull('parent_id')->groupBy('parent_id'),
             'permissions' => Permission::query()->orderBy('module')->orderBy('id')->get(['id', 'slug', 'name']),
-            'ikon' => self::ikonTersedia(),
+            'icon' => self::availableIcons(),
         ]);
     }
 
@@ -34,33 +34,33 @@ class MenuController extends Controller
         $data = $request->validate([
             'menu' => ['required', 'array'],
             'menu.*.title' => ['required', 'string', 'max:150'],
-            'menu.*.icon' => ['nullable', Rule::in(self::ikonTersedia())],
+            'menu.*.icon' => ['nullable', Rule::in(self::availableIcons())],
             'menu.*.sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
             'menu.*.is_active' => ['boolean'],
             'menu.*.permission_id' => ['nullable', 'integer', 'exists:permissions,id'],
         ]);
         DB::transaction(function () use ($data) {
-            foreach ($data['menu'] as $id => $isi) {
+            foreach ($data['menu'] as $id => $content) {
                 $m = MenuItem::query()->find((int) $id);
                 if (! $m) {
                     continue;
                 }
-                $ubah = ['title' => $isi['title'], 'sort_order' => (int) $isi['sort_order'], 'is_active' => (bool) ($isi['is_active'] ?? false)];
+                $update = ['title' => $content['title'], 'sort_order' => (int) $content['sort_order'], 'is_active' => (bool) ($content['is_active'] ?? false)];
                 if ($m->parent_id === null) {
-                    $ubah['icon'] = $isi['icon'] ?? $m->icon;
+                    $update['icon'] = $content['icon'] ?? $m->icon;
                 } else {
-                    $ubah['permission_id'] = $isi['permission_id'] ?? null;
+                    $update['permission_id'] = $content['permission_id'] ?? null;
                 }
-                $m->update($ubah);
+                $m->update($update);
             }
         });
 
         return back()->with('ok', 'Menu tersimpan. Menu tetap hanya navigasi; hak akses diperiksa di server.');
     }
 
-    /** Ikon yang tersedia sebagai berkas SVG lokal (Lucide, ISC). */
-    public static function ikonTersedia(): array
+    /** Icons available as local SVG files (Lucide, ISC). */
+    public static function availableIcons(): array
     {
-        return collect(glob(resource_path('ikon/*.svg')) ?: [])->map(fn ($f) => basename($f, '.svg'))->sort()->values()->all();
+        return collect(glob(resource_path('icons/*.svg')) ?: [])->map(fn ($f) => basename($f, '.svg'))->sort()->values()->all();
     }
 }

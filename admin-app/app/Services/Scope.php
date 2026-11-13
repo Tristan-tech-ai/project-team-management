@@ -13,11 +13,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Data scope (Petunjuk Teknis 3.2 dan 4.2): permission + keanggotaan project.
- * - Super Admin: semua project.
- * - Manager: project di company tempat ia anggota aktif, ditambah project yang ia ikuti.
- * - Member: hanya project tempat ia anggota aktif (project asing tidak terlihat).
- * Pengelola project = Super Admin, Manager pada company project, atau PIC project.
+ * Data scope (Technical Guide 3.2 and 4.2): permission + project membership.
+ * - Super Admin: every project.
+ * - Manager: projects in companies where they are an active member, plus projects they joined.
+ * - Member: only projects where they are an active member (foreign projects are invisible).
+ * Project manager = Super Admin, a Manager of the project company, or the project PIC.
  */
 class Scope
 {
@@ -48,41 +48,41 @@ class Scope
     }
 
     /**
-     * Company tempat pengguna menjadi anggota aktif; null berarti semua company (Super Admin).
-     * Dipakai untuk data master (company, divisi, jabatan, anggota) sesuai Petunjuk Teknis 3.2.
+     * Companies where the user is an active member; null means every company (Super Admin).
+     * Used for master data (companies, divisions, positions, members) as in Technical Guide 3.2.
      */
     public static function companyIds(User $user): ?array
     {
         return $user->isSuperAdmin() ? null : array_values(array_map('intval', $user->activeCompanyIds()));
     }
 
-    public static function bolehCompany(User $user, mixed $companyId): bool
+    public static function canAccessCompany(User $user, mixed $companyId): bool
     {
         $ids = self::companyIds($user);
 
         return $ids === null || in_array((int) $companyId, $ids, true);
     }
 
-    /** Aturan validasi: company yang dipilih harus dalam cakupan pengguna. */
-    public static function aturanCompany(User $user): \Closure
+    /** Validation rule: the selected company must be within the user's scope. */
+    public static function companyRule(User $user): \Closure
     {
-        return function (string $atribut, mixed $nilai, \Closure $gagal) use ($user): void {
-            if (! self::bolehCompany($user, $nilai)) {
-                $gagal('Company ini di luar cakupan aksesmu.');
+        return function (string $attribute, mixed $values, \Closure $failed) use ($user): void {
+            if (! self::canAccessCompany($user, $values)) {
+                $failed('Company ini di luar cakupan aksesmu.');
             }
         };
     }
 
-    /** Batasi query berkolom company_id ke company pengguna (tanpa batas untuk Super Admin). */
-    public static function batasiCompany(Builder $q, User $user, string $kolom = 'company_id'): Builder
+    /** Limits a query with a company_id column to the user's companies (no limit for the Super Admin). */
+    public static function limitToCompanies(Builder $q, User $user, string $columns = 'company_id'): Builder
     {
         $ids = self::companyIds($user);
 
-        return $ids === null ? $q : $q->whereIn($kolom, $ids ?: [0]);
+        return $ids === null ? $q : $q->whereIn($columns, $ids ?: [0]);
     }
 
-    /** Anggota (users) yang boleh terlihat di data master: anggota aktif company pengguna, atau semua untuk Super Admin. */
-    public static function anggotaMaster(User $user): Builder
+    /** Members (users) visible in master data: active members of the user's companies, or everyone for the Super Admin. */
+    public static function masterMembers(User $user): Builder
     {
         $q = User::query();
         $ids = self::companyIds($user);
@@ -90,7 +90,7 @@ class Scope
         return $ids === null ? $q : $q->whereIn('users.id', DB::table('company_members')->select('user_id')->whereIn('company_id', $ids ?: [0])->where('is_active', 1));
     }
 
-    /** Client yang boleh terlihat: semua untuk Super Admin, selain itu client dari project dalam cakupan. */
+    /** Visible clients: all for the Super Admin, otherwise clients of projects within scope. */
     public static function clients(User $user): Builder
     {
         $q = Client::query();
@@ -98,7 +98,7 @@ class Scope
         return $user->isSuperAdmin() ? $q : $q->whereIn('clients.id', self::projects($user)->whereNotNull('projects.client_id')->select('projects.client_id'));
     }
 
-    /** Pilihan filter Company: company keanggotaan ditambah company dari project dalam cakupan. */
+    /** Company filter options: membership companies plus companies of projects within scope. */
     public static function filterCompanies(User $user): Collection
     {
         $q = Company::query();
@@ -115,22 +115,22 @@ class Scope
         return self::clients($user)->orderBy('name')->pluck('name', 'id');
     }
 
-    /** Pilihan filter PIC: hanya PIC dari project dalam cakupan. */
+    /** PIC filter options: only PICs of projects within scope. */
     public static function filterPics(User $user): Collection
     {
         return User::query()->whereIn('users.id', self::projects($user)->whereNotNull('projects.pic_user_id')->select('projects.pic_user_id'))
             ->orderBy('name')->pluck('name', 'id');
     }
 
-    /** Pilihan filter pelaksana: hanya pelaksana task dalam cakupan. */
-    public static function filterPelaksana(User $user): Collection
+    /** Assignee filter options: only assignees of tasks within scope. */
+    public static function filterAssignees(User $user): Collection
     {
         return User::query()->whereIn('users.id', DB::table('task_assignees')->select('user_id')->whereIn('task_id', self::tasks($user)->select('tasks.id')))
             ->orderBy('name')->pluck('name', 'id');
     }
 
-    /** Pilihan filter divisi: divisi aktif di company yang terlihat oleh pengguna. */
-    public static function filterDivisi(User $user): Collection
+    /** Division filter options: active divisions in companies visible to the user. */
+    public static function filterDivisions(User $user): Collection
     {
         $q = Division::query()->where('is_active', 1);
         if (! $user->isSuperAdmin()) {
@@ -140,13 +140,34 @@ class Scope
         return $q->orderBy('name')->pluck('name', 'id');
     }
 
-    public static function bisaLihat(User $user, Project $project): bool
+    /**
+     * Team App (Technical Guide 5.2, "My Projects: member projects only"): projects where the user is an active member
+     * or the PIC. Used for the list, detail, Kanban, quick add, activities, and review in the Team App; the Super Admin sees all.
+     * Managers see every project of their company in the Admin App (Scope::projects).
+     */
+    public static function memberProjects(User $user): Builder
+    {
+        $q = Project::query();
+        if ($user->isSuperAdmin()) {
+            return $q;
+        }
+
+        return $q->where(fn (Builder $w) => $w->whereIn('projects.id', DB::table('project_members')->select('project_id')->where('user_id', $user->id)->where('is_active', 1))
+            ->orWhere('projects.pic_user_id', $user->id));
+    }
+
+    public static function isMemberOrPic(User $user, Project $project): bool
+    {
+        return $user->isSuperAdmin() || (int) $project->pic_user_id === (int) $user->id || self::isProjectMember($user, $project);
+    }
+
+    public static function canView(User $user, Project $project): bool
     {
         return $user->isSuperAdmin() || self::projects($user)->whereKey($project->id)->exists();
     }
 
-    /** Pengelola: Super Admin, Manager pada company project, atau PIC project. */
-    public static function pengelola(User $user, Project $project): bool
+    /** Project manager: Super Admin, a Manager of the project company, or the project PIC. */
+    public static function isManager(User $user, Project $project): bool
     {
         if ($user->isSuperAdmin() || (int) $project->pic_user_id === (int) $user->id) {
             return true;
@@ -155,18 +176,18 @@ class Scope
         return $user->hasRole('manager') && in_array((int) $project->company_id, array_map('intval', $user->activeCompanyIds()), true);
     }
 
-    public static function anggota(User $user, Project $project): bool
+    public static function isProjectMember(User $user, Project $project): bool
     {
         return DB::table('project_members')->where('project_id', $project->id)->where('user_id', $user->id)->where('is_active', 1)->exists();
     }
 
-    public static function pelaksana(User $user, Task $task): bool
+    public static function isAssignee(User $user, Task $task): bool
     {
         return (int) $task->pic_user_id === (int) $user->id
             || DB::table('task_assignees')->where('task_id', $task->id)->where('user_id', $user->id)->exists();
     }
 
-    /** Reviewer hasil: punya tasks.review dan menjadi pengelola project atau PIC task (bukan pengirim hasil itu sendiri bila ia Member). */
+    /** Result reviewer: has tasks.review and manages the project or is the task PIC (never the Member who sent the result). */
     public static function reviewer(User $user, Task $task): bool
     {
         if (! $user->hasPermission('tasks.review')) {
@@ -174,6 +195,6 @@ class Scope
         }
         $task->loadMissing('project');
 
-        return self::pengelola($user, $task->project) || (int) $task->pic_user_id === (int) $user->id;
+        return self::isManager($user, $task->project) || (int) $task->pic_user_id === (int) $user->id;
     }
 }

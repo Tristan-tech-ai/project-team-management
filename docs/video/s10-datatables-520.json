@@ -1,6 +1,6 @@
 {
  "name": "s10-datatables-520",
- "url": "http://127.0.0.1:8101/masuk",
+ "url": "http://127.0.0.1:8101/login",
  "steps": [
   {
    "pause": 500

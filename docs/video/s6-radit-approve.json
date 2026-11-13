@@ -1,0 +1,51 @@
+{
+ "name": "s6-radit-approve",
+ "url": "http://127.0.0.1:8101/login",
+ "steps": [
+  {
+   "pause": 500
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "goto": "/tasks/578"
+  },
+  {
+   "waitFor": "#review"
+  },
+  {
+   "hover": "#review",
+   "zoom": 1.3,
+   "pauseAfter": 1600
+  },
+  {
+   "click": "#review button.btn-success",
+   "pauseAfter": 1000
+  },
+  {
+   "waitFor": "text=Riwayat hasil"
+  },
+  {
+   "scroll": {
+    "to": "top"
+   },
+   "zoom": false,
+   "pauseAfter": 800
+  },
+  {
+   "hover": "main dl",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  }
+ ]
+}

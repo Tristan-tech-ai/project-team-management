@@ -1,6 +1,6 @@
 <?php
 
-// Pesan validasi bahasa Indonesia untuk aturan yang dipakai PTM (aturan lain jatuh ke bahasa cadangan en).
+// Indonesian validation messages for the rules PTM uses (other rules fall back to en).
 return [
     'accepted' => ':Attribute harus disetujui.',
     'after' => ':Attribute harus setelah :date.',
@@ -55,7 +55,7 @@ return [
         'website' => 'situs', 'notes' => 'catatan', 'company_id' => 'company', 'client_id' => 'client', 'lead_user_id' => 'kepala divisi',
         'description' => 'deskripsi', 'title' => 'judul', 'pic_user_id' => 'PIC', 'assignees' => 'pelaksana', 'due_at' => 'deadline',
         'project_type' => 'tipe project', 'status' => 'status', 'priority' => 'prioritas', 'role' => 'role', 'reason' => 'alasan',
-        'proposed_due_at' => 'deadline usulan', 'review_note' => 'catatan revisi', 'external_url' => 'tautan hasil', 'berkas' => 'berkas',
+        'proposed_due_at' => 'deadline usulan', 'review_note' => 'catatan revisi', 'external_url' => 'tautan hasil', 'file' => 'berkas',
         'submission_note' => 'catatan', 'duration_minutes' => 'durasi', 'participants' => 'peserta', 'activity_type' => 'jenis aktivitas',
         'impact_type' => 'dampak', 'occurred_at' => 'tanggal', 'starts_at' => 'tanggal mulai', 'ends_at' => 'tanggal selesai',
         'period_code' => 'kode periode', 'start_at' => 'tanggal mulai', 'setting_value' => 'nilai', 'timezone' => 'zona waktu',

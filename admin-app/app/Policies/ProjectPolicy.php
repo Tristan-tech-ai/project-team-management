@@ -6,7 +6,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Services\Scope;
 
-/** Policy project: permission (role_permissions) DAN scope keanggotaan, diperiksa di server setiap request. */
+/** Project policy: permission (role_permissions) AND membership scope, checked on the server on every request. */
 class ProjectPolicy
 {
     public function viewAny(User $user): bool
@@ -16,7 +16,7 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return $user->hasPermission('projects.view') && Scope::bisaLihat($user, $project);
+        return $user->hasPermission('projects.view') && Scope::canView($user, $project);
     }
 
     public function create(User $user): bool
@@ -26,32 +26,32 @@ class ProjectPolicy
 
     public function update(User $user, Project $project): bool
     {
-        return $user->hasPermission('projects.update') && Scope::pengelola($user, $project);
+        return $user->hasPermission('projects.update') && Scope::isManager($user, $project);
     }
 
     public function manageTeam(User $user, Project $project): bool
     {
-        return $user->hasPermission('projects.manage_team') && Scope::pengelola($user, $project);
+        return $user->hasPermission('projects.manage_team') && Scope::isManager($user, $project);
     }
 
     public function delete(User $user, Project $project): bool
     {
-        return $user->hasPermission('projects.delete') && Scope::pengelola($user, $project);
+        return $user->hasPermission('projects.delete') && Scope::isManager($user, $project);
     }
 
-    /** Membuat task di project: pengelola, atau anggota aktif project yang punya tasks.create (Member "task project sendiri"). */
+    /** Creating a task in a project: a project manager, or an active project member with tasks.create (Member "own project tasks"). */
     public function createTask(User $user, Project $project): bool
     {
-        return $user->hasPermission('tasks.create') && (Scope::pengelola($user, $project) || Scope::anggota($user, $project));
+        return $user->hasPermission('tasks.create') && (Scope::isManager($user, $project) || Scope::isProjectMember($user, $project));
     }
 
     public function createActivity(User $user, Project $project): bool
     {
-        return $user->hasPermission('activities.create') && (Scope::pengelola($user, $project) || Scope::anggota($user, $project));
+        return $user->hasPermission('activities.create') && (Scope::isManager($user, $project) || Scope::isProjectMember($user, $project));
     }
 
     public function approveSchedule(User $user, Project $project): bool
     {
-        return $user->hasPermission('projects.approve_schedule') && Scope::pengelola($user, $project);
+        return $user->hasPermission('projects.approve_schedule') && Scope::isManager($user, $project);
     }
 }

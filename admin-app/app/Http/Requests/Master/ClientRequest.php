@@ -5,7 +5,7 @@ namespace App\Http\Requests\Master;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Client adalah master terpisah tanpa Client PIC (Petunjuk Teknis 03). */
+/** A client is a separate master record without a Client PIC (Technical Guide 03). */
 class ClientRequest extends FormRequest
 {
     public function authorize(): bool

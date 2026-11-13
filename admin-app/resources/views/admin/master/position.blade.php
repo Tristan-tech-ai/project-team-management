@@ -1,12 +1,12 @@
-<x-layouts.admin :judul="$position->exists ? 'Ubah jabatan' : 'Tambah jabatan'">
-    <div class="kepala-halaman"><div><div class="remah"><a href="{{ route('positions.index') }}">Jabatan</a></div>
+<x-layouts.admin :title="$position->exists ? 'Ubah jabatan' : 'Tambah jabatan'">
+    <div class="page-header"><div><div class="crumb"><a href="{{ route('positions.index') }}">Jabatan</a></div>
         <h1>{{ $position->exists ? 'Ubah jabatan '.$position->name : 'Tambah jabatan' }}</h1></div></div>
-    <form method="post" action="{{ $position->exists ? route('positions.update', $position) : route('positions.store') }}" class="kartu" style="max-width:760px">
-        @csrf @if ($position->exists) @method('PUT') @endif
+    <form method="post" action="{{ $position->exists ? route('positions.update', $position) : route('positions.store') }}" class="panel" style="max-width:760px">
+        @csrf @if($position->exists) @method('PUT') @endif
         <div class="row g-3">
-            <div class="col-md-6"><x-isian nama="company_id" label="Company" jenis="select" :pilihan="$companies" :nilai="$position->company_id" kosong="Pilih company" wajib/></div>
-            <div class="col-md-6"><x-isian nama="name" label="Nama jabatan" :nilai="$position->name" wajib/></div>
-            <div class="col-12"><x-isian nama="description" label="Keterangan" jenis="textarea" :nilai="$position->description"/></div>
+            <div class="col-md-6"><x-field name="company_id" label="Company" type="select" :options="$companies" :value="$position->company_id" empty="Pilih company" required/></div>
+            <div class="col-md-6"><x-field name="name" label="Nama jabatan" :value="$position->name" required/></div>
+            <div class="col-12"><x-field name="description" label="Keterangan" type="textarea" :value="$position->description"/></div>
         </div>
         <div class="form-check mb-3"><input type="hidden" name="is_active" value="0">
             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $position->is_active))>

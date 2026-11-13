@@ -1,12 +1,12 @@
-<x-layouts.admin :judul="$judul">
-    <div class="kepala-halaman">
-        <div><div class="remah">Master Data</div><h1>{{ $judul }}</h1><p>{{ $ket }}</p></div>
-        @if ($tambah)<a href="{{ $tambah }}" class="btn btn-primary"><x-ikon name="plus"/> Tambah {{ mb_strtolower($judul) }}</a>@endif
+<x-layouts.admin :title="$title">
+    <div class="page-header">
+        <div><div class="crumb">Master Data</div><h1>{{ $title }}</h1><p>{{ $description }}</p></div>
+        @if($add)<a href="{{ $add }}" class="btn btn-primary"><x-icon name="plus"/> Tambah {{ mb_strtolower($title) }}</a>@endif
     </div>
-    <div class="kartu">
+    <div class="panel">
         <div class="table-responsive">
-            <table class="table align-middle w-100" data-tabel="{{ $data }}" data-kolom="{{ json_encode(collect($kolom)->map(fn ($k) => collect($k)->except('judul'))->values()) }}">
-                <thead><tr>@foreach ($kolom as $k)<th scope="col" class="{{ $k['kelas'] ?? '' }}">{{ $k['judul'] }}@if($k['judul'] === '')<span class="visually-hidden">Aksi</span>@endif</th>@endforeach</tr></thead>
+            <table class="table align-middle w-100" data-table="{{ $data }}" data-columns="{{ json_encode(collect($columns)->map(fn ($k) => collect($k)->except('title'))->values()) }}">
+                <thead><tr>@foreach($columns as $k)<th scope="col" class="{{ $k['cssClass'] ?? '' }}">{{ $k['title'] }}@if($k['title'] === '')<span class="visually-hidden">Aksi</span>@endif</th>@endforeach</tr></thead>
             </table>
         </div>
     </div>

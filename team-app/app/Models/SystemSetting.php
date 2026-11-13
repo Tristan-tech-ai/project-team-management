@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `system_settings`).
+// Generated from project_team_management_laravel.sql (table `system_settings`).
 
 namespace App\Models;
 
@@ -13,7 +13,7 @@ class SystemSetting extends Model
 
     protected $guarded = ['id'];
 
-    /** Kolom setting_value bertipe JSON di SQL modul: nilai teks disimpan sebagai string JSON dan dibaca kembali apa adanya. */
+    /** setting_value is a JSON column in the module SQL: text values are stored as JSON strings and read back as they are. */
     protected $casts = ['setting_value' => 'json'];
 
     public function updater(): BelongsTo

@@ -1,6 +1,6 @@
 <?php
 
-// Dibuat dari project_team_management_laravel.sql (tabel `task_time_entries`).
+// Generated from project_team_management_laravel.sql (table `task_time_entries`).
 
 namespace App\Models;
 
