@@ -20,13 +20,13 @@ use App\Models\TaskTimeEntry;
 use App\Services\ProjectTeamService;
 use App\Services\ProjectTemplateService;
 use App\Services\TaskWorkflowService;
+use App\Support\Berkas;
 use App\Support\Kode;
 use App\Support\Waktu;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -158,9 +158,11 @@ class TaskAksiController extends Controller
         if ($attachment->external_url) {
             return redirect()->away($attachment->external_url);
         }
-        abort_unless($attachment->storage_path && Storage::disk($attachment->storage_disk ?: 'local')->exists($attachment->storage_path), 404);
+        // Disk bersama: berkas yang diunggah di Team App terbaca di Admin App dan sebaliknya.
+        $disk = Berkas::cari($attachment->storage_disk, $attachment->storage_path);
+        abort_if($disk === null, 404);
 
-        return Storage::disk($attachment->storage_disk ?: 'local')->download($attachment->storage_path, $attachment->original_name ?: basename($attachment->storage_path));
+        return $disk->download($attachment->storage_path, $attachment->original_name ?: basename($attachment->storage_path));
     }
 
     private function jawab(Request $request, string $pesan, array $data = [], int $kode = 200): JsonResponse|RedirectResponse

@@ -16,12 +16,12 @@ use Illuminate\View\View;
 /** Halaman task Admin: Semua Task, Task Saya, Menunggu Review, Detail Task. Aksi task ada di Bersama\TaskAksiController. */
 class TaskController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', Task::class);
 
         return view('admin.tasks.index', ['judul' => 'Semua Task', 'feed' => route('tasks.data'), 'saya' => false,
-            'orang' => User::query()->whereIn('id', DB::table('task_assignees')->select('user_id'))->orderBy('name')->pluck('name', 'id')]);
+            'orang' => Scope::filterPelaksana($request->user())]);
     }
 
     public function data(Request $request): JsonResponse

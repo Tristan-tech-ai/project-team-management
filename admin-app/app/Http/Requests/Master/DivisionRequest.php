@@ -4,6 +4,7 @@ namespace App\Http\Requests\Master;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
+use App\Services\Scope;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -19,7 +20,7 @@ class DivisionRequest extends FormRequest
         $id = $this->route('division')?->id;
 
         return [
-            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')->whereNull('deleted_at')],
+            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::aturanCompany($this->user())],
             'name' => ['required', 'string', 'max:150', Rule::unique('divisions', 'name')->where('company_id', $this->integer('company_id'))->ignore($id)],
             'lead_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'description' => ['nullable', 'string', 'max:2000'],

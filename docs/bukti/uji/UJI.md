@@ -1,14 +1,27 @@
 # Hasil uji LV-07
 
+## Revisi 1 pembina (13 Nov 2026)
+
+Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm_test`, lalu uji peramban dua app lokal (`:8101` dan `:8102`) yang memakai database uji terpisah `ptm_e2e` (migrasi, impor SQL modul, seeder dokumen).
+
+| Revisi | Perubahan | Bukti |
+|---|---|---|
+| Penyimpanan lampiran | Disk `bersama` di kedua app menunjuk `admin-app/storage/app/private`; lampiran hasil task dan foto profil dari Team App tersimpan di storage admin-app dan terbuka di kedua app; berkas lama di disk lama tetap terbaca; foto profil hanya untuk pemiliknya dan Super Admin; `PTM_STORAGE_ROOT` untuk server terpisah | `PenyimpananBersamaTest` (4 tes, sama di kedua app), e2e "berkas yang diunggah di Team App terbuka di Admin App (isi sama)" |
+| Pembatasan akses data | Filter Company, Client, PIC, pelaksana, dan divisi di Projects, Tasks, Management diambil dari data dalam cakupan; daftar master Company, Client, Divisi, Jabatan, Anggota untuk Manager hanya company tempat ia anggota aktif; ubah lewat URL di luar cakupan 403 walau punya izin kelola; role Super Admin hanya bisa diberikan Super Admin; tabel Per divisi di Management ikut dibatasi (kebocoran ini ditemukan tes) | `CakupanDataTest` (3 tes) |
+| Akses project Team App | Daftar project memakai aturan yang sama dengan detail dan Kanban (`Scope::projects` = `ProjectPolicy::view`, juga sama dengan Admin App); sebelumnya Manager hanya melihat project yang ia ikuti di daftar tetapi bisa membuka project lain di company-nya lewat URL | `TimCakupanProjectTest` (member, manager company sama, manager company lain; daftar, detail, Kanban, status task) |
+| Instalasi Team App | Folder `database` Team App dihapus (seeder bawaan Test User, factory, migrasi kosong), skrip composer tanpa `migrate`, perintah `migrate`, `migrate:status`, `migrate:fresh`, `db:seed`, `db:wipe` ditolak dengan pesan | `TimInstalasiTest` (dijalankan sebagai proses artisan sungguhan) |
+| Pengujian akhir | Semua tes dan bukti diperbarui | `phpunit-admin-app.xml`, `phpunit-team-app.xml`, `e2e-alur.txt` (16 lulus), `asap-admin.txt` (53 halaman), `../ui/audit-admin.json` (Log Aktivitas, Pengaturan Sistem, Profil: axe 0 di 390 dan 1366) |
+
+
 Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti README di folder terpisah (database baru, seeder dokumen + `UatSkenarioSeeder`), dengan Debugbar mati. Semua berkas bukti ada di folder ini.
 
 | Bukti | Isi | Hasil |
 |---|---|---|
-| `phpunit-admin-app.xml` | `php artisan test` admin-app (25 tes domain + 16 tes fitur) | 41 lulus, 0 gagal |
-| `phpunit-team-app.xml` | `php artisan test` team-app (25 tes domain identik + 6 tes fitur) | 31 lulus, 0 gagal |
-| `e2e-alur.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366 | 17 lulus, 0 gagal |
-| `asap-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin | 53 halaman, 0 gagal |
-| `asap-tim.txt` | Ketiga role membuka setiap menu Tim + board, project, task | 29 halaman, 0 gagal |
+| `phpunit-admin-app.xml` | `php artisan test` admin-app (29 tes domain + 25 tes fitur), diulang 13 Nov 2026 dengan kode terbaru | 54 lulus, 0 gagal |
+| `phpunit-team-app.xml` | `php artisan test` team-app (29 tes domain identik + 10 tes fitur), diulang 13 Nov 2026 | 39 lulus, 0 gagal |
+| `e2e-alur.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366, termasuk berkas dari Team App dibuka di Admin App (13 Nov 2026) | 18 lulus, 0 gagal |
+| `asap-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin (13 Nov 2026) | 53 halaman, 0 gagal |
+| `asap-tim.txt` | Ketiga role membuka setiap menu Tim + board, project, task (13 Nov 2026) | 29 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe dan tangkapan 390/1366 | 0 pelanggaran serius |
 | `../performa.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
 | `../../video/ptm-demo.mp4` | Video rekaman 8 skenario 11.3 dalam satu alur (Radit manager, Putri member) | 4 menit 28 detik |
@@ -71,6 +84,9 @@ Dijalankan 12 Nov 2026 terhadap **instalasi bersih** yang dipasang mengikuti REA
 12. Petunjuk Teknis 4.1 meminta semua aksi Super Admin dicatat, sedangkan yang tercatat baru riwayat task (`task_activities`); ditambah tabel `audit_logs` lewat migrasi admin-app, middleware `CatatAksi` di kedua app, dan halaman Log Aktivitas (Pengaturan Sistem) khusus Super Admin.
 13. Tes audit menemukan Simpan di Pengaturan Sistem selalu gagal (500) karena `system_settings.setting_value` bertipe JSON di SQL modul sedangkan nilainya disimpan sebagai teks biasa; model kini memakai cast JSON, dijaga `PengaturanSistemTest`.
 14. Baris per halaman tabel tersimpan di Pengaturan Sistem tetapi tabel selalu 25 baris; kini DataTables membaca nilainya.
+15. Tes cakupan menemukan tabel Per divisi di Monitoring Divisi & Anggota menampilkan nama divisi company lain (angka 0); kini hanya divisi di company yang terlihat.
+16. Tes penolak `migrate` di Team App sempat gagal mendeteksi: Laravel tidak meneruskan event perintah saat tes unit (`runningUnitTests`), jadi tes kini menjalankan `php artisan` sebagai proses terpisah dengan `APP_ENV=local`.
+17. Halaman Log Aktivitas di HP 390 px memanjang karena kolom isian menyempit; tabel diberi lebar minimum dan digeser ke samping seperti tabel lain (tangkapan `../ui/admin-390-settings_audit.png`).
 
 ## Uji versi online (12 Nov 2026)
 

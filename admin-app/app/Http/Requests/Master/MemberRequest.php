@@ -4,6 +4,7 @@ namespace App\Http\Requests\Master;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
+use App\Services\Scope;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator;
@@ -24,11 +25,15 @@ class MemberRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:180', Rule::unique('users', 'email')->ignore($user?->id)],
             'password' => [$user ? 'nullable' : 'required', 'string', Password::min(12)->letters()->numbers()],
-            'role' => ['required', Rule::exists('roles', 'slug')],
+            'role' => ['required', Rule::exists('roles', 'slug'), function (string $a, mixed $v, \Closure $gagal) {
+                if ($v === 'super_admin' && ! $this->user()->isSuperAdmin()) {
+                    $gagal('Hanya Super Admin yang bisa memberi role Super Admin.');
+                }
+            }],
             'phone' => ['nullable', 'string', 'max:30'],
             'is_active' => ['boolean'],
             'companies' => ['array'],
-            'companies.*' => ['integer', Rule::exists('companies', 'id')->whereNull('deleted_at')],
+            'companies.*' => ['integer', Rule::exists('companies', 'id')->whereNull('deleted_at'), Scope::aturanCompany($this->user())],
             'divisi' => ['array'],
             'divisi.*.ikut' => ['nullable', 'boolean'],
             'divisi.*.position_id' => ['nullable', 'integer', 'exists:positions,id'],

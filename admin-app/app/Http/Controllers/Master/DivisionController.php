@@ -7,6 +7,7 @@ use App\Http\Requests\Master\DivisionRequest;
 use App\Models\Company;
 use App\Models\Division;
 use App\Models\User;
+use App\Services\Scope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class DivisionController extends Controller
     public function data(Request $request): JsonResponse
     {
         $boleh = $request->user()->can('divisions.manage');
-        $q = Division::query()->with(['company:id,name', 'lead:id,name'])
+        $q = Scope::batasiCompany(Division::query(), $request->user(), 'divisions.company_id')->with(['company:id,name', 'lead:id,name'])
             ->select('divisions.*')->withCount(['memberships as anggota_aktif' => fn ($m) => $m->where('is_active', 1)]);
 
         return DataTables::eloquent($q)
@@ -66,12 +67,14 @@ class DivisionController extends Controller
     public function edit(Division $division): View
     {
         $this->authorize('divisions.manage');
+        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
 
         return $this->form($division);
     }
 
     public function update(DivisionRequest $request, Division $division): RedirectResponse
     {
+        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
         $division->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('divisions.index')->with('ok', 'Perubahan divisi tersimpan.');
@@ -80,6 +83,7 @@ class DivisionController extends Controller
     public function toggle(Division $division): RedirectResponse
     {
         $this->authorize('divisions.manage');
+        abort_unless(Scope::bolehCompany(request()->user(), $division->company_id), 403);
         $division->update(['is_active' => ! $division->is_active]);
 
         return back()->with('ok', $division->is_active ? "Divisi {$division->name} aktif lagi." : "Divisi {$division->name} dinonaktifkan.");
@@ -89,8 +93,8 @@ class DivisionController extends Controller
     {
         return view('admin.master.division', [
             'division' => $division,
-            'companies' => Company::query()->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'users' => User::query()->orderBy('name')->pluck('name', 'id'),
+            'companies' => Scope::batasiCompany(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            'users' => Scope::anggotaMaster(request()->user())->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 }

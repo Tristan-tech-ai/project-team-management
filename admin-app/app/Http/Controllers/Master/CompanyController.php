@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\CompanyRequest;
 use App\Models\Company;
+use App\Services\Scope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +29,8 @@ class CompanyController extends Controller
     public function data(Request $request): JsonResponse
     {
         $bolehUbah = $request->user()->can('companies.manage');
-        $query = Company::query()->select('companies.*')->withCount('divisions');
+        // Cakupan (Petunjuk Teknis 3.2): selain Super Admin hanya company tempat ia anggota aktif.
+        $query = Scope::batasiCompany(Company::query()->select('companies.*')->withCount('divisions'), $request->user(), 'companies.id');
 
         return DataTables::eloquent($query)
             ->addColumn('divisi', fn (Company $c) => $c->divisions_count)
@@ -58,12 +60,14 @@ class CompanyController extends Controller
     public function edit(Company $company): View
     {
         $this->authorize('companies.manage');
+        abort_unless(Scope::bolehCompany(request()->user(), $company->id), 403);
 
         return view('admin.master.company', ['company' => $company]);
     }
 
     public function update(CompanyRequest $request, Company $company): RedirectResponse
     {
+        abort_unless(Scope::bolehCompany(request()->user(), $company->id), 403);
         $company->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('companies.index')->with('ok', 'Perubahan company tersimpan.');
@@ -72,6 +76,7 @@ class CompanyController extends Controller
     public function destroy(Company $company): RedirectResponse
     {
         $this->authorize('companies.manage');
+        abort_unless(Scope::bolehCompany(request()->user(), $company->id), 403);
         if ($company->projects()->exists()) {
             return back()->with('galat', "{$company->name} masih punya project. Nonaktifkan saja, atau pindahkan project-nya dulu.");
         }

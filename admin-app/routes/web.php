@@ -138,6 +138,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 
     // Akun
     Route::get('/akun', [AkunController::class, 'edit'])->name('akun.edit');
+    Route::get('/akun/foto/{user}', [AkunController::class, 'foto'])->name('akun.foto');
     Route::put('/akun', [AkunController::class, 'update'])->name('akun.update');
     Route::put('/akun/password', [AkunController::class, 'password'])->name('akun.password');
 });

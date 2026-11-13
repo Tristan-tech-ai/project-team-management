@@ -1,12 +1,13 @@
 ok   pratinjau template menampilkan 5 task sebelum generate
-ok   project 7 dibuat dari template: 5 task di Antrian, 3 divisi
+ok   project 6 dibuat dari template: 5 task di Antrian, 3 divisi
 ok   seret ke Dikerjakan tersimpan di server (bertahan setelah muat ulang)
 ok   seret ke Selesai ditolak API: "Task tidak bisa pindah dari Dikerjakan ke Selesai. Kirim hasil untuk review dulu; Selesai hanya lewat persetujuan PIC atau manager.", kartu kembali ke Dikerjakan
 ok   task punya 2 pelaksana + 2 checklist
 ok   HP: dropdown status memindah task ke Dikerjakan (endpoint sama)
 ok   HP: member tidak bisa memilih Selesai tanpa review, pilihan kembali
 ok   HP: checklist dicentang langsung, tersimpan setelah muat ulang
-ok   HP: hasil dikirim, task masuk Review
+ok   HP: hasil dikirim (tautan + berkas), task masuk Review
+ok   berkas yang diunggah di Team App terbuka di Admin App (isi sama)
 ok   revisi beralasan mengembalikan task ke Dikerjakan
 ok   hasil kedua diterima: task Selesai, tanggal selesai aktual terisi, riwayat 2 hasil
 ok   aktivitas berpeserta + pengajuan deadline disetujui, target awal tetap ditampilkan
@@ -16,4 +17,4 @@ ok   Tim 1366 px: bottom nav tersembunyi, sidebar tampil, padding bawah 28px
 ok   Member memaksa /management, /settings/roles, /master/companies: semua 403 dengan halaman ramah
 ok   DataTables: recordsTotal 520, tiap permintaan hanya 25 baris (length=25), halaman 2 start=25 (25 baris), cari "512" difilter server menjadi 1
 
-17 lulus, 0 gagal
+18 lulus, 0 gagal

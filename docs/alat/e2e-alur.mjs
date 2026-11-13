@@ -12,6 +12,7 @@ const TIM = process.env.E2E_TIM ?? 'http://127.0.0.1:8102';
 const BUKTI = process.env.E2E_BUKTI ?? 'docs/bukti/e2e';
 mkdirSync(BUKTI, { recursive: true });
 const nama = `Campaign Sekolah ${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}`;
+const isiBerkas = `Riset audiens ${nama}: siswa 13-17 tahun, kanal Instagram dan TikTok.`;
 const hasil = [];
 const catat = (ok, langkah) => { hasil.push([ok, langkah]); console.log(`${ok ? 'ok  ' : 'GAGAL'} ${langkah}`); };
 
@@ -105,9 +106,11 @@ try {
     catat(true, 'HP: checklist dicentang langsung, tersimpan setelah muat ulang');
     await t.fill('input[name=external_url]', 'https://drive.contoh.test/riset-audiens');
     await t.fill('textarea[name=submission_note]', 'Riset audiens versi 1');
+    // Berkas diunggah lewat Team App; harus terbaca di Admin App (penyimpanan bersama di storage admin-app).
+    await t.setInputFiles('input[name=berkas]', { name: 'riset-audiens-v1.txt', mimeType: 'text/plain', buffer: Buffer.from(isiBerkas) });
     await t.click('button:has-text("Kirim untuk Review")');
     await expect(t.locator('main .lencana').first()).toContainText('Review');
-    catat(true, 'HP: hasil dikirim, task masuk Review');
+    catat(true, 'HP: hasil dikirim (tautan + berkas), task masuk Review');
     await t.screenshot({ path: `${BUKTI}/04-tim-task-review-390.png`, fullPage: true });
     await kt.close();
 
@@ -119,6 +122,12 @@ try {
     await m.goto(`${ADMIN}/tasks/review`);
     await expect(m.locator('.kartu', { hasText: 'Riset audiens versi 1' })).toHaveCount(1);
     await m.goto(`${ADMIN}/tasks/${idKedua}`);
+    const tautanBerkas = m.locator('a', { hasText: 'riset-audiens-v1.txt' }).first();
+    await expect(tautanBerkas).toBeVisible();
+    const unduhan = await m.request.get(new URL(await tautanBerkas.getAttribute('href'), ADMIN).href);
+    expect(unduhan.status()).toBe(200);
+    expect(await unduhan.text()).toBe(isiBerkas);
+    catat(true, 'berkas yang diunggah di Team App terbuka di Admin App (isi sama)');
     await m.fill('#tinjau textarea[name=review_note]', 'Tambahkan data usia 13-17 tahun');
     await m.click('#tinjau button:has-text("Kembalikan untuk revisi")');
     await expect(m.locator('main .lencana').first()).toContainText('Dikerjakan');

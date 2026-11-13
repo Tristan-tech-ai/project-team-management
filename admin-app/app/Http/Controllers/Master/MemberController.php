@@ -9,6 +9,7 @@ use App\Models\Division;
 use App\Models\Position;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Scope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class MemberController extends Controller
     public function data(Request $request): JsonResponse
     {
         $boleh = $request->user()->can('members.manage');
-        $q = User::query()->with(['roles:id,name', 'profile:id,user_id,is_active', 'divisionMemberships' => fn ($m) => $m->where('is_active', 1)->with('division:id,name')])
+        $q = Scope::anggotaMaster($request->user())->with(['roles:id,name', 'profile:id,user_id,is_active', 'divisionMemberships' => fn ($m) => $m->where('is_active', 1)->with('division:id,name')])
             ->select('users.id', 'users.name', 'users.email');
 
         return DataTables::eloquent($q)
@@ -69,12 +70,14 @@ class MemberController extends Controller
     public function edit(User $member): View
     {
         $this->authorize('members.manage');
+        abort_unless(Scope::anggotaMaster(request()->user())->whereKey($member->id)->exists(), 403);
 
         return $this->form($member);
     }
 
     public function update(MemberRequest $request, User $member): RedirectResponse
     {
+        abort_unless(Scope::anggotaMaster(request()->user())->whereKey($member->id)->exists(), 403);
         DB::transaction(function () use ($request, $member) {
             $isi = ['name' => $request->input('name'), 'email' => $request->input('email')];
             if ($request->filled('password')) {
@@ -128,10 +131,11 @@ class MemberController extends Controller
 
         return view('admin.master.member', [
             'member' => $member,
-            'roles' => Role::query()->orderBy('id')->pluck('name', 'slug'),
-            'companies' => Company::query()->where('is_active', 1)->orderBy('name')->get(['id', 'name']),
-            'divisions' => Division::query()->with('company:id,name')->where('is_active', 1)->orderBy('company_id')->orderBy('name')->get(),
-            'positions' => Position::query()->where('is_active', 1)->orderBy('name')->get(['id', 'name', 'company_id']),
+            // Selain Super Admin: role Super Admin tidak bisa diberikan, pilihan company/divisi/jabatan hanya dalam cakupan.
+            'roles' => Role::query()->when(! request()->user()->isSuperAdmin(), fn ($q) => $q->where('slug', '!=', 'super_admin'))->orderBy('id')->pluck('name', 'slug'),
+            'companies' => Scope::batasiCompany(Company::query(), request()->user(), 'companies.id')->where('is_active', 1)->orderBy('name')->get(['id', 'name']),
+            'divisions' => Scope::batasiCompany(Division::query(), request()->user())->with('company:id,name')->where('is_active', 1)->orderBy('company_id')->orderBy('name')->get(),
+            'positions' => Scope::batasiCompany(Position::query(), request()->user())->where('is_active', 1)->orderBy('name')->get(['id', 'name', 'company_id']),
             'companyIni' => $member->exists ? DB::table('company_members')->where('user_id', $member->id)->where('is_active', 1)->pluck('company_id')->all() : [],
             'divisiIni' => $member->exists ? DB::table('division_members')->where('user_id', $member->id)->where('is_active', 1)->pluck('position_id', 'division_id')->all() : [],
         ]);

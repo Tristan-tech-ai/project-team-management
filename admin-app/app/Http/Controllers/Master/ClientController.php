@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\ClientRequest;
 use App\Models\Client;
+use App\Services\Scope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,8 @@ class ClientController extends Controller
     {
         $bolehUbah = $request->user()->can('clients.manage');
 
-        return DataTables::eloquent(Client::query()->select('clients.*')->withCount('projects'))
+        // Cakupan: selain Super Admin hanya client dari project yang terlihat olehnya.
+        return DataTables::eloquent(Scope::clients($request->user())->select('clients.*')->withCount('projects'))
             ->addColumn('project', fn (Client $c) => $c->projects_count)
             ->addColumn('status', fn (Client $c) => $c->is_active ? 'Aktif' : 'Nonaktif')
             ->addColumn('status_kelas', fn (Client $c) => $c->is_active ? 'ok' : 'netral')
@@ -58,12 +60,14 @@ class ClientController extends Controller
     public function edit(Client $client): View
     {
         $this->authorize('clients.manage');
+        abort_unless(Scope::clients(request()->user())->whereKey($client->id)->exists(), 403);
 
         return view('admin.master.client', ['client' => $client]);
     }
 
     public function update(ClientRequest $request, Client $client): RedirectResponse
     {
+        abort_unless(Scope::clients(request()->user())->whereKey($client->id)->exists(), 403);
         $client->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('clients.index')->with('ok', 'Perubahan client tersimpan.');
@@ -72,6 +76,7 @@ class ClientController extends Controller
     public function destroy(Client $client): RedirectResponse
     {
         $this->authorize('clients.manage');
+        abort_unless(Scope::clients(request()->user())->whereKey($client->id)->exists(), 403);
         $client->delete();
 
         return redirect()->route('clients.index')->with('ok', "{$client->name} dihapus.");

@@ -11,7 +11,7 @@
     </form>
     <div class="kartu">
         <div class="table-responsive" role="region" aria-label="Tabel log aktivitas" tabindex="0">
-            <table class="table table-sm align-middle mb-0">
+            <table class="table table-sm align-middle mb-0" style="min-width:900px">
                 <thead><tr><th scope="col">Waktu</th><th scope="col">Pengguna</th><th scope="col">Aplikasi</th><th scope="col">Aksi</th><th scope="col">Status</th><th scope="col">Isian</th></tr></thead>
                 <tbody>
                 @forelse ($log as $l)
@@ -21,7 +21,7 @@
                         <td>{{ $l->app }}</td>
                         <td><code>{{ $l->method }}</code> {{ $l->route ?? $l->path }}</td>
                         <td>{{ $l->status }}</td>
-                        <td class="small teks-2" style="max-width:320px;overflow-wrap:anywhere">{{ Str::limit(json_encode($l->input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 160) }}</td>
+                        <td class="small teks-2" style="min-width:260px;max-width:340px;overflow-wrap:anywhere">{{ Str::limit(json_encode($l->input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 160) }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="6" class="teks-2">{{ $cari === '' ? 'Belum ada aksi yang tercatat.' : 'Tidak ada aksi yang cocok dengan pencarian ini.' }}</td></tr>

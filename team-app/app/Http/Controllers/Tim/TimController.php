@@ -109,12 +109,10 @@ class TimController extends Controller
     {
         abort_unless($request->user()->hasPermission('projects.view'), 403);
         $u = $request->user();
+        // Satu aturan cakupan untuk daftar, detail, dan Kanban (Scope::projects = ProjectPolicy::view), juga sama dengan Admin App:
+        // project yang tidak ada di daftar ini juga ditolak 403 bila dibuka lewat URL.
         $q = Scope::projects($u)->with(['client:id,name', 'pic:id,name'])
             ->withCount(['tasks as task_utama' => fn ($t) => $t->whereNull('parent_id'), 'tasks as task_selesai' => fn ($t) => $t->whereNull('parent_id')->where('status', 'done')]);
-        if (! $u->isSuperAdmin()) {
-            // Tim: project keanggotaan saja (manager melihat seluruh company di aplikasi Admin).
-            $q->where(fn ($w) => $w->whereIn('projects.id', DB::table('project_members')->select('project_id')->where('user_id', $u->id)->where('is_active', 1))->orWhere('projects.pic_user_id', $u->id));
-        }
         if ($request->filled('cari')) {
             $q->where('projects.name', 'like', '%'.str_replace(['%', '_'], ['\%', '\_'], (string) $request->input('cari')).'%');
         }

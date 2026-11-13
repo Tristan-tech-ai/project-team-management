@@ -35,10 +35,13 @@ class ProjectController extends Controller
     {
         $this->authorize('viewAny', Project::class);
 
+        // Pilihan filter hanya dari data dalam cakupan pengguna (Petunjuk Teknis 3.2).
+        $u = $request->user();
+
         return view('admin.projects.index', [
-            'companies' => Company::query()->orderBy('name')->pluck('name', 'id'),
-            'clients' => Client::query()->orderBy('name')->pluck('name', 'id'),
-            'pics' => User::query()->whereIn('id', Project::query()->select('pic_user_id'))->orderBy('name')->pluck('name', 'id'),
+            'companies' => Scope::filterCompanies($u),
+            'clients' => Scope::filterClients($u),
+            'pics' => Scope::filterPics($u),
         ]);
     }
 

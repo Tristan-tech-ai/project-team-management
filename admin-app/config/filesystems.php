@@ -38,6 +38,16 @@ return [
             'report' => false,
         ],
 
+        // Penyimpanan bersama Admin App dan Team App: semua berkas (lampiran hasil task, foto profil) disimpan di storage
+        // admin-app dan dibaca dari sana oleh kedua aplikasi. Team App menunjuk folder yang sama (config team-app).
+        // PTM_STORAGE_ROOT dipakai bila kedua app dipasang di server atau folder berbeda dengan penyimpanan bersama.
+        'bersama' => [
+            'driver' => 'local',
+            'root' => env('PTM_STORAGE_ROOT', storage_path('app/private')),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

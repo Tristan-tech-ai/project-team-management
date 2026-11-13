@@ -38,6 +38,16 @@ return [
             'report' => false,
         ],
 
+        // Penyimpanan bersama: Team App tidak menyimpan berkas di storage-nya sendiri, tetapi di storage admin-app
+        // (folder sebelah di repositori yang sama), sehingga berkas yang diunggah di sini terbaca di Admin App dan sebaliknya.
+        // PTM_STORAGE_ROOT dipakai bila kedua app dipasang di server atau folder berbeda dengan penyimpanan bersama.
+        'bersama' => [
+            'driver' => 'local',
+            'root' => env('PTM_STORAGE_ROOT', dirname(base_path()).'/admin-app/storage/app/private'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

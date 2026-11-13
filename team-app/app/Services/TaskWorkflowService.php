@@ -7,6 +7,7 @@ use App\Models\TaskActivity;
 use App\Models\TaskAttachment;
 use App\Models\TaskSubmission;
 use App\Models\User;
+use App\Support\Berkas;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -122,9 +123,13 @@ class TaskWorkflowService
                 TaskAttachment::create(['task_id' => $t->id, 'task_submission_id' => $sub->id, 'uploaded_by' => $user->id, 'external_url' => $tautan, 'original_name' => null]);
             }
             if ($berkas) {
-                $path = $berkas->store('lampiran/task-'.$t->id, 'local');
+                // Disk bersama: berkas dari Team App tersimpan di storage admin-app dan terbaca di kedua app.
+                $path = $berkas->store('lampiran/task-'.$t->id, Berkas::DISK);
+                if ($path === false) {
+                    throw ValidationException::withMessages(['berkas' => 'Berkas gagal disimpan. Coba unggah lagi.']);
+                }
                 TaskAttachment::create(['task_id' => $t->id, 'task_submission_id' => $sub->id, 'uploaded_by' => $user->id,
-                    'original_name' => mb_substr($berkas->getClientOriginalName(), 0, 255), 'storage_disk' => 'local', 'storage_path' => $path,
+                    'original_name' => mb_substr($berkas->getClientOriginalName(), 0, 255), 'storage_disk' => Berkas::DISK, 'storage_path' => $path,
                     'mime_type' => $berkas->getMimeType(), 'file_size_bytes' => $berkas->getSize()]);
             }
             $dari = $t->status;

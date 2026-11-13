@@ -36,6 +36,7 @@ ENV APP_ENV=production \
     MYSQL_ATTR_SSL_CA=/etc/ssl/certs/ca-certificates.crt \
     XDG_CONFIG_HOME=/tmp/caddy-config \
     XDG_DATA_HOME=/tmp/caddy-data \
+    PTM_STORAGE_ROOT=/tmp/storage/app/private \
     PORT=80
 COPY . .
 COPY --from=vendor /app/vendor ./vendor

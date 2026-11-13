@@ -42,7 +42,7 @@ class ManagementController extends Controller
         $filter = $request->only(['project_type', 'status', 'company_id', 'client_id']);
 
         return view('admin.management.projects', ['baris' => $this->m->monitoring($request->user(), $filter), 'filter' => $filter,
-            'companies' => Company::query()->orderBy('name')->pluck('name', 'id'), 'clients' => Client::query()->orderBy('name')->pluck('name', 'id')]);
+            'companies' => Scope::filterCompanies($request->user()), 'clients' => Scope::filterClients($request->user())]);
     }
 
     public function teams(Request $request): View
@@ -51,7 +51,7 @@ class ManagementController extends Controller
         $div = $request->integer('division_id') ?: null;
 
         return view('admin.management.teams', ['divisi' => $this->m->perDivisi($request->user()), 'orang' => $this->m->bebanAnggota($request->user(), $div),
-            'pilihanDivisi' => Division::query()->where('is_active', 1)->orderBy('name')->pluck('name', 'id'), 'divDipilih' => $div]);
+            'pilihanDivisi' => Scope::filterDivisi($request->user()), 'divDipilih' => $div]);
     }
 
     public function reports(Request $request): View

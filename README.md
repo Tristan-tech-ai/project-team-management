@@ -23,7 +23,10 @@ Aturan penting yang dijaga di server, bukan hanya di tampilan:
 - Task ke **Review** hanya lewat kirim hasil; ke **Selesai** hanya lewat terima oleh peninjau. Kartu yang diseret ke kolom terlarang dikembalikan.
 - Deadline tidak bisa ditimpa langsung: lewat `schedule_change_requests` yang disetujui manager; baseline tetap.
 - Data tanpa `deleted_at` (divisi, jabatan, anggota, keanggotaan) dinonaktifkan, tidak dihapus. Perintah perusak database (`migrate:fresh`, `db:wipe`) diblokir di kode.
-- DataTables memuat data dari server (25 baris per halaman, cari dan urut di server); diuji dengan 520 task.
+- DataTables memuat data dari server (baris per halaman dari Pengaturan Sistem, bawaan 25; cari dan urut di server); diuji dengan 520 task.
+- **Satu aturan cakupan data** (`App\Services\Scope`) untuk daftar, filter (Company, Client, PIC, pelaksana, divisi), data master, detail, dan Kanban di kedua app: Super Admin semua, Manager company tempat ia anggota aktif, Member project yang ia ikuti. Data di luar cakupan tidak muncul di pilihan filter, dan URL langsung ke data itu dijawab 403.
+- **Satu penyimpanan berkas untuk dua app.** Lampiran hasil task dan foto profil disimpan di storage `admin-app` (disk `bersama`, folder `admin-app/storage/app/private`), termasuk yang diunggah lewat Team App, sehingga terbuka di kedua app. Bila kedua app dipasang di folder atau server berbeda, isi `PTM_STORAGE_ROOT` di kedua `.env` dengan folder bersama yang sama.
+- **Log aktivitas**: setiap aksi yang mengubah data di kedua app tercatat (`audit_logs`) tanpa kata sandi; dilihat Super Admin di Pengaturan Sistem.
 
 ## Teknologi
 
@@ -52,7 +55,7 @@ cd project-team-management
    php artisan key:generate    # APP_KEY kedua app harus berbeda
    ```
    Isi `DB_PASSWORD` di kedua `.env` sama dengan `MYSQL_PASSWORD`.
-3. **Skema.** Hanya di `admin-app`: `php artisan migrate`. Lalu impor `docs/project_team_management_laravel.sql` **satu kali** ke database `project_team_management` lewat phpMyAdmin (menu Import), atau `node docs/alat/impor-phpmyadmin.mjs` (menolak bila tabel modul sudah ada).
+3. **Skema.** Hanya di `admin-app`: `php artisan migrate`. Team App tidak punya folder `database` (tanpa migrasi, seeder, dan factory), dan `migrate`/`db:seed` di Team App ditolak dengan pesan. Lalu impor `docs/project_team_management_laravel.sql` **satu kali** ke database `project_team_management` lewat phpMyAdmin (menu Import), atau `node docs/alat/impor-phpmyadmin.mjs` (menolak bila tabel modul sudah ada).
 4. **Data awal.** Di `admin-app/.env` isi `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD` (minimal 12 karakter), dan untuk lokal `DEMO_SEED_PASSWORD`, lalu `php artisan db:seed` di `admin-app`.
 5. **Jalankan.** `npm run build` di kedua app, lalu:
    ```bash
@@ -109,7 +112,7 @@ Memasang sendiri:
    Lalu Deploy. Setiap push ke `main` membangun ulang kedua app.
 
 Batasan versi online:
-- Berkas yang diunggah (foto profil, lampiran hasil task) disimpan di penyimpanan sementara container: hilang saat instance diganti dan tidak dibagi antar-app. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk berkas permanen dibutuhkan penyimpanan objek (misalnya disk `s3` Laravel), yang berarti menambah paket.
+- Di versi online kedua app berjalan di dua container terpisah dengan penyimpanan sementara, jadi berkas yang diunggah (foto profil, lampiran hasil task) hilang saat instance diganti dan berkas dari Team App online belum terbuka di Admin App online. Di instalasi biasa (kedua app di satu server, sesuai petunjuk teknis) berkas sudah bersama lewat disk `bersama`. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk versi online dibutuhkan penyimpanan objek bersama (misalnya disk `s3` Laravel), yang berarti menambah paket.
 - App tidur setelah 5 menit tanpa kunjungan; permintaan pertama sesudahnya sedikit lebih lambat.
 - Image di atas dibangun dan dijalankan oleh Vercel. Untuk menjalankannya dengan Docker di komputer sendiri: `docker build -t ptm-admin admin-app`, lalu `docker run -p 8101:80` dengan variabel yang sama (untuk MySQL lokal tanpa TLS, isi `MYSQL_ATTR_SSL_CA` dengan string kosong).
 
@@ -117,7 +120,7 @@ Batasan versi online:
 
 ```
 admin-app/      Laravel: manajemen (memegang migrasi schema)
-team-app/       Laravel: aplikasi tim mobile-first (tanpa migrasi)
+team-app/       Laravel: aplikasi tim mobile-first (tanpa migrasi dan seeder; berkas disimpan di storage admin-app)
   Dockerfile, docker/   image produksi tiap app (Docker dan Vercel)
 docs/
   project_team_management_laravel.sql   schema modul (diimpor satu kali)

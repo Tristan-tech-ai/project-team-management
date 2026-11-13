@@ -126,6 +126,8 @@ class ManagementMetricsService
         $ids = Scope::projects($user)->select('projects.id');
 
         return DB::table('divisions')->join('companies', 'companies.id', '=', 'divisions.company_id')->where('divisions.is_active', 1)
+            // Cakupan: hanya divisi di company yang terlihat oleh pengguna (Super Admin semua).
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('divisions.company_id', Scope::filterCompanies($user)->keys()->all() ?: [0]))
             ->select('divisions.id', 'divisions.name', 'companies.name as company')
             ->selectSub(DB::table('division_members')->selectRaw('count(distinct user_id)')->whereColumn('division_id', 'divisions.id')->where('is_active', 1), 'anggota')
             ->selectSub(DB::table('project_divisions')->selectRaw('count(distinct project_id)')->whereColumn('division_id', 'divisions.id')->whereIn('project_id', $ids), 'project')

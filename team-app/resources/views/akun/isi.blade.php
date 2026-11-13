@@ -5,7 +5,7 @@
             <h2 class="kartu-judul">Profil</h2>
             <div class="d-flex align-items-center gap-3 mb-3">
                 @if ($user->profile?->avatar_path)
-                    <img src="{{ asset('storage/'.$user->profile->avatar_path) }}" alt="Foto {{ $user->name }}" width="64" height="64" class="rounded-circle object-fit-cover">
+                    <img src="{{ route('akun.foto', ['user' => $user->id, 'v' => substr(md5($user->profile->avatar_path), 0, 8)]) }}" alt="Foto {{ $user->name }}" width="64" height="64" class="rounded-circle object-fit-cover">
                 @else
                     <span class="rounded-circle d-grid fw-bold" style="width:64px;height:64px;place-items:center;background:var(--ptm-aksi-lembut);color:var(--ptm-aksi-gelap)" aria-hidden="true">{{ $user->inisial() }}</span>
                 @endif
