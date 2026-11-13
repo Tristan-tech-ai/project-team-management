@@ -92,7 +92,8 @@ def lang_hits(rel, src):
             hits.append(f'{rel}:{line} {kind} {token!r} ({",".join(bad)})')
 
     for m in COM.finditer(src):
-        words = {w.lower() for w in re.findall(r'[A-Za-z]+', m.group(0))}
+        # text in double quotes inside a comment quotes the user interface verbatim (UI text stays Indonesian)
+        words = {w.lower() for w in re.findall(r'[A-Za-z]+', re.sub(r'"[^"\n]*"', ' ', m.group(0)))}
         bad = sorted(words & ID_WORDS & {'dan', 'yang', 'untuk', 'dengan', 'tidak', 'atau', 'dari', 'oleh', 'tanpa', 'harus', 'bisa', 'boleh',
                                          'sama', 'tetap', 'belum', 'sudah', 'hanya', 'setiap', 'tiap', 'semua', 'ini', 'pakai', 'lihat', 'bila',
                                          'saat', 'supaya', 'agar', 'kalau', 'jadi', 'akan', 'pada', 'sebagai', 'ke', 'di'} | (words & {
@@ -157,7 +158,8 @@ def content_checks(root, label, tracked=None):
             continue
         if f != 'docs/tools/release-check.py':
             traces += [f'{f}: {m.group(0)}' for m in TRACE.finditer(src)][:3]
-        secrets += [f'{f}: {p.pattern}' for p in SECRET if p.search(src)]
+        if f != 'docs/tools/release-check.py':  # this file holds the patterns themselves
+            secrets += [f'{f}: {p.pattern}' for p in SECRET if p.search(src)]
         if f.endswith('.env.example'):
             secrets += [f'{f}: {ln.split("=")[0]} has a value' for ln in src.splitlines()
                         if re.match(r'^[A-Z_]*(PASSWORD|SECRET|_KEY|TOKEN)=(?!null$)\S', ln) and not ln.startswith(('APP_KEY=', 'VITE_'))]
