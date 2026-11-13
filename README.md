@@ -144,7 +144,7 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 - Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), dan `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1).
 - Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 
-README ini diuji dari nol di folder dan database baru (12 November 2026) sampai login dan seluruh uji lulus, lalu diuji lagi dari klon repositori publik ini: tes admin 41/41 dan tim 31/31 lulus.
+README ini diuji dari nol (13 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah 2-6 di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 63/63 dan tim 40/40 lulus dan semua menu tiga peran terbuka tanpa galat (`docs/evidence/tests/clean-install.txt`).
 
 ## Catatan
 

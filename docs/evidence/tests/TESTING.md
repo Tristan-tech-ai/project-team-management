@@ -23,8 +23,21 @@ Hasil terbaru 13 Nov 2026, setelah penyeragaman bahasa Inggris dan audit putaran
 | `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin (13 Nov 2026) | 53 halaman, 0 gagal |
 | `smoke-team.txt` | Ketiga role membuka setiap menu Tim + board, project, task (13 Nov 2026) | 29 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe, area klik 44/40 px, dan ukuran tabel 6.1 di 390 dan 1366 px (`../ui/audit-admin.json` 37 layar, 74 pemeriksaan; `../ui/audit-team-manager.json` 2 layar, 4 pemeriksaan; `../ui/audit-team.json` 12 layar, 24 pemeriksaan) | 102 pemeriksaan, 0 masalah |
+| `clean-install.txt` | Pasang bersih dari zip serah terima ke database baru, tes dan smoke dari folder itu (13 Nov 2026) | admin 63 dan tim 40 tes lulus, 73 halaman 0 gagal |
 | `../performance.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
 | `../../video/ptm-demo.mp4` | Video rekaman 8 skenario 11.3 dalam satu alur (Radit manager, Putri member), direkam 12 Nov 2026 sebelum perubahan tampilan 13 Nov | 3 menit 49 detik |
+
+## Pasang bersih dari zip
+
+Zip serah terima dibuat dengan `git archive` dari HEAD repositori publik (commit `ec337ee`, kode sama dengan hash di atas), diekstrak ke folder baru, lalu dipasang mengikuti README langkah 2-6 apa adanya ke dua database TiDB kosong yang baru dibuat (`ptm_fresh` untuk aplikasi, `ptm_fresh_test` untuk tes seperti bagian Uji README). Rinciannya di `clean-install.txt`.
+
+| Langkah | Hasil |
+|---|---|
+| `composer install`, `npm install`, `.env` dari `.env.example`, `php artisan key:generate` di kedua app | Lulus; APP_KEY kedua app berbeda |
+| `php artisan migrate` hanya di admin-app, impor SQL modul satu kali, `db:seed`, `UatScenarioSeeder` | Lulus pada database kosong (0 tabel sebelum pasang) |
+| `php artisan migrate` di Team App | Ditolak dengan pesan, sesuai petunjuk teknis |
+| `npm run build` lalu `php artisan test` | admin-app 63 lulus, team-app 40 lulus, 0 gagal |
+| Kedua app dijalankan dari folder itu, `smoke-test.mjs` 3 peran | Admin 53 halaman, Tim 20 menu, 0 gagal; `/login` kedua app 200 |
 
 ## Checklist penerimaan 11.2
 

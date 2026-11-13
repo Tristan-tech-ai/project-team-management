@@ -1,0 +1,127 @@
+Pasang bersih dari zip serah terima (13 Nov 2026)
+Zip: git archive HEAD repositori publik (ec337ee), diekstrak ke folder baru; README "Memasang dari nol" langkah 2-6 dijalankan apa adanya,
+dengan database dari TiDB Cloud (README bagian Online langkah 1): dua database kosong baru, ptm_fresh (aplikasi) dan ptm_fresh_test (README bagian Uji).
+Koneksi database diberikan lewat variabel lingkungan; nilainya tidak dicetak.
+
+extracted <folder-baru>/uji.zip -> <folder-baru>/project-team-management
+$ composer install --no-interaction --no-progress  (cwd project-team-management/admin-app) -> 0
+$ npm install --no-audit --no-fund  (cwd project-team-management/admin-app) -> 0
+$ php artisan key:generate --no-interaction  (cwd project-team-management/admin-app) -> 0
+$ composer install --no-interaction --no-progress  (cwd project-team-management/team-app) -> 0
+$ npm install --no-audit --no-fund  (cwd project-team-management/team-app) -> 0
+$ php artisan key:generate --no-interaction  (cwd project-team-management/team-app) -> 0
+APP_KEY generated for both apps, different: True
+$ <folder-baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_fresh'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
+$ <folder-baru>/project-team-management/admin-app php artisan tinker --execute echo 'tables='.count(DB::select('show tables'));  (cwd project-team-management/admin-app) -> 0
+ptm_fresh: 0 tables before install
+$ <folder-baru>/project-team-management/admin-app php artisan migrate --force --no-interaction  (cwd project-team-management/admin-app) -> 0
+$ php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql  (cwd project-team-management/admin-app) -> 0
+$ <folder-baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_fresh_test'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
+$ <folder-baru>/project-team-management/admin-app php artisan tinker --execute echo 'tables='.count(DB::select('show tables'));  (cwd project-team-management/admin-app) -> 0
+ptm_fresh_test: 0 tables before install
+$ <folder-baru>/project-team-management/admin-app php artisan migrate --force --no-interaction  (cwd project-team-management/admin-app) -> 0
+$ php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql  (cwd project-team-management/admin-app) -> 0
+$ <folder-baru>/project-team-management/admin-app php artisan db:seed --force --no-interaction  (cwd project-team-management/admin-app) -> 0
+$ php artisan db:seed --class=UatScenarioSeeder --force --no-interaction  (cwd project-team-management/admin-app) -> 0
+$ <env-TiDB> <folder-baru>/project-team-management/team-app php artisan migrate --force  (cwd project-team-management/team-app) -> 1
+team-app migrate refused: True
+$ npm run build  (cwd project-team-management/admin-app) -> 0
+$ <folder-baru>/project-team-management/admin-app php artisan test --log-junit ../admin-app-junit.xml  (cwd project-team-management/admin-app) -> 0
+admin-app tests: 63 passed (423 assertions)
+$ npm run build  (cwd project-team-management/team-app) -> 0
+$ <folder-baru>/project-team-management/team-app php artisan test --log-junit ../team-app-junit.xml  (cwd project-team-management/team-app) -> 0
+team-app tests: 40 passed (250 assertions)
+done
+
+== smoke-admin dari instalasi bersih (Admin :8201, Team :8202)
+
+== super_admin: 9 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates, Management, Master Data, System Settings), 23 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Menunggu Review /tasks/review 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+ok   200 Management Overview /management 
+ok   200 Monitoring Project /management/projects 
+ok   200 Monitoring Divisi & Anggota /management/teams 
+ok   200 Laporan Operasional /management/reports 
+ok   200 Company /master/companies 
+ok   200 Client /master/clients 
+ok   200 Divisi /master/divisions 
+ok   200 Jabatan /master/positions 
+ok   200 Anggota Tim /master/members 
+ok   200 Roles & Permissions /settings/roles 
+ok   200 Menu Management /settings/menus 
+ok   200 Pengaturan Sistem /settings/general 
+
+== manager: 8 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates, Management, Master Data), 20 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Menunggu Review /tasks/review 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+ok   200 Management Overview /management 
+ok   200 Monitoring Project /management/projects 
+ok   200 Monitoring Divisi & Anggota /management/teams 
+ok   200 Laporan Operasional /management/reports 
+ok   200 Company /master/companies 
+ok   200 Client /master/clients 
+ok   200 Divisi /master/divisions 
+ok   200 Jabatan /master/positions 
+ok   200 Anggota Tim /master/members 
+
+== member: 6 menu induk (Dashboard, Projects, Tasks, Calendar, Activities, Templates), 10 submenu
+ok   200 Ringkasan Sistem /dashboard 
+ok   200 Daftar Project /projects 
+ok   200 Semua Task /tasks 
+ok   200 Task Saya /tasks/mine 
+ok   200 Kalender Pekerjaan & Aktivitas /calendar 
+ok   200 Daftar Aktivitas /activities 
+ok   200 Rapat & Kunjungan /activities/meetings-visits 
+ok   200 Hambatan & Perubahan /activities/impacts 
+ok   200 Template Project /templates/projects 
+ok   200 Template Task /templates/tasks 
+
+gagal: 0
+
+== smoke-team dari instalasi bersih (Admin :8201, Team :8202)
+
+== super_admin: 4 menu induk (Beranda, Tasks, Kalender, Profil), 7 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Review Task /review 
+ok   200 Profil /account 
+
+== manager: 4 menu induk (Beranda, Tasks, Kalender, Profil), 7 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Review Task /review 
+ok   200 Profil /account 
+
+== member: 4 menu induk (Beranda, Tasks, Kalender, Profil), 6 submenu
+ok   200 Beranda / 
+ok   200 Task Saya /tasks 
+ok   200 Project Saya /projects 
+ok   200 Kalender /calendar 
+ok   200 Aktivitas /activities 
+ok   200 Profil /account 
+
+gagal: 0
