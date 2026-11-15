@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 
 /** Activities, schedule changes, and calendar events: identical in both apps (Technical Guide 8.4, 8.6, 9.2). */
@@ -49,7 +50,13 @@ class OperationsController extends Controller
             return $a;
         });
 
-        return back()->with('ok', Codes::label(Codes::ACTIVITY_TYPE, $a->activity_type).' tercatat'.(! empty($d['propose_deadline']) ? ' dan pengajuan deadline menunggu persetujuan.' : '.'));
+        $message = Codes::label(Codes::ACTIVITY_TYPE, $a->activity_type).' tercatat'.(! empty($d['propose_deadline']) ? ' dan pengajuan deadline menunggu persetujuan.' : '.');
+        // From the Team App form the person lands on their activity list with the new entry on top, not on an empty form again.
+        if ($request->input('after') === 'list' && Route::has('activities.index')) {
+            return redirect()->route('activities.index')->with('ok', $message);
+        }
+
+        return back()->with('ok', $message);
     }
 
     public function proposeSchedule(ScheduleChangeFormRequest $request): RedirectResponse

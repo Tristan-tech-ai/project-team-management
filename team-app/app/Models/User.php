@@ -22,6 +22,8 @@ class User extends Authenticatable
 
     private ?array $roleCache = null;
 
+    private ?array $companyCache = null;
+
     protected function casts(): array
     {
         return [
@@ -99,13 +101,14 @@ class User extends Authenticatable
     /** IDs of the companies where the user is an active member. */
     public function activeCompanyIds(): array
     {
-        return DB::table('company_members')->where('user_id', $this->id)->where('is_active', 1)->pluck('company_id')->all();
+        return $this->companyCache ??= DB::table('company_members')->where('user_id', $this->id)->where('is_active', 1)->pluck('company_id')->all();
     }
 
     public function forgetPermissions(): void
     {
         $this->permissionCache = null;
         $this->roleCache = null;
+        $this->companyCache = null;
     }
 
     public function initials(): string

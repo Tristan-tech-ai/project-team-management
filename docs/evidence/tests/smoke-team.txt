@@ -1,5 +1,6 @@
+uji asap http://127.0.0.1:8102, dijalankan 2026-11-15T15:53:34.085Z
 
-== super_admin: 4 menu induk (Beranda, Tasks, Kalender, Profil), 10 submenu
+== super_admin: 4 menu induk (Beranda, Tasks, Kalender, Profil), 13 submenu
 ok   200 Beranda / 
 ok   200 Task Saya /tasks 
 ok   200 Project Saya /projects 
@@ -9,9 +10,12 @@ ok   200 Review Task /review
 ok   200 Profil /account 
 ok   200 /projects/1 /projects/1 
 ok   200 /projects/1/board /projects/1/board 
+ok   200 /projects/5 /projects/5 
+ok   200 /projects/5/board /projects/5/board 
 ok   200 /tasks/1 /tasks/1 
+ok   200 /tasks/create /tasks/create 
 
-== manager: 4 menu induk (Beranda, Tasks, Kalender, Profil), 10 submenu
+== manager: 4 menu induk (Beranda, Tasks, Kalender, Profil), 13 submenu
 ok   200 Beranda / 
 ok   200 Task Saya /tasks 
 ok   200 Project Saya /projects 
@@ -21,9 +25,12 @@ ok   200 Review Task /review
 ok   200 Profil /account 
 ok   200 /projects/1 /projects/1 
 ok   200 /projects/1/board /projects/1/board 
+ok   200 /projects/5 /projects/5 
+ok   200 /projects/5/board /projects/5/board 
 ok   200 /tasks/1 /tasks/1 
+ok   200 /tasks/create /tasks/create 
 
-== member: 4 menu induk (Beranda, Tasks, Kalender, Profil), 9 submenu
+== member: 4 menu induk (Beranda, Tasks, Kalender, Profil), 12 submenu
 ok   200 Beranda / 
 ok   200 Task Saya /tasks 
 ok   200 Project Saya /projects 
@@ -32,6 +39,9 @@ ok   200 Aktivitas /activities
 ok   200 Profil /account 
 ok   200 /projects/1 /projects/1 
 ok   200 /projects/1/board /projects/1/board 
+ok   200 /projects/5 /projects/5 
+ok   200 /projects/5/board /projects/5/board 
 ok   200 /tasks/1 /tasks/1 
+ok   200 /tasks/create /tasks/create 
 
 gagal: 0

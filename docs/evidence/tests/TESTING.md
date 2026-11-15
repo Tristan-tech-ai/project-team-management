@@ -1,5 +1,20 @@
 # Hasil uji LV-07
 
+## Peningkatan kegunaan (15 Nov 2026)
+
+Setelah penilaian pembina (UX 3/10, UI 4/10) tampilan dan alur diubah mengikuti `docs/UX-PLAN.md`. Semua bukti di bawah dibuat ulang pada kode yang sama (hash tree di bawah): tes Laravel ke database uji TiDB `ptm_test`; audit UI, e2e, dan uji asap ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_final_1115`: data awal, akun demo, data contoh agensi, project contoh akun demo).
+
+| Perubahan | Bukti |
+|---|---|
+| Siap pakai: `ptm:setup` di kedua app, `setup.ps1`/`setup.sh`, akun demo setiap peran dengan tombol Coba sebagai (hanya lokal) | `DemoLoginTest`, pemasangan dari salinan tanpa `.env` ke database kosong |
+| Navigasi satu klik, tombol Buat, pintasan `/`, lonceng Perlu kamu kerjakan | `SidebarTest` |
+| Bug lama: kolom Status dan tombol Ubah/Hapus kosong di semua daftar (atribut `data-columns` dibaca DataTables 2 sebagai opsinya) | `TemplateListTest`, uji asap kini menolak kolom status tanpa label |
+| Kode company/client otomatis, data baru aktif, Client baru dan Company baru dari formulir project | `QuickAddTest` |
+| Pengaturan menu seret-lepas tanpa route; hak akses tabel centang tanpa kode izin; judul menu sehari-hari | `MenuSettingsTest`, `RoleMatrixTest` |
+| Tambah task satu layar, tombol Pakai template, sandi awal anggota otomatis, log aktivitas berupa kalimat | `TaskQuickAddTest`, `TemplateListTest`, `MemberFirstPasswordTest`, `AuditSentenceTest`, `AuditLogTest` |
+| Perlu kamu kerjakan per peran dan tanggal terbaca (termasuk perbaikan: manager company yang bukan PIC tidak melihat review), beban kerja di samping nama, Langkah pertama Super Admin | `TodoTest` (tes regresi dibuat gagal dulu tanpa perbaikan), `WorkloadTest`, `SidebarTest` |
+| Ukuran kegunaan 12 alur inti: 65 menjadi 53 langkah | `docs/evidence/ux-metrics/before.json`, `docs/evidence/ux-metrics/after.json` |
+
 ## Revisi 1 pembina (13 Nov 2026)
 
 Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm_test`, lalu uji peramban dua app lokal (`:8101` dan `:8102`) yang memakai database uji terpisah `ptm_e2e` (migrasi, impor SQL modul, seeder dokumen).
@@ -13,16 +28,16 @@ Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm
 | Pengujian akhir | Semua tes dan bukti diperbarui (13 Nov 2026) | `phpunit-admin-app.xml` (63 tes), `phpunit-team-app.xml` (40 tes), `e2e-flow.txt` (18 lulus), `smoke-admin.txt` (53 halaman), `smoke-team.txt` (29 halaman), audit UI 102 pemeriksaan tanpa masalah |
 
 
-Hasil terbaru 13 Nov 2026, setelah penyeragaman bahasa Inggris dan audit putaran kedua. Kode yang diuji: admin-app `c8acb658d7ae`, team-app `f5038497a71d` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database uji terpisah `ptm_e2e`; pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
+Hasil terbaru 15 Nov 2026, setelah peningkatan kegunaan. Kode yang diuji: admin-app `57e097893264`, team-app `1b3540ddabb6` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database uji terpisah `ptm_e2e`; pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
 
 | Bukti | Isi | Hasil |
 |---|---|---|
-| `phpunit-admin-app.xml` | `php artisan test` admin-app (29 tes domain + 34 tes fitur), 13 Nov 2026 | 63 lulus, 0 gagal |
-| `phpunit-team-app.xml` | `php artisan test` team-app (29 tes domain identik + 11 tes fitur), 13 Nov 2026 | 40 lulus, 0 gagal |
-| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366, termasuk berkas dari Team App dibuka di Admin App, timeline project, dan persetujuan deadline (13 Nov 2026) | 18 lulus, 0 gagal |
-| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin (13 Nov 2026) | 53 halaman, 0 gagal |
-| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + board, project, task (13 Nov 2026) | 29 halaman, 0 gagal |
-| `../ui/AUDIT.md` | axe, area klik 44/40 px, dan ukuran tabel 6.1 di 390 dan 1366 px (`../ui/audit-admin.json` 37 layar, 74 pemeriksaan; `../ui/audit-team-manager.json` 2 layar, 4 pemeriksaan; `../ui/audit-team.json` 12 layar, 24 pemeriksaan) | 102 pemeriksaan, 0 masalah |
+| `phpunit-admin-app.xml` | `php artisan test --log-junit` admin-app (tes domain bersama + tes fitur Admin), 15 Nov 2026 | 97 lulus, 0 gagal |
+| `phpunit-team-app.xml` | `php artisan test --log-junit` team-app (tes domain bersama identik + tes fitur Tim), 15 Nov 2026 | 47 lulus, 0 gagal |
+| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366: project dari template, seret Kanban dan penolakan, pelaksana dan checklist, kirim hasil dari HP, revisi dan terima, aktivitas dan persetujuan deadline, kalender, periode baru, 403 member, DataTables 520 baris (15 Nov 2026) | 18 lulus, 0 gagal |
+| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (15 Nov 2026) | 53 halaman, 0 gagal |
+| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (15 Nov 2026) | 38 halaman, 0 gagal |
+| `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, dan gulir samping terhadap lebar layar yang diminta, di 390 dan 1366 px (`../ui/audit-admin.json` 40 layar, 80 pemeriksaan; `../ui/audit-team-manager.json` 2 layar, 4 pemeriksaan; `../ui/audit-team.json` 13 layar, 26 pemeriksaan) | 110 pemeriksaan, 0 masalah |
 | `clean-install.txt` | Pasang bersih dari zip serah terima ke database baru, tes dan smoke dari folder itu (13 Nov 2026) | admin 63 dan tim 40 tes lulus, 73 halaman 0 gagal |
 | `../performance.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
 | `../../video/ptm-demo.mp4` | Video rekaman 8 skenario 11.3 dalam satu alur (Radit manager, Putri member), direkam 12 Nov 2026 sebelum perubahan tampilan 13 Nov | 3 menit 49 detik |

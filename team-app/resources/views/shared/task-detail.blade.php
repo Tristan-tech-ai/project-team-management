@@ -16,11 +16,18 @@
                 <span class="pill pill-neutral">Prioritas {{ mb_strtolower(Codes::label(Codes::PRIORITY, $task->priority)) }}</span>
                 @if($task->period)<span class="pill pill-info">{{ $task->period->name }}</span>@endif
             </div>
+            @php($lastResult = $task->submissions->sortByDesc('id')->first())
+            @if($task->status === 'in_progress' && $lastResult?->status === 'revision')
+                {{-- The revision note is what the person needs first after a result was returned. --}}
+                <div class="revision-note mb-3" role="status"><x-icon name="rotate-ccw"/>
+                    <div><div class="fw-semibold">Diminta revisi oleh {{ $lastResult->reviewer?->name ?? 'peninjau' }}</div><div>{{ $lastResult->review_note }}</div>
+                        <div class="small muted mt-1">Perbaiki, lalu kirim hasil lagi. Hasil sebelumnya tetap tersimpan di riwayat.</div></div></div>
+            @endif
             @if($task->description)<p class="mb-3" style="white-space:pre-line">{{ $task->description }}</p>@endif
             <dl class="row small mb-0">
                 <dt class="col-sm-4 muted fw-normal">PIC</dt><dd class="col-sm-8">{{ $task->pic?->name }}</dd>
                 <dt class="col-sm-4 muted fw-normal">Pelaksana</dt><dd class="col-sm-8">{{ $task->assignees->pluck('name')->implode(', ') ?: '-' }}</dd>
-                <dt class="col-sm-4 muted fw-normal">Deadline</dt><dd class="col-sm-8 {{ $late ? 'text-danger fw-semibold' : '' }}">{{ Dates::dateTime($task->due_at) }}</dd>
+                <dt class="col-sm-4 muted fw-normal">Deadline</dt><dd class="col-sm-8 {{ $late ? 'text-danger fw-semibold' : '' }}">{{ Dates::dateTime($task->due_at) }}@if($task->due_at && $task->status !== 'done') <span class="muted fw-normal">· {{ Dates::relative($task->due_at) }}</span>@endif</dd>
                 <dt class="col-sm-4 muted fw-normal">Target awal</dt><dd class="col-sm-8">{{ Dates::dateTime($task->baseline_due_at) }}@if($task->baseline_due_at && $task->due_at && ! $task->baseline_due_at->equalTo($task->due_at)) <span class="pill pill-risk">bergeser {{ (int) round($task->baseline_due_at->diffInDays($task->due_at, false)) }} hari</span>@endif</dd>
                 <dt class="col-sm-4 muted fw-normal">Selesai aktual</dt><dd class="col-sm-8">{{ $task->completed_at ? Dates::dateTime($task->completed_at) : '-' }}</dd>
                 <dt class="col-sm-4 muted fw-normal">Waktu kerja tercatat</dt><dd class="col-sm-8 numeric">{{ $workMinutes }} menit @if($task->estimated_minutes)<span class="muted">dari estimasi {{ $task->estimated_minutes }} menit</span>@endif</dd>
@@ -74,8 +81,10 @@
                 @csrf
                 <h2 class="panel-title">Kirim hasil untuk review</h2>
                 <x-field name="external_url" label="Tautan hasil" type="url" help="Misalnya tautan Google Drive, Figma, atau halaman yang sudah jadi."/>
-                <div class="mb-3"><label class="form-label" for="file">Atau unggah berkas</label>
-                    <input class="form-control @error('file') is-invalid @enderror" type="file" id="file" name="file">
+                <div class="mb-3"><span class="form-label d-block" id="file-label">Atau unggah berkas</span>
+                    <label class="file-pick @error('file') is-invalid @enderror" for="file"><span class="btn btn-outline-secondary btn-sm"><x-icon name="paperclip" :size="16"/> Pilih berkas</span>
+                        <span class="file-name muted small" data-file-name>Belum ada berkas dipilih</span>
+                        <input class="visually-hidden" type="file" id="file" name="file" aria-labelledby="file-label" data-file-input></label>
                     <div class="form-text">PDF, gambar, dokumen Office, ZIP, MP4, paling besar 10 MB.</div>
                     @error('file')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror</div>
                 <x-field name="submission_note" label="Catatan singkat" type="textarea"/>
@@ -141,13 +150,15 @@
         @endif
 
         @if($task->status !== 'done' && ($can['update'] || $can['status']))
-            <form method="post" action="{{ route('schedule-changes.store') }}" class="panel mb-3">@csrf
-                <h2 class="panel-title">Ajukan perubahan deadline</h2>
+            <details class="panel mb-3 fold-panel" @if($errors->has('proposed_due_at') || $errors->has('reason')) open @endif>
+            <summary class="panel-title mb-0">Butuh geser deadline?</summary>
+            <form method="post" action="{{ route('schedule-changes.store') }}" class="mt-3">@csrf
                 <input type="hidden" name="project_id" value="{{ $task->project_id }}"><input type="hidden" name="task_id" value="{{ $task->id }}">
-                <x-field name="proposed_due_at" label="Deadline usulan" type="datetime-local" required/>
+                <x-field data-quick-dates name="proposed_due_at" label="Deadline usulan" type="datetime-local" required hint="Deadline baru yang kamu ajukan. Berlaku setelah disetujui PIC atau manager; target awal tetap tercatat."/>
                 <x-field name="reason" label="Alasan" type="textarea" required help="Disetujui PIC berizin atau manager. Target awal tetap tercatat."/>
                 <button class="btn btn-outline-primary btn-sm" type="submit">Ajukan</button>
             </form>
+            </details>
         @endif
         @if($schedule->isNotEmpty())
             <div class="panel mb-3"><h2 class="panel-title">Perubahan jadwal</h2>

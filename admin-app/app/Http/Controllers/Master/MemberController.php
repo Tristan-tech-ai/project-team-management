@@ -57,14 +57,17 @@ class MemberController extends Controller
 
     public function store(MemberRequest $request): RedirectResponse
     {
-        $user = DB::transaction(function () use ($request) {
-            $user = User::create(['name' => $request->input('name'), 'email' => $request->input('email'), 'password' => $request->input('password')]);
+        // I12: an empty password field gets a generated first password, shown once to the admin to pass on.
+        $generated = $request->filled('password') ? null : self::firstPassword();
+        $user = DB::transaction(function () use ($request, $generated) {
+            $user = User::create(['name' => $request->input('name'), 'email' => $request->input('email'), 'password' => $generated ?? $request->input('password')]);
             $this->saveMemberships($user, $request);
 
             return $user;
         });
+        $redirect = redirect()->route('members.index')->with('ok', "{$user->name} ditambahkan sebagai anggota tim.");
 
-        return redirect()->route('members.index')->with('ok', "{$user->name} ditambahkan sebagai anggota tim.");
+        return $generated ? $redirect->with('first_password', ['name' => $user->name, 'email' => $user->email, 'password' => $generated]) : $redirect;
     }
 
     public function edit(User $member): View
@@ -139,5 +142,15 @@ class MemberController extends Controller
             'currentCompanies' => $member->exists ? DB::table('company_members')->where('user_id', $member->id)->where('is_active', 1)->pluck('company_id')->all() : [],
             'currentDivisions' => $member->exists ? DB::table('division_members')->where('user_id', $member->id)->where('is_active', 1)->pluck('position_id', 'division_id')->all() : [],
         ]);
+    }
+
+    /** Readable first password: letters and digits only, no look-alike characters, 12 characters (MemberRequest minimum). */
+    public static function firstPassword(): string
+    {
+        $letters = 'abcdefghjkmnpqrstuvwxyz';
+        $digits = '23456789';
+        $pick = fn (string $set, int $n) => implode('', array_map(fn () => $set[random_int(0, strlen($set) - 1)], range(1, $n)));
+
+        return $pick($letters, 4).'-'.$pick($digits, 3).'-'.$pick($letters, 4);
     }
 }

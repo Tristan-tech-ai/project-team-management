@@ -18,7 +18,7 @@ class ClientRequest extends FormRequest
         $id = $this->route('client')?->id;
 
         return [
-            'code' => ['required', 'string', 'max:40', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('clients', 'code')->ignore($id)],
+            'code' => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('clients', 'code')->ignore($id)],
             'name' => ['required', 'string', 'max:200'],
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:30'],

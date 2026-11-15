@@ -58,6 +58,12 @@ return [
     'team_url' => env('TEAM_APP_URL', 'http://127.0.0.1:8102'),
     'admin_url' => env('ADMIN_APP_URL', 'http://127.0.0.1:8101'),
 
+    // Local demo sign-in helper (App\Support\DemoAccounts): only with APP_ENV=local and PTM_DEMO_LOGIN=true.
+    'demo_login' => (bool) env('PTM_DEMO_LOGIN', false),
+    'demo_password' => env('DEMO_SEED_PASSWORD'),
+    'initial_admin_email' => env('INITIAL_ADMIN_EMAIL'),
+    'initial_admin_password' => env('INITIAL_ADMIN_PASSWORD'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

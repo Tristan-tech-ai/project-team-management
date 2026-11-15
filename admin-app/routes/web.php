@@ -33,6 +33,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard.index'))->name('home');
     // Global search in the header (prototypes 7.1-7.3); each group follows the user's data scope.
     Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/todo', \App\Http\Controllers\Admin\TodoController::class)->name('todo');
 
     // 1. Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('can:dashboard.view')->name('dashboard.index');
@@ -136,6 +137,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/settings/roles/{role}', [RolePermissionController::class, 'update'])->middleware('can:settings.roles.manage')->name('settings.roles.update');
     Route::get('/settings/menus', [MenuController::class, 'index'])->middleware('can:settings.menus.manage')->name('settings.menus.index');
     Route::put('/settings/menus', [MenuController::class, 'update'])->middleware('can:settings.menus.manage')->name('settings.menus.update');
+    Route::post('/settings/menus/groups', [MenuController::class, 'storeGroup'])->middleware('can:settings.menus.manage')->name('settings.menus.groups.store');
+    Route::delete('/settings/menus/groups/{menuItem}', [MenuController::class, 'destroyGroup'])->middleware('can:settings.menus.manage')->name('settings.menus.groups.destroy');
     Route::get('/settings/general', [GeneralSettingController::class, 'edit'])->middleware('can:settings.system.manage')->name('settings.general');
     Route::put('/settings/general', [GeneralSettingController::class, 'update'])->middleware('can:settings.system.manage')->name('settings.general.update');
     Route::get('/settings/audit', [AuditLogController::class, 'index'])->middleware('can:settings.system.manage')->name('settings.audit');

@@ -24,7 +24,7 @@ class MemberRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:180', Rule::unique('users', 'email')->ignore($user?->id)],
-            'password' => [$user ? 'nullable' : 'required', 'string', Password::min(12)->letters()->numbers()],
+            'password' => ['nullable', 'string', Password::min(12)->letters()->numbers()],
             'role' => ['required', Rule::exists('roles', 'slug'), function (string $a, mixed $v, \Closure $failed) {
                 if ($v === 'super_admin' && ! $this->user()->isSuperAdmin()) {
                     $failed('Hanya Super Admin yang bisa memberi role Super Admin.');

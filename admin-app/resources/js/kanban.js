@@ -34,6 +34,7 @@ export function initKanban() {
                     try {
                         const result = await sendJson(statusUrl(card), 'PATCH', { status: target });
                         card.dataset.status = result.status;
+                        card.querySelector('.card-actions')?.remove(); // its next step belonged to the old column
                         const select = card.querySelector('[data-change-status]');
                         if (select) select.value = result.status;
                         notify(result.message);

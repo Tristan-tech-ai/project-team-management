@@ -14,13 +14,17 @@ Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yan
 
 Server dijalankan dengan `DEBUGBAR_ENABLED=false` supaya tangkapan bersih. Rincian per halaman ada di `audit-admin.json`, `audit-team.json`, dan `audit-team-manager.json` (kolom `serious`, `smallTargets`, `styleIssues`).
 
-## Hasil akhir
+## Hasil akhir (15 Nov 2026, setelah peningkatan kegunaan)
+
+Diulang pada database baru hasil `php artisan ptm:setup` (data contoh agensi dan project contoh akun demo), dengan tampilan baru: sidebar terang satu klik, tombol Buat, kotak Perlu kamu kerjakan, tabel jadi kartu di HP, pengaturan menu seret-lepas, hak akses centang, penyusun template, penjelasan istilah. Pemeriksa gulir samping kini membandingkan lebar halaman dengan lebar layar yang diminta (390 atau 1366 px); sebelumnya dibandingkan dengan `innerWidth` yang ikut membesar saat HP memperkecil tampilan, sehingga kartu Team App yang melebar 21 px sempat lolos. Temuan itu sudah diperbaiki.
 
 | App | Peran | Layar | Pemeriksaan (390 + 1366 px) | Masalah |
 |---|---|---:|---:|---:|
-| Admin | Super Admin | 37 | 74 | 0 |
+| Admin | Super Admin | 40 | 80 | 0 |
 | Tim | Manager (Review Task) | 2 | 4 | 0 |
-| Tim | Member | 12 | 24 | 0 |
+| Tim | Member | 13 | 26 | 0 |
+
+Hasil 13 Nov 2026 (sebelum peningkatan kegunaan): Admin 37 layar 74 pemeriksaan, Tim Manager 2 layar 4 pemeriksaan, Tim Member 12 layar 24 pemeriksaan, semua 0 masalah.
 
 ## Temuan dan perbaikan
 

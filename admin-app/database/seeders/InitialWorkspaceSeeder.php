@@ -16,6 +16,9 @@ class InitialWorkspaceSeeder extends Seeder
                 'Set INITIAL_ADMIN_EMAIL dan INITIAL_ADMIN_PASSWORD (>=12 karakter).'
             );
         }
+        if (!app()->environment('local') && $password === \App\Support\DemoAccounts::DEFAULT_PASSWORD) {
+            throw new RuntimeException('Sandi demo bawaan hanya untuk lokal. Isi sandi lain yang kuat.');
+        }
         DB::transaction(function () use ($email, $password) {
             // Roles, permissions, and menus are ALREADY created by the initial SQL.
             $roleId = DB::table('roles')

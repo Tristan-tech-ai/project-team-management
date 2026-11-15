@@ -91,7 +91,7 @@ class AuditLogTest extends TestCase
 
         $html = $this->actingAs($admin)->get('/settings/audit?keyword='.urlencode($admin->email))->assertOk()->getContent();
         $this->assertStringContainsString($admin->name, $html);
-        $this->assertStringContainsString('settings.general.update', $html);
+        $this->assertStringContainsString('mengubah pengaturan sistem', $html, 'I10: the log reads as a sentence');
         $this->actingAs($admin)->get('/settings/general')->assertOk()->assertSee(route('settings.audit'), false);
         $this->actingAs($admin)->get('/settings/audit?keyword=tidak-ada-yang-cocok-xyz')->assertOk()->assertSee('Tidak ada aksi yang cocok');
 

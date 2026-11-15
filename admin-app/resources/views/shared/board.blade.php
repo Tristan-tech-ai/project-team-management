@@ -6,7 +6,7 @@
         <section class="kanban-column" aria-labelledby="col-{{ $code }}">
             <header class="d-flex align-items-center justify-content-between mb-2">
                 <h2 class="mb-0" id="col-{{ $code }}">{{ $label }}</h2>
-                <span class="pill pill-neutral numeric" data-count="{{ $code }}">{{ $cards->count() }}</span>
+                <span class="pill pill-plain pill-neutral numeric" data-count="{{ $code }}">{{ $cards->count() }}</span>
             </header>
             <div class="kanban-body" data-kanban-column data-status="{{ $code }}">
                 @foreach($cards as $t)

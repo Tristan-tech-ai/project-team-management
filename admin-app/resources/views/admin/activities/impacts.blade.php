@@ -1,6 +1,6 @@
 @php use App\Support\Codes; use App\Support\Dates; @endphp
 <x-layouts.admin title="Hambatan & Perubahan">
-    <div class="page-header"><div><div class="crumb">Activities</div><h1>Hambatan &amp; Perubahan</h1>
+    <div class="page-header"><div><div class="crumb">Aktivitas</div><h1>Hambatan &amp; Perubahan</h1>
         <p>Aktivitas yang berdampak pada jadwal dan pengajuan deadline. Hanya pengajuan yang disetujui mengubah deadline; target awal tetap.</p></div></div>
     <div class="row g-3">
         <div class="col-lg-7">

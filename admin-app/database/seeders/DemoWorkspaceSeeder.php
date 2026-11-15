@@ -16,6 +16,9 @@ class DemoWorkspaceSeeder extends Seeder
         if (!$password || strlen($password) < 12) {
             throw new RuntimeException('Set DEMO_SEED_PASSWORD (>=12 karakter).');
         }
+        if (!app()->environment('local') && $password === \App\Support\DemoAccounts::DEFAULT_PASSWORD) {
+            throw new RuntimeException('Sandi demo bawaan hanya untuk lokal. Isi sandi lain yang kuat.');
+        }
         DB::transaction(function () use ($password) {
             $companyId = DB::table('companies')
                 ->where('code', 'COMP-A')->value('id');

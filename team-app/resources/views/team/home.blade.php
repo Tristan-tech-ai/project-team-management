@@ -2,8 +2,10 @@
 <x-layouts.team title="Beranda">
     <div class="page-header"><div><h1 class="mb-0">Halo, {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}</h1><p>{{ Dates::date(now()) }}</p></div></div>
     <div class="status-summary mb-3">
+        @php($look = ['backlog' => ['list-todo', ''], 'in_progress' => ['timer', ''], 'review' => ['clipboard-check', 'is-review'], 'done' => ['circle-check', 'is-done']])
         @foreach(Codes::TASK_STATUS as $k => $v)
-            <a class="panel text-decoration-none text-reset" href="{{ route('tasks.index', ['status' => $k]) }}"><div class="small muted">{{ $v }}</div><div class="number-large">{{ $counts[$k] ?? 0 }}</div></a>
+            <a class="panel stat-card stat-link {{ $look[$k][1] ?? '' }}" href="{{ route('tasks.index', ['status' => $k]) }}">
+                <span class="stat-label"><span class="stat-icon"><x-icon :name="$look[$k][0] ?? 'circle-dot'"/></span>{{ $v }}</span><span class="number-large">{{ $counts[$k] ?? 0 }}</span></a>
         @endforeach
     </div>
     @if($revision->isNotEmpty())
@@ -12,7 +14,7 @@
     @endif
     @if($pendingForMe)
         <a class="panel d-flex align-items-center justify-content-between mb-3 text-decoration-none text-reset" href="{{ route('review.index') }}">
-            <span><x-icon name="clipboard-check"/> <strong class="numeric">{{ $pendingForMe }}</strong> hasil menunggu review-mu</span><x-icon name="chevron-down" style="transform:rotate(-90deg)"/></a>
+            <span><x-icon name="clipboard-check"/> <strong class="numeric">{{ $pendingForMe }}</strong> hasil menunggu review-mu</span><x-icon name="chevron-right"/></a>
     @endif
     <section class="mb-3" aria-labelledby="h-today">
         <h2 class="mb-2" id="h-today">Deadline hari ini</h2>

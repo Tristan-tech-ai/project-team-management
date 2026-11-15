@@ -1,6 +1,6 @@
 @php use App\Support\Codes; use App\Support\Dates; $pt = $kpi['per_type']; @endphp
-<x-layouts.admin title="Management Overview">
-    <div class="page-header"><div><div class="crumb">Management</div><h1>Management Overview</h1><p>Pantau prioritas dan aktivitas kerja lintas divisi.</p></div></div>
+<x-layouts.admin title="Ringkasan Manajemen">
+    <div class="page-header"><div><div class="crumb">Manajemen</div><h1>Ringkasan manajemen</h1><p>Pantau prioritas dan aktivitas kerja lintas divisi.</p></div></div>
     <div class="row g-3 mb-3">
         <div class="col-6 col-xl-3"><div class="panel h-100"><div class="muted">Project aktif</div><div class="kpi-value" style="color:var(--ptm-action)">{{ $kpi['active_projects'] }}</div>
             <div class="small muted">{{ $pt['one_time'] ?? 0 }} sekali jadi · {{ $pt['recurring'] ?? 0 }} berulang · {{ $pt['ongoing'] ?? 0 }} berkelanjutan</div></div></div>

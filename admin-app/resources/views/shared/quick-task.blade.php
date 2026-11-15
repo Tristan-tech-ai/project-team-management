@@ -8,7 +8,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
             <div class="modal-body">
                 <x-field name="title" label="Judul task" required/>
-                <x-field name="pic_user_id" label="PIC" type="select" :options="$memberOptions" :value="auth()->id()" required/>
+                <x-field name="pic_user_id" label="PIC" type="select" :options="$memberOptions" :value="auth()->id()" required hint="Penanggung jawab utama task. PIC memastikan task selesai dan ikut meninjau hasil; otomatis menjadi pelaksana."/>
                 <fieldset class="mb-3"><legend class="form-label">Pelaksana</legend>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($memberOptions as $id => $name)
@@ -18,7 +18,7 @@
                     </div>
                     <div class="form-text">PIC otomatis ikut sebagai pelaksana. Boleh lebih dari satu orang, lintas divisi.</div>
                 </fieldset>
-                <x-field name="due_at" label="Deadline" type="datetime-local"/>
+                <x-field data-quick-dates name="due_at" label="Deadline" type="datetime-local"/>
                 @if(! empty($taskTemplates) && count($taskTemplates))
                     <x-field name="task_template_id" label="Pakai template task (opsional)" type="select" :options="$taskTemplates" empty="Tanpa template" help="Checklist subtask dari template langsung dibuat."/>
                 @endif

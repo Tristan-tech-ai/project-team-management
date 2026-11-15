@@ -1,4 +1,6 @@
-// Yajra DataTables server-side (Technical Guide 9.3). All text is rendered through DataTable.render.text(), so user
+// Yajra DataTables server-side (Technical Guide 9.3). Column definitions live in data-table-columns, never data-columns:
+// DataTables 2 reads data-* attributes named after its own options and would replace the render functions below with plain strings.
+// All text is rendered through DataTable.render.text(), so user
 // content never becomes HTML; action buttons are built from URLs sent by the server.
 import $ from 'jquery';
 import DataTable from 'datatables.net-bs5';
@@ -51,7 +53,7 @@ const renderers = {
                     ${Object.entries(a.fields ?? {}).map(([k, v]) => `<input type="hidden" name="${escape(k)}" value="${escape(v)}">`).join('')}
                     <button type="submit" class="btn btn-sm ${a.fields ? 'btn-primary' : 'btn-outline-secondary'}">${escape(a.label)}</button></form>`;
             }
-            return `<a href="${escape(a.url)}" class="btn btn-sm btn-outline-primary">${escape(a.label)}</a>`;
+            return `<a href="${escape(a.url)}" class="btn btn-sm ${a.primary ? 'btn-primary' : 'btn-outline-primary'}">${escape(a.label)}</a>`;
         });
         return `<div class="d-flex gap-1 justify-content-end flex-wrap">${buttons.join('')}</div>`;
     },
@@ -59,7 +61,7 @@ const renderers = {
 
 export function initTables() {
     document.querySelectorAll('table[data-table]').forEach((el) => {
-        const columns = JSON.parse(el.dataset.columns).map((c) => ({
+        const columns = JSON.parse(el.dataset.tableColumns).map((c) => ({
             data: c.data,
             name: c.name ?? c.data,
             orderable: c.orderable ?? true,
@@ -68,8 +70,19 @@ export function initTables() {
             render: renderers[c.render ?? 'text'],
         }));
         const filter = el.dataset.filter ? document.querySelector(el.dataset.filter) : null;
+        // I6: filter choices live in the page address, so coming back from a detail page or sharing the link keeps them.
+        if (filter) {
+            const params = new URLSearchParams(window.location.search);
+            filter.querySelectorAll('select[name], input[name]').forEach((field) => {
+                if (params.has(field.name)) field.value = params.get(field.name);
+            });
+        }
         const pageLength = Number(document.body.dataset.tablePageLength);
+        // I15: on phones every row becomes a card; each cell carries its column title as a label.
+        const headers = [...el.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+        el.classList.add('table-cards');
         const table = new DataTable(el, {
+            createdRow: (row) => row.querySelectorAll('td').forEach((td, i) => { if (headers[i]) td.dataset.label = headers[i]; }),
             processing: true,
             serverSide: true,
             ajax: {
@@ -83,8 +96,16 @@ export function initTables() {
             pageLength: [10, 25, 50, 100].includes(pageLength) ? pageLength : 25,
             language,
             autoWidth: false,
+            // I6: search text, sort, and page are remembered per table for this browser tab.
+            stateSave: true,
+            stateDuration: -1,
         });
-        filter?.addEventListener('change', () => table.ajax.reload());
-        filter?.addEventListener('submit', (e) => { e.preventDefault(); table.ajax.reload(); });
+        const rememberFilters = () => {
+            const url = new URL(window.location.href);
+            new FormData(filter).forEach((v, k) => { if (v) url.searchParams.set(k, String(v)); else url.searchParams.delete(k); });
+            window.history.replaceState(null, '', url);
+        };
+        filter?.addEventListener('change', () => { rememberFilters(); table.ajax.reload(); });
+        filter?.addEventListener('submit', (e) => { e.preventDefault(); rememberFilters(); table.ajax.reload(); });
     });
 }

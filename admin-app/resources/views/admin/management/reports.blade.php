@@ -1,15 +1,15 @@
 @php use App\Support\Codes; use App\Support\Dates; use Illuminate\Support\Carbon; @endphp
 <x-layouts.admin title="Laporan Operasional">
-    <div class="page-header"><div><div class="crumb">Management</div><h1>Laporan Operasional</h1><p>Periode, export, dan jejak perubahan jadwal dengan bukti aktivitas, peserta, dampak, dan keputusan.</p></div></div>
+    <div class="page-header"><div><div class="crumb">Manajemen</div><h1>Laporan Operasional</h1><p>Periode, export, dan jejak perubahan jadwal dengan bukti aktivitas, peserta, dampak, dan keputusan.</p></div></div>
     <form method="get" class="panel mb-3"><div class="row g-2 align-items-end">
         <div class="col-6 col-md-3"><label class="form-label" for="r-d">Dari</label><input id="r-d" type="date" name="from" class="form-control" value="{{ $from->toDateString() }}"></div>
         <div class="col-6 col-md-3"><label class="form-label" for="r-s">Sampai</label><input id="r-s" type="date" name="until" class="form-control" value="{{ $until->toDateString() }}"></div>
         <div class="col-12 col-md-auto"><button class="btn btn-outline-secondary" type="submit">Tampilkan</button></div>
         @if($canExport)
             <div class="col-12 col-md-auto ms-md-auto d-flex gap-2 flex-wrap">
-                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'schedule', 'from' => $from->toDateString(), 'until' => $until->toDateString()]) }}">Export jejak jadwal</a>
-                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'monitoring']) }}">Export monitoring</a>
-                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'members']) }}">Export beban anggota</a>
+                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'schedule', 'from' => $from->toDateString(), 'until' => $until->toDateString()]) }}">Unduh jejak jadwal</a>
+                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'monitoring']) }}">Unduh monitoring</a>
+                <a class="btn btn-outline-primary" href="{{ route('management.export', ['kind' => 'members']) }}">Unduh beban anggota</a>
             </div>
         @endif
     </div></form>

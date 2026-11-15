@@ -9,6 +9,7 @@ use App\Models\ProjectActivity;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\TaskTemplate;
+use App\Support\ProjectPeople;
 use App\Services\ManagementMetricsService;
 use App\Services\ProjectTeamService;
 use App\Services\Scope;
@@ -59,6 +60,8 @@ class TeamController extends Controller
             $q->where('tasks.status', $request->input('status'));
         }
         $sort = $request->input('sort', 'deadline');
+        // Work still to do comes first; finished tasks go to the end of the list (U9).
+        $q->orderByRaw("tasks.status = 'done'");
         $sort === 'new' ? $q->latest('tasks.id') : $q->orderByRaw('tasks.due_at is null')->orderBy('tasks.due_at');
 
         return view('team.tasks', [
@@ -87,8 +90,7 @@ class TeamController extends Controller
         $selected = $projects->firstWhere('id', $request->integer('project')) ?? ($projects->count() === 1 ? $projects->first() : null);
 
         return view('team.task-create', [
-            'projects' => $projects, 'project' => $selected,
-            'memberOptions' => $selected ? $this->members($selected) : collect(),
+            'projects' => $projects, 'project' => $selected, 'members' => ProjectPeople::byProject($projects->pluck('id')),
             'taskTemplates' => TaskTemplate::query()->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
         ]);
     }

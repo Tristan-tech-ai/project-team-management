@@ -4,26 +4,35 @@
 
 .app-main { padding: 16px 16px 92px; max-width: 1440px; }
 @media (max-width: 359.98px) { .app-main { padding: 12px 12px 92px; } }
-.mobile-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; height: 72px; background: #fff; border-top: 1px solid var(--ptm-line);
+.mobile-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; height: 72px; background: rgba(255, 255, 255, .96); border-top: 1px solid var(--ptm-line); box-shadow: 0 -4px 16px -8px rgba(16, 24, 40, .12);
     display: grid; grid-template-columns: repeat(4, 1fr); padding-bottom: env(safe-area-inset-bottom); }
 .mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--ptm-ink-2); text-decoration: none; font-size: .78rem; font-weight: 600; min-height: 44px; }
 .mobile-bottom-nav a[aria-current="page"] { color: var(--ptm-action); }
 .desktop-sidebar { display: none !important; }
 .team-header { position: sticky; top: 0; z-index: 1020; background: rgba(255, 255, 255, .97); border-bottom: 1px solid var(--ptm-line); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-.team-header .brand-small { font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--ptm-action); }
+.team-header .brand-small { font-size: .72rem; font-weight: 600; color: var(--ptm-ink-3); }
 
 @media (min-width: 992px) {
     .app-main { padding: 28px 32px; margin-left: 248px; }
     .mobile-bottom-nav { display: none !important; }
-    .desktop-sidebar { display: flex !important; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 248px; background: var(--ptm-sidebar); color: #dbe3f1; padding: 20px 12px; overflow-y: auto; }
-    .team-header { margin-left: 248px; padding: 14px 32px; }
+    .desktop-sidebar { display: flex !important; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 248px; background: var(--ptm-sidebar); color: var(--ptm-ink);
+        border-right: 1px solid var(--ptm-line); padding: 0 0 12px; overflow-y: auto; z-index: 1030; }
+    .team-header { margin-left: 248px; padding: 12px 32px; }
 }
-.desktop-sidebar .brand { display: flex; align-items: center; gap: .65rem; padding: 0 8px 18px; color: #fff; text-decoration: none; font-weight: 700; line-height: 1.1; font-size: .95rem; }
-.desktop-sidebar .brand small { display: block; font-weight: 500; color: #9fb0cc; font-size: .72rem; }
-.desktop-sidebar .brand-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--ptm-action); display: grid; place-items: center; color: #fff; flex: none; }
-.desktop-sidebar a.nav-team { display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem; border-radius: 10px; color: #dbe3f1; text-decoration: none; font-weight: 550; min-height: var(--ptm-hit); }
-.desktop-sidebar a.nav-team:hover { background: var(--ptm-sidebar-2); color: #fff; }
-.desktop-sidebar a.nav-team[aria-current="page"] { background: var(--ptm-sidebar-2); color: #fff; }
+/* Desktop sidebar: same light look as the Admin App (U10). */
+.desktop-sidebar .brand { display: flex; align-items: center; gap: .65rem; padding: 18px 20px 14px; color: var(--ptm-ink); text-decoration: none; }
+.desktop-sidebar .brand-name { font-weight: 700; line-height: 1.15; font-size: .95rem; letter-spacing: -.01em; }
+.desktop-sidebar .brand-name small { display: block; font-weight: 500; color: var(--ptm-ink-3); font-size: .75rem; letter-spacing: 0; }
+.desktop-sidebar .brand-mark { width: 32px; height: 32px; border-radius: 9px; background: var(--ptm-action); display: grid; place-items: center; color: #fff; flex: none; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12); }
+.side-nav { display: flex; flex-direction: column; gap: 2px; padding: 4px 12px; }
+.side-link { display: flex; align-items: center; gap: .65rem; padding: .45rem .7rem; border-radius: 9px; color: var(--ptm-ink-2); text-decoration: none; font-weight: 500;
+    font-size: .925rem; min-height: var(--ptm-hit); position: relative; border: 0; background: none; width: 100%; text-align: left; transition: background-color .12s ease, color .12s ease; }
+.side-link .icon { color: #7b8594; }
+.side-link:hover { background: var(--ptm-sidebar-2); color: var(--ptm-ink); text-decoration: none; }
+.side-link[aria-current="page"] { background: var(--ptm-action-soft); color: var(--ptm-action-dark); font-weight: 600; }
+.side-link[aria-current="page"] .icon { color: var(--ptm-action); }
+.side-link[aria-current="page"]::before { content: ''; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ptm-action); }
+.team-header .avatar { width: 36px; height: 36px; }
 
 .page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .page-header p { margin: .2rem 0 0; color: var(--ptm-ink-2); }
@@ -35,8 +44,18 @@
 .status-summary .panel { padding: 16px; }
 @media (min-width: 992px) { .status-summary .panel { padding: 18px; } }
 .status-summary .number-large { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.task-list { display: grid; gap: 12px; }
+.task-list { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.task-list > * { min-width: 0; }
 @media (min-width: 992px) { .task-list { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
-.project-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; }
-.project-tabs a { padding: .5rem .9rem; border: 1px solid var(--ptm-line); background: #fff; border-radius: 10px; text-decoration: none; color: var(--ptm-ink-2); white-space: nowrap; font-weight: 550; min-height: var(--ptm-hit); display: inline-flex; align-items: center; }
-.project-tabs a[aria-current="page"] { background: var(--ptm-action); border-color: var(--ptm-action); color: #fff; }
+.project-tabs { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 16px; border-bottom: 1px solid var(--ptm-line); }
+.project-tabs a { padding: .5rem .85rem; margin-bottom: -1px; border-bottom: 2px solid transparent; text-decoration: none; color: var(--ptm-ink-2); white-space: nowrap; font-weight: 550;
+    min-height: var(--ptm-hit); display: inline-flex; align-items: center; border-radius: 8px 8px 0 0; }
+.project-tabs a[aria-current="page"] { color: var(--ptm-action-dark); border-bottom-color: var(--ptm-action); font-weight: 650; }
+/* Phone task tile: the whole card opens the task, the action button sits above the card link (I2). */
+.task-tile { position: relative; transition: border-color .15s ease, box-shadow .15s ease; }
+.task-tile:hover { border-color: var(--ptm-line-strong); box-shadow: var(--ptm-shadow); }
+.task-tile-title { display: block; margin-top: .25rem; font-weight: 600; font-size: 1rem; line-height: 1.3; color: var(--ptm-ink); text-decoration: none; }
+.task-tile-title:hover { color: var(--ptm-action); text-decoration: none; }
+.task-tile-action { position: relative; z-index: 2; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--ptm-line); }
+.btn-truncate { max-width: 100%; }
+.btn-truncate > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

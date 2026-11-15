@@ -2,6 +2,7 @@
 @php use App\Support\Codes; @endphp
 <form method="post" action="{{ route('projects.activities.store', $project) }}" class="panel">
     @csrf
+    @if(! empty($after))<input type="hidden" name="after" value="{{ $after }}">@endif
     <h2 class="panel-title">Catat aktivitas</h2>
     <div class="row g-2">
         <div class="col-sm-6"><x-field name="activity_type" label="Jenis" type="select" :options="Codes::ACTIVITY_TYPE" value="meeting" required/></div>

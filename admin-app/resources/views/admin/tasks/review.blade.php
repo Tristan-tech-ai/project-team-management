@@ -1,6 +1,6 @@
 @php use App\Support\Codes; use App\Support\Dates; @endphp
 <x-layouts.admin title="Menunggu Review">
-    <div class="page-header"><div><div class="crumb">Tasks</div><h1>Menunggu Review</h1>
+    <div class="page-header"><div><div class="crumb">Task</div><h1>Menunggu Review</h1>
         <p>Terima hasil untuk menyelesaikan task, atau kembalikan dengan catatan revisi. Riwayat hasil tidak dihapus.</p></div></div>
     <div class="row g-3">
         @forelse($pending as $s)

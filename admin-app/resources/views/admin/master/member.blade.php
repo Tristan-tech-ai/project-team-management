@@ -8,13 +8,11 @@
             <div class="row g-3">
                 <div class="col-md-6"><x-field name="name" label="Nama" :value="$member->name" required/></div>
                 <div class="col-md-6"><x-field name="email" label="Email" type="email" :value="$member->email" required/></div>
-                <div class="col-md-6"><x-field name="password" label="{{ $member->exists ? 'Kata sandi baru' : 'Kata sandi' }}" type="password" :required="! $member->exists"
-                    help="{{ $member->exists ? 'Kosongkan bila tidak diganti. ' : '' }}Minimal 12 karakter dengan huruf dan angka."/></div>
+                <div class="col-md-6"><x-field name="password" label="{{ $member->exists ? 'Kata sandi baru' : 'Kata sandi (opsional)' }}" type="password"
+                    help="{{ $member->exists ? 'Kosongkan bila tidak diganti. Minimal 12 karakter dengan huruf dan angka.' : 'Kosongkan: sandi awal dibuat otomatis dan ditampilkan sekali setelah disimpan.' }}"/></div>
                 <div class="col-md-6"><x-field name="phone" label="Telepon" :value="$member->profile?->phone"/></div>
                 <div class="col-md-6"><x-field name="role" label="Role" type="select" :options="$roles" :value="$member->roles->first()?->slug ?? 'member'" required help="Role menentukan hak akses. Jabatan diatur per divisi di bawah."/></div>
-                <div class="col-md-6 d-flex align-items-end"><div class="form-check mb-3"><input type="hidden" name="is_active" value="0">
-                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $member->exists ? (bool) $member->profile?->is_active : true))>
-                    <label class="form-check-label" for="is_active">Aktif (bisa masuk)</label></div></div>
+                <div class="col-md-6 d-flex align-items-end"><x-switch label="Aktif (bisa masuk)" :checked="$member->exists ? (bool) $member->profile?->is_active : true"/></div>
             </div>
         </div>
         <div class="panel mb-3">

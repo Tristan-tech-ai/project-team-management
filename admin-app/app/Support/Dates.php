@@ -52,6 +52,42 @@ final class Dates
         return $l === null ? '-' : self::date($t).' '.$l->format('H.i');
     }
 
+    /**
+     * I4 readable time next to a date. Deadlines: "hari ini 17.00", "besok 09.00", "3 hari lagi", "terlambat 2 hari".
+     * Past events ($past): "baru saja", "2 jam lalu", "kemarin", "3 hari lalu".
+     */
+    public static function relative(?CarbonInterface $t, bool $past = false, ?CarbonInterface $now = null): ?string
+    {
+        $l = self::local($t);
+        if ($l === null) {
+            return null;
+        }
+        $n = Carbon::instance($now ?? now())->setTimezone(self::zone());
+        $days = (int) $n->copy()->startOfDay()->diffInDays($l->copy()->startOfDay(), false);
+        if ($past) {
+            $minutes = (int) $l->diffInMinutes($n, false);
+
+            return match (true) {
+                $minutes < 2 => 'baru saja',
+                $minutes < 60 => $minutes.' menit lalu',
+                $days === 0 => intdiv($minutes, 60).' jam lalu',
+                $days === -1 => 'kemarin',
+                default => abs($days).' hari lalu',
+            };
+        }
+        if ($l->lessThan($n)) {
+            $hours = (int) $l->diffInHours($n);
+
+            return $days === 0 ? 'terlambat '.max(1, $hours).' jam' : 'terlambat '.abs($days).' hari';
+        }
+
+        return match (true) {
+            $days === 0 => 'hari ini '.$l->format('H.i'),
+            $days === 1 => 'besok '.$l->format('H.i'),
+            default => $days.' hari lagi',
+        };
+    }
+
     /** Value for a datetime-local input in the display time zone. */
     public static function forInput(?CarbonInterface $t): string
     {

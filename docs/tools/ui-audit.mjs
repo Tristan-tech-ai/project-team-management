@@ -33,7 +33,8 @@ for (const width of [390, 1366]) {
         const axe = await new AxeBuilder({ page: h }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
         const serious = axe.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
             .map((v) => `${v.id} (${v.nodes.length}): ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`);
-        const overflow = await h.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        // Compare with the requested width: on a phone a too-wide element zooms the layout out, which also grows innerWidth.
+        const overflow = await h.evaluate((w) => Math.max(document.documentElement.scrollWidth, window.innerWidth) - w, width);
         const bottomNav = await h.evaluate(() => { const n = document.querySelector('.mobile-bottom-nav'); return n ? getComputedStyle(n).display !== 'none' : null; });
         // Technical Guide 6.1: click area at least 44 x 44 px on phones and 40 x 40 px on desktop.
         // A checkbox or radio counts together with its label, because clicking the label toggles it.

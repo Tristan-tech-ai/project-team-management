@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Models\TaskTemplate;
+use App\Support\ProjectPeople;
 use App\Models\User;
 use App\Services\Scope;
 use App\Services\TaskWorkflowService;
@@ -42,9 +43,7 @@ class TaskController extends Controller
         $selected = $projects->firstWhere('id', $request->integer('project')) ?? ($projects->count() === 1 ? $projects->first() : null);
 
         return view('admin.tasks.create', [
-            'projects' => $projects, 'project' => $selected,
-            'memberOptions' => $selected ? DB::table('project_members')->join('users', 'users.id', '=', 'project_members.user_id')->where('project_id', $selected->id)
-                ->where('project_members.is_active', 1)->orderBy('users.name')->pluck('users.name', 'users.id') : collect(),
+            'projects' => $projects, 'project' => $selected, 'members' => ProjectPeople::byProject($projects->pluck('id')),
             'taskTemplates' => TaskTemplate::query()->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
         ]);
     }

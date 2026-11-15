@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\ClientRequest;
 use App\Models\Client;
 use App\Services\Scope;
+use App\Support\CodeGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,9 +51,13 @@ class ClientController extends Controller
         return view('admin.master.client', ['client' => new Client(['is_active' => true])]);
     }
 
-    public function store(ClientRequest $request): RedirectResponse
+    public function store(ClientRequest $request): RedirectResponse|JsonResponse
     {
-        Client::create($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $client = Client::create($this->withCode($request->validated()) + ['is_active' => $request->boolean('is_active', true)]);
+        if ($request->expectsJson()) {
+            // Quick add from another form (U5): the new record is selected there right away.
+            return response()->json(['id' => $client->id, 'name' => $client->name, 'code' => $client->code, 'message' => "Client {$client->name} ditambahkan."], 201);
+        }
 
         return redirect()->route('clients.index')->with('ok', 'Client tersimpan.');
     }
@@ -68,7 +73,7 @@ class ClientController extends Controller
     public function update(ClientRequest $request, Client $client): RedirectResponse
     {
         abort_unless(Scope::clients(request()->user())->whereKey($client->id)->exists(), 403);
-        $client->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $client->update($this->withCode($request->validated(), $client->id) + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('clients.index')->with('ok', 'Perubahan client tersimpan.');
     }
@@ -80,5 +85,16 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()->route('clients.index')->with('ok', "{$client->name} dihapus.");
+    }
+
+    /** U4: an empty code is generated from the name (unique, soft-deleted rows included). */
+    private function withCode(array $data, ?int $ignoreId = null): array
+    {
+        if (blank($data['code'] ?? null)) {
+            $data['code'] = CodeGenerator::unique($data['name'], fn (string $code) => Client::withTrashed()->where('code', $code)
+                ->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))->exists());
+        }
+
+        return $data;
     }
 }

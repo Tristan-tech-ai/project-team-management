@@ -6,6 +6,8 @@ Ringkasan: 0 pernyataan belum terpenuhi. Putaran pertama (13 Nov pagi) menemukan
 
 **Putaran kedua (13 Nov sore)** membandingkan ketujuh gambar prototipe dengan tangkapan layar asli dan mengukur angka bagian 06 di setiap halaman. Hasilnya, dua penilaian putaran pertama ternyata salah dan sudah dikoreksi: (a) area klik 44x44 HP / 40x40 desktop sebelumnya hanya dicek pada tombol, padahal tautan, checkbox berlabel, judul lipatan, kepala tabel, kontrol kalender, paginasi, dan pegangan seret masih lebih kecil; (b) timeline 7.3 sebelumnya ditandai Catatan, padahal gambar prototipe jelas memuat kejadian task selesai dan usulan perubahan deadline. Ditemukan juga: judul kartu (H2) 16,8 px di bawah 18-24 px, kolom cari global prototipe 7.1-7.3 baru mencari task, dan detail task Tim belum punya tautan Kembali ke Task Saya (prototipe 7.4). Semuanya diperbaiki; ukuran bagian 06 kini diukur otomatis di setiap halaman oleh `docs/tools/ui-audit.mjs`.
 
+**Putaran ketiga (15 Nov, peningkatan kegunaan setelah penilaian pembina)** mengubah tampilan dan alur tanpa melonggarkan satu pun pernyataan: sidebar tetap sembilan menu induk dari SQL dan menu induk tetap hanya muncul bila ada submenu berizin, hanya judul teknisnya diterjemahkan saat pemasangan (`MenuLabelSeeder`, tidak menimpa judul yang diubah admin); Menu Management tetap tidak membuat atau mengubah route (seret-lepas, pindah kelompok, kelompok baru tanpa halaman baru, `MenuSettingsTest`); hak akses tetap roles, role_permissions, permissions (`RoleMatrixTest`); urutan pemasangan tetap sama, hanya dibungkus `php artisan ptm:setup` dan `setup.ps1`/`setup.sh`; `InitialWorkspaceSeeder` sama dengan kode dokumen, ditambah penolakan sandi demo di luar lokal. Setiap baris di bawah dicek ulang dengan tes dan bukti yang dibuat ulang pada kode yang sama.
+
 ## 01 Ringkasan dan sasaran
 
 | No | Pernyataan | Status | Bukti |
@@ -18,7 +20,7 @@ Ringkasan: 0 pernyataan belum terpenuhi. Putaran pertama (13 Nov pagi) menemukan
 | 1.6 | Subtask checklist satu tingkat; lampiran dan link mudah dikirim | Diperbaiki | `test_checklist_is_one_level_and_tracks_progress`; lampiran dari Team App terbuka di Admin App (`test_submitted_files_use_shared_disk_and_download_respects_access`, e2e "berkas yang diunggah di Team App terbuka di Admin App") |
 | 1.7 | Tim mencatat rapat, kunjungan, revisi, hambatan, laporan kerja | Sesuai | `Codes::ACTIVITY_TYPE`, e2e langkah 6 |
 | 1.8 | Management melihat progres, beban, perubahan jadwal, alasan | Sesuai | Management Overview/Monitoring/Laporan Operasional, `test_dynamic_overdue_and_kpi_separate_unique_members_from_assignments` |
-| 1.9 | Tanpa billing, payroll, chat, editor menu yang mengubah route PHP; template berulang digandakan manual per periode | Sesuai | Menu Management tidak bisa mengubah `route_name`; periode baru lewat tombol "Buka periode baru" (`test_recurring_opens_new_period_without_closing_parent_and_old_tasks_stay`) |
+| 1.9 | Tanpa billing, payroll, chat, editor menu yang mengubah route PHP; template berulang digandakan manual per periode | Sesuai | Menu Management tidak bisa mengubah `route_name` (seret-lepas dan pindah kelompok hanya mengubah urutan dan induk, `test_reorder_and_move_a_page_to_another_group`); periode baru lewat tombol "Buka periode baru" (`test_recurring_opens_new_period_without_closing_parent_and_old_tasks_stay`) |
 
 ## 02 Arsitektur dan teknologi
 
@@ -29,7 +31,7 @@ Ringkasan: 0 pernyataan belum terpenuhi. Putaran pertama (13 Nov pagi) menemukan
 | 2.3 | Tabel Admin: Yajra server-side; Team: kartu di HP, Yajra untuk daftar besar di desktop | Diperbaiki | Task Saya Team App kini punya tampilan Tabel Yajra di desktop (kartu tetap bawaan sesuai prototipe 7.5): `test_my_tasks_has_yajra_table_view_with_own_tasks_only` |
 | 2.4 | Login Auth Laravel + policy di kedua app | Sesuai | `test_each_role_can_log_in_and_inactive_accounts_are_rejected`, `test_guest_is_redirected_and_member_login_succeeds` |
 | 2.5 | Stack: Laravel 13, PHP 8.3+, MySQL 8, Bootstrap 5.3, Yajra 13 + DataTables 2, Debugbar dev di kedua app, SortableJS, FullCalendar, Vite | Sesuai | `composer.json` dan `package.json` kedua app (versi dikunci, `docs/RESEARCH.md`) |
-| 2.6 | Urutan instalasi wajib; migrate hanya admin-app; impor SQL satu kali; Initial seeder, demo hanya local | Sesuai | README bagian Instalasi, `docs/tools/import-sql.php` menolak impor ulang, `DatabaseSeeder` |
+| 2.6 | Urutan instalasi wajib; migrate hanya admin-app; impor SQL satu kali; Initial seeder, demo hanya local | Sesuai | README bagian Instalasi (langkah manual) dan `php artisan ptm:setup` yang menjalankan urutan yang sama (`DemoLoginTest`, pasang bersih), `docs/tools/import-sql.php` menolak impor ulang, `DatabaseSeeder` |
 | 2.7 | Jangan migrate:fresh/db:wipe/impor ulang; perubahan schema lewat migrasi admin-app | Sesuai | `DB::prohibitDestructiveCommands()`; tabel `audit_logs` lewat migrasi admin-app |
 | 2.8 | Dua .env: nama app, DB sama, APP_KEY berbeda, cookie sesi terpisah, prefix cache berbeda; production APP_DEBUG/DEBUGBAR false | Sesuai | `.env.example` kedua app (`ptm_admin_session`/`ptm_team_session`, `ptm_admin_`/`ptm_team_`), Dockerfile |
 

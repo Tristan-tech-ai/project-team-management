@@ -79,10 +79,12 @@ class ProjectController extends Controller
     public function create(Request $request): View
     {
         $this->authorize('create', Project::class);
+        // "Pakai" from the template list (U9): the template is chosen and its project type follows it.
+        $template = ProjectTemplate::query()->where('is_active', 1)->find($request->integer('template'));
 
         return view('admin.projects.form', $this->options($request->user()) + [
-            'project' => new Project(['project_type' => 'one_time', 'status' => 'active', 'priority' => 'normal', 'recurrence_unit' => 'month', 'recurrence_interval' => 1,
-                'project_template_id' => SystemSetting::query()->where('setting_key', 'default_project_template_id')->value('setting_value')]),
+            'project' => new Project(['project_type' => $template?->project_type ?? 'one_time', 'status' => 'active', 'priority' => 'normal', 'recurrence_unit' => 'month', 'recurrence_interval' => 1,
+                'project_template_id' => $template?->id ?? SystemSetting::query()->where('setting_key', 'default_project_template_id')->value('setting_value')]),
             'teamDivisions' => [], 'teamMembers' => [],
         ]);
     }
@@ -94,7 +96,7 @@ class ProjectController extends Controller
         $start = Dates::fromInput($request->input('start')) ?? now();
 
         return response()->json(['tasks' => collect($this->templates->preview($t, $start))->map(fn ($x) => $x + ['due' => Dates::date($x['due_at'])])->all(),
-            'type' => $t ? Codes::label(Codes::PROJECT_TYPE, $t->project_type) : null]);
+            'type' => $t ? Codes::label(Codes::PROJECT_TYPE, $t->project_type) : null, 'project_type' => $t?->project_type]);
     }
 
     public function store(ProjectRequest $request): RedirectResponse

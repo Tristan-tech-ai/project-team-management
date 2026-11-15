@@ -98,6 +98,18 @@
  {
   "app": "team",
   "width": 390,
+  "paths": "/projects/5/board",
+  "http": 200,
+  "serious": [],
+  "horizontalOverflow": 0,
+  "bottomNavVisible": true,
+  "minTarget": 44,
+  "smallTargets": [],
+  "styleIssues": []
+ },
+ {
+  "app": "team",
+  "width": 390,
   "paths": "/calendar",
   "http": 200,
   "serious": [],
@@ -231,6 +243,18 @@
   "app": "team",
   "width": 1366,
   "paths": "/projects/1/board",
+  "http": 200,
+  "serious": [],
+  "horizontalOverflow": 0,
+  "bottomNavVisible": false,
+  "minTarget": 40,
+  "smallTargets": [],
+  "styleIssues": []
+ },
+ {
+  "app": "team",
+  "width": 1366,
+  "paths": "/projects/5/board",
   "http": 200,
   "serious": [],
   "horizontalOverflow": 0,

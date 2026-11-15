@@ -1,5 +1,5 @@
 <x-layouts.admin title="Pengaturan Sistem">
-    <div class="page-header"><div><div class="crumb">System Settings</div><h1>Pengaturan Sistem</h1>
+    <div class="page-header"><div><div class="crumb">Pengaturan</div><h1>Pengaturan Sistem</h1>
         <p>Berlaku untuk aplikasi Admin dan Tim karena keduanya membaca database yang sama.</p></div>
         @if(auth()->user()->isSuperAdmin())<a class="btn btn-outline-secondary" href="{{ route('settings.audit') }}">Log aktivitas</a>@endif</div>
     <form method="post" action="{{ route('settings.general.update') }}" class="panel" style="max-width:640px">

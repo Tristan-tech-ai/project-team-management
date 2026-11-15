@@ -1,7 +1,7 @@
 @php use App\Support\Codes; @endphp
 <div class="page-header">
     <div>
-        <div class="crumb"><a href="{{ route('projects.index') }}">Projects</a> / {{ $project->code }}</div>
+        <div class="crumb"><a href="{{ route('projects.index') }}">Project</a> / {{ $project->code }}</div>
         <h1 class="mb-1">{{ $project->name }}</h1>
         <p class="mb-0">{{ $project->client?->name ?? 'Project internal' }} · {{ Codes::label(Codes::PROJECT_TYPE, $project->project_type) }} · PIC: {{ $project->pic?->name }}
             · <span class="numeric">{{ $counts['divisions'] }}</span> divisi · <span class="numeric">{{ $counts['people'] }}</span> anggota
@@ -13,7 +13,7 @@
     </div>
 </div>
 <nav class="project-tabs" aria-label="Bagian project">
-    @foreach(['projects.show' => 'Overview', 'projects.board' => 'Kanban Board', 'projects.tasks' => 'Task List', 'projects.team' => 'Project Team', 'projects.activities' => 'Activities', 'projects.calendar' => 'Calendar'] as $r => $l)
+    @foreach(['projects.show' => 'Ringkasan', 'projects.board' => 'Papan Kanban', 'projects.tasks' => 'Daftar Task', 'projects.team' => 'Tim', 'projects.activities' => 'Aktivitas', 'projects.calendar' => 'Kalender'] as $r => $l)
         <a href="{{ route($r, $project) }}" @if(request()->routeIs($r)) aria-current="page" @endif>{{ $l }}</a>
     @endforeach
 </nav>

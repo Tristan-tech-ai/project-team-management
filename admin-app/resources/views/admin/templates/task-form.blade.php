@@ -13,7 +13,7 @@
                 <textarea id="rows" name="rows" rows="6" class="form-control" aria-describedby="rows-b">{{ old('rows', $rows) }}</textarea>
                 <div id="rows-b" class="form-text">Satu checklist per baris, paling banyak 50.</div></div>
         </div>
-        <div class="form-check my-3"><input type="hidden" name="is_active" value="0"><input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $template->is_active))><label class="form-check-label" for="is_active">Aktif</label></div>
+        <x-switch class="my-3" :checked="(bool) ($template->is_active ?? true)" help="Template nonaktif tidak muncul saat membuat project atau task."/>
         <button class="btn btn-primary" type="submit">Simpan template</button>
     </form>
 </x-layouts.admin>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Master\CompanyRequest;
 use App\Models\Company;
 use App\Services\Scope;
+use App\Support\CodeGenerator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,9 +51,13 @@ class CompanyController extends Controller
         return view('admin.master.company', ['company' => new Company(['is_active' => true])]);
     }
 
-    public function store(CompanyRequest $request): RedirectResponse
+    public function store(CompanyRequest $request): RedirectResponse|JsonResponse
     {
-        Company::create($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $company = Company::create($this->withCode($request->validated()) + ['is_active' => $request->boolean('is_active', true)]);
+        if ($request->expectsJson()) {
+            // Quick add from another form (U5): the new record is selected there right away.
+            return response()->json(['id' => $company->id, 'name' => $company->name, 'code' => $company->code, 'message' => "Company {$company->name} ditambahkan."], 201);
+        }
 
         return redirect()->route('companies.index')->with('ok', 'Company tersimpan.');
     }
@@ -68,7 +73,7 @@ class CompanyController extends Controller
     public function update(CompanyRequest $request, Company $company): RedirectResponse
     {
         abort_unless(Scope::canAccessCompany(request()->user(), $company->id), 403);
-        $company->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $company->update($this->withCode($request->validated(), $company->id) + ['is_active' => $request->boolean('is_active')]);
 
         return redirect()->route('companies.index')->with('ok', 'Perubahan company tersimpan.');
     }
@@ -83,5 +88,16 @@ class CompanyController extends Controller
         $company->delete();
 
         return redirect()->route('companies.index')->with('ok', "{$company->name} dihapus.");
+    }
+
+    /** U4: an empty code is generated from the name (unique, soft-deleted rows included). */
+    private function withCode(array $data, ?int $ignoreId = null): array
+    {
+        if (blank($data['code'] ?? null)) {
+            $data['code'] = CodeGenerator::unique($data['name'], fn (string $code) => Company::withTrashed()->where('code', $code)
+                ->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))->exists());
+        }
+
+        return $data;
     }
 }

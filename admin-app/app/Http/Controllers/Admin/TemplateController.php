@@ -32,6 +32,7 @@ class TemplateController extends Controller
     {
         abort_unless($request->user()->hasPermission('templates.view'), 403);
         $can = $request->user()->can('templates.manage');
+        $canUse = $request->user()->can('projects.create');
         $q = ProjectTemplate::query()->with(['tasks' => fn ($t) => $t->orderBy('sort_order')])->select('project_templates.*');
 
         return DataTables::eloquent($q)
@@ -40,7 +41,10 @@ class TemplateController extends Controller
                 .$t->tasks->whereNull('parent_id')->pluck('title')->implode(', '))
             ->addColumn('status', fn (ProjectTemplate $t) => $t->is_active ? 'Aktif' : 'Nonaktif')
             ->addColumn('status_class', fn (ProjectTemplate $t) => $t->is_active ? 'ok' : 'neutral')
-            ->addColumn('actions', fn (ProjectTemplate $t) => $can ? [['label' => 'Ubah', 'url' => route('templates.projects.edit', $t)]] : [])
+            ->addColumn('actions', fn (ProjectTemplate $t) => array_values(array_filter([
+                $canUse && $t->is_active ? ['label' => 'Pakai', 'url' => route('projects.create', ['template' => $t->id]), 'primary' => true] : null,
+                $can ? ['label' => 'Ubah', 'url' => route('templates.projects.edit', $t)] : null,
+            ])))
             ->toJson();
     }
 

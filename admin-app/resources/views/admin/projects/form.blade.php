@@ -1,6 +1,6 @@
 @php use App\Support\Codes; use App\Support\Dates; $new = ! $project->exists; @endphp
 <x-layouts.admin :title="$new ? 'Buat project' : 'Ubah project'">
-    <div class="page-header"><div><div class="crumb"><a href="{{ route('projects.index') }}">Projects</a></div>
+    <div class="page-header"><div><div class="crumb"><a href="{{ route('projects.index') }}">Project</a></div>
         <h1>{{ $new ? 'Buat project' : 'Ubah '.$project->name }}</h1>
         <p>{{ $new ? 'Pilih company, tipe, PIC, tim, dan template. Task dan subtask dari template dibuat sekaligus.' : 'Tipe project dan target awal tidak berubah setelah project dibuat.' }}</p></div></div>
     <form method="post" action="{{ $new ? route('projects.store') : route('projects.update', $project) }}" data-form-project data-preview-url="{{ route('projects.preview') }}">
@@ -11,30 +11,32 @@
                     <h2 class="panel-title">Project</h2>
                     <div class="row g-2">
                         @if($new)
-                            <div class="col-md-6"><x-field name="company_id" label="Company" type="select" :options="$companies" :value="$companies->count() === 1 ? $companies->keys()->first() : null" empty="Pilih company" required/></div>
+                            <div class="col-md-6"><x-field name="company_id" label="Company" type="select" :options="$companies" :value="$companies->count() === 1 ? $companies->keys()->first() : null" empty="Pilih company" required>
+                                <x-slot:action>@can('companies.manage')<x-quick-add :url="route('companies.store')" target="#f-company_id" title="Tambah company" label="Company baru"/>@endcan</x-slot:action></x-field></div>
                         @else
                             <div class="col-md-6"><div class="mb-3"><span class="form-label d-block">Company</span>{{ $project->company?->name }}</div></div>
                         @endif
-                        <div class="col-md-6"><x-field name="client_id" label="Client" type="select" :options="$clients" :value="$project->client_id" empty="Tanpa client (project internal)"/></div>
+                        <div class="col-md-6"><x-field name="client_id" label="Client" type="select" :options="$clients" :value="$project->client_id" empty="Tanpa client (project internal)">
+                            <x-slot:action>@can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru"/>@endcan</x-slot:action></x-field></div>
                         <div class="col-md-8"><x-field name="name" label="Nama project" :value="$project->name" required/></div>
                         <div class="col-md-4"><x-field name="code" label="Kode" :value="$project->code" help="Kosongkan untuk kode otomatis."/></div>
                         @if($new)
-                            <div class="col-md-4"><x-field name="project_type" label="Klasifikasi" type="select" :options="Codes::PROJECT_TYPE" :value="$project->project_type" required/></div>
+                            <div class="col-md-4"><x-field name="project_type" label="Klasifikasi" type="select" :options="Codes::PROJECT_TYPE" :value="$project->project_type" required hint="Sekali jadi: selesai lalu ditutup. Berulang: task dibuat ulang tiap periode, misalnya konten bulanan. Berkelanjutan: berjalan terus dan dipantau per periode."/></div>
                         @else
                             <div class="col-md-4"><div class="mb-3"><span class="form-label d-block">Klasifikasi</span>{{ Codes::label(Codes::PROJECT_TYPE, $project->project_type) }}</div></div>
                         @endif
                         <div class="col-md-4"><x-field name="status" label="Status" type="select" :options="Codes::PROJECT_STATUS" :value="$project->status" required/></div>
                         <div class="col-md-4"><x-field name="priority" label="Prioritas" type="select" :options="Codes::PRIORITY" :value="$project->priority" required/></div>
-                        <div class="col-md-6"><label class="form-label" for="f-pic">PIC project <span class="text-danger" aria-hidden="true">*</span></label>
+                        <div class="col-md-4"><div class="label-row"><label class="form-label" for="f-pic">PIC project <span class="text-danger" aria-hidden="true">*</span></label><x-hint term="PIC project" text="Penanggung jawab project. PIC melihat semua task project, meninjau hasil, dan otomatis menjadi anggota project." class="me-auto"/></div>
                             <select id="f-pic" name="pic_user_id" class="form-select @error('pic_user_id') is-invalid @enderror" required>
                                 <option value="">Pilih PIC</option>
                                 @foreach($people->unique('id') as $o)<option value="{{ $o->id }}" data-company="{{ $o->company_id }}" @selected((string) old('pic_user_id', $project->pic_user_id ?? auth()->id()) === (string) $o->id)>{{ $o->name }}</option>@endforeach
-                            </select><div class="form-text">PIC adalah anggota tim internal dan otomatis masuk anggota project.</div>
+                            </select>
                             @error('pic_user_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror</div>
-                        <div class="col-md-3"><x-field name="start_at" label="Mulai" type="datetime-local" :value="Dates::forInput($project->start_at ?? now())"/></div>
-                        <div class="col-md-3">
+                        <div class="col-md-4"><x-field name="start_at" label="Mulai" type="datetime-local" :value="Dates::forInput($project->start_at ?? now())"/></div>
+                        <div class="col-md-4">
                             @if($new || ! $project->baseline_due_at)
-                                <x-field name="due_at" label="Deadline" type="datetime-local" :value="Dates::forInput($project->due_at)"/>
+                                <x-field data-quick-dates name="due_at" label="Deadline" type="datetime-local" :value="Dates::forInput($project->due_at)"/>
                             @else
                                 <div class="mb-3"><span class="form-label d-block">Deadline</span>{{ Dates::date($project->due_at) }}<div class="form-text">Target awal {{ Dates::date($project->baseline_due_at) }}. Geser lewat pengajuan di Activities.</div></div>
                             @endif

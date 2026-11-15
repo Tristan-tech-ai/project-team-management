@@ -27,6 +27,11 @@ class TaskQuickAddTest extends TestCase
         $choose = $this->actingAs($manager)->get('/tasks/create')->assertOk()->getContent();
         $this->assertStringContainsString(e($p->name), $choose);
         $this->assertStringNotContainsString(e($foreign->name), $choose);
+        // U9: one screen, the project is chosen on the same form as the title and people (no "Lanjut" step).
+        $this->assertStringNotContainsString('>Lanjut<', $choose);
+        $this->assertStringContainsString('name="title"', $choose);
+        $this->assertStringContainsString('data-members=', $choose);
+        $this->assertStringContainsString($a->name, html_entity_decode($choose), 'members of the project are sent with the form');
         $form = $this->actingAs($manager)->get("/tasks/create?project={$p->id}")->assertOk()->getContent();
         $this->assertStringContainsString(route('projects.tasks.store', $p), $form);
         $this->assertStringContainsString(e($a->name), $form);

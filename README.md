@@ -7,9 +7,31 @@ Sistem manajemen project dan tim untuk agensi (developer, content creator, digit
 
 | Admin: ringkasan | Admin: Kanban project | Tim di HP: beranda |
 |---|---|---|
-| ![Dashboard admin](docs/evidence/ui/admin-1366-dashboard.png) | ![Kanban](docs/evidence/ui/admin-1366-projects_1_board.png) | ![Beranda tim di HP](docs/evidence/ui/team-390-home.png) |
+| ![Dashboard admin](docs/evidence/ui/admin-1366-dashboard.png) | ![Kanban](docs/evidence/ui/admin-1366-projects_5_board.png) | ![Beranda tim di HP](docs/evidence/ui/team-390-home.png) |
 
 Video alur kerja (rekaman aplikasi yang berjalan, bukan animasi): [`docs/video/ptm-demo.mp4`](docs/video/ptm-demo.mp4).
+
+## Coba dalam 5 menit
+
+Butuh PHP 8.3+, Composer 2, Node.js 22+, dan Docker Desktop (untuk MySQL). Dari folder ini:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File setup.ps1    # Windows (Linux/macOS: ./setup.sh)
+powershell -ExecutionPolicy Bypass -File start.ps1    # Linux/macOS: ./start.sh
+```
+
+`setup` menyalakan MySQL, memasang kedua app, membuat `.env` dan kunci aplikasi, membuat tabel (migrasi + SQL modul), lalu mengisi data awal, akun setiap peran, dan data contoh agensi (project berjalan, task berbagai status, template berisi task dan checklist). Aman dijalankan ulang. Tanpa Docker: `setup.ps1 -NoDocker` setelah mengisi `DB_*` di `admin-app/.env`.
+
+Buka **Admin App** http://127.0.0.1:8101 dan **Team App** http://127.0.0.1:8102. Di halaman masuk lokal ada tombol **Coba sebagai** untuk setiap akun di bawah.
+
+| Peran | Email | Sandi (lokal) | Masuk di |
+|---|---|---|---|
+| Super Admin | `admin@example.test` | `ptm-demo-2026` | Admin App |
+| Manager | `demo.manager@example.test` | `ptm-demo-2026` | Admin App dan Team App |
+| Member | `demo.member@example.test` | `ptm-demo-2026` | Team App (juga Admin App, menu terbatas) |
+| Tim contoh | `radit@example.test` (manager), `ayu@`, `binda@`, `putri@`, `dika@`, `raka@` (member) | `ptm-demo-2026` | sesuai peran |
+
+Sandi demo hanya dipakai bila `.env` lokal mengosongkannya; seeder menolak sandi ini di luar `APP_ENV=local`, dan tombol Coba sebagai hanya muncul bila `APP_ENV=local` dan `PTM_DEMO_LOGIN=true`.
 
 ## Fitur per peran
 
@@ -18,6 +40,13 @@ Video alur kerja (rekaman aplikasi yang berjalan, bukan animasi): [`docs/video/p
 | **Super Admin** | Semua akses: perusahaan, divisi, jabatan, anggota, client, template, pengaturan sistem, role dan permission, menu dinamis, log aktivitas semua aksi. |
 | **Manager** | Membuat project (sekali, berulang, berkelanjutan) dari template dengan pratinjau task; memilih tim dari divisi; Kanban dengan aturan status di server; PIC dan banyak pelaksana per task; checklist; meninjau hasil (terima atau revisi wajib beralasan); menyetujui pengajuan geser deadline (target awal tetap tercatat); membuka periode baru tanpa menutup project induk; laporan dan monitoring. Hanya untuk perusahaan tempat ia anggota aktif. |
 | **Member** | Task saya, centang checklist, kirim hasil (tautan atau berkas), kirim ulang setelah revisi, catat aktivitas dan hambatan, ajukan geser deadline, kalender. Hanya untuk project yang ia ikuti; halaman manajemen dijawab 403. |
+
+Kemudahan pakai (penilaian pembina 14 Nov 2026 dan rencana [`docs/UX-PLAN.md`](docs/UX-PLAN.md)):
+- **Satu klik ke setiap halaman.** Menu dengan satu tujuan (Dashboard, Project, Kalender) langsung terbuka; kelompok lain tampil terbuka dengan ikon per menu, bisa dilipat dan diingat. Tombol **+ Buat** di kepala halaman dan pintasan `/` untuk mencari.
+- **Perlu kamu kerjakan** di Dashboard: hasil yang menunggu review-mu, pengajuan geser deadline yang menunggu keputusanmu, task yang dikembalikan untuk revisi, task terlambat dan yang jatuh tempo dua hari ke depan, masing-masing langsung menuju tempat tindakannya.
+- **Tanpa bolak-balik halaman.** Kode company dan client dibuat otomatis dari nama, data baru langsung aktif, tombol **Client baru** dan **Company baru** di formulir project, Tambah task dalam satu layar (project, judul, PIC, pelaksana, deadline), tombol **Pakai** di daftar template, filter papan langsung berlaku, kartu Kanban berisi langkah berikutnya (Mulai, Kirim hasil, Review hasil), pilihan cepat tanggal (Hari ini, Besok, Jumat, +1 minggu), dan tanggal yang langsung terbaca ("terlambat 2 hari").
+- **Pengaturan tanpa istilah teknis.** Urutan menu diatur dengan seret-lepas dan pindah kelompok lewat satu pilihan; hak akses berupa tabel centang Lihat, Tambah, Ubah, Hapus, dan aksi khusus bernama biasa. Route dan kode izin tidak tampil di layar.
+- **Diukur, bukan dikira.** `docs/tools/ux-metrics.mjs` menghitung klik, isian, dan halaman untuk 12 alur inti sebelum dan sesudah perubahan.
 
 Aturan penting yang dijaga di server, bukan hanya di tampilan:
 - Task ke **Review** hanya lewat kirim hasil; ke **Selesai** hanya lewat terima oleh peninjau. Kartu yang diseret ke kolom terlarang dikembalikan.
@@ -35,7 +64,9 @@ Aturan penting yang dijaga di server, bukan hanya di tampilan:
 
 Laravel 13 (PHP 8.3+), MySQL 8.4 (Docker) + phpMyAdmin, Bootstrap 5.3.8, jQuery 3.7.1, Yajra DataTables (datatables.net 2.3), SortableJS 1.15.7, FullCalendar 6.1.22, ikon Lucide (ISC), Laravel Debugbar (hanya pengembangan). Versi pustaka dikunci karena perintah pasang "terbaru" kini memasang versi mayor lain (catatan di `docs/RESEARCH.md`).
 
-## Memasang dari nol
+## Memasang dari nol (langkah manual)
+
+Langkah di bawah sama dengan yang dijalankan `setup.ps1`/`setup.sh`, untuk yang ingin memasang satu per satu.
 
 Persyaratan: PHP 8.3 atau lebih baru dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `intl`, `fileinfo`; Composer 2; Node.js 22+ dan npm; Docker Desktop (atau Docker Engine) untuk MySQL.
 
@@ -140,8 +171,8 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 ## Uji
 
 - Database uji: `sh docs/tools/prepare-test-db.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
-- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 63, tim 40; tes domain identik di keduanya).
-- Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), dan `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1).
+- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 97, tim 47; tes domain identik di keduanya).
+- Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1, gulir samping), dan `node docs/tools/ux-metrics.mjs` (klik dan isian 12 alur inti).
 - Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 
 README ini diuji dari nol (13 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah 2-6 di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 63/63 dan tim 40/40 lulus dan semua menu tiga peran terbuka tanpa galat (`docs/evidence/tests/clean-install.txt`).

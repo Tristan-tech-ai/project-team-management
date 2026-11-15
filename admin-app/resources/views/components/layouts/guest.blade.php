@@ -9,13 +9,18 @@
     @vite(['resources/css/layout.css', 'resources/js/app.js'])
 </head>
 <body>
-<main class="min-vh-100 d-flex align-items-center justify-content-center p-3" style="background:var(--ptm-bg)">
-    <div class="panel w-100" style="max-width:420px">
-        <div class="d-flex align-items-center gap-2 mb-4">
-            <span class="d-grid place-items-center rounded-3 text-white" style="width:36px;height:36px;background:var(--ptm-action);display:grid;place-items:center"><x-icon name="folder-kanban" :size="20"/></span>
-            <span class="fw-bold" style="line-height:1.1">PROJECT &amp; TEAM<br><small class="muted fw-semibold" style="font-size:.72rem">MANAGEMENT</small></span>
+<main class="guest-main {{ isset($aside) ? 'guest-split' : '' }}">
+    @isset($aside)
+        <section class="guest-aside" aria-label="Tentang aplikasi">{{ $aside }}</section>
+    @endisset
+    <div class="guest-form">
+        <div class="panel guest-card">
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <span class="guest-mark"><x-icon name="folder-kanban" :size="20"/></span>
+                <span class="fw-bold lh-sm">Project &amp; Team<br><small class="muted fw-semibold" style="font-size:.75rem">Management</small></span>
+            </div>
+            {{ $slot }}
         </div>
-        {{ $slot }}
     </div>
 </main>
 </body>

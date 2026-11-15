@@ -2,11 +2,21 @@
 <x-layouts.team title="Aktivitas Saya">
     <div class="page-header"><div><h1 class="mb-0">Aktivitas Saya</h1><p>Rapat, kunjungan, revisi, dan hambatan yang kamu catat atau hadiri.</p></div></div>
     @if($projects->isNotEmpty())
-        <form method="get" class="panel mb-3 d-flex flex-wrap gap-2 align-items-end" action="{{ route('projects.activities.create', $projects->first()) }}" onsubmit="this.action=this.dataset.urlTemplate.replace('__ID__', this.project.value)" data-url-template="{{ route('projects.activities.create', ['project' => '__ID__']) }}">
-            <div class="flex-grow-1"><label class="form-label small" for="a-p">Catat aktivitas di project</label>
-                <select id="a-p" name="project" class="form-select">@foreach($projects as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
-            <button class="btn btn-primary" type="submit"><x-icon name="plus"/> Tambah activity</button>
-        </form>
+        {{-- One tap to the form of the right project (U9): buttons for a few projects, a picker for many. --}}
+        <section class="panel mb-3" aria-labelledby="h-add-activity">
+            <h2 class="panel-title" id="h-add-activity">Catat rapat, kunjungan, atau hambatan</h2>
+            @if($projects->count() <= 6)
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach($projects as $p)<a class="btn btn-outline-primary btn-truncate" href="{{ route('projects.activities.create', $p) }}" title="{{ $p->name }}"><x-icon name="plus" :size="16"/><span>{{ $p->name }}</span></a>@endforeach
+                </div>
+            @else
+                <form method="get" class="d-flex flex-wrap gap-2 align-items-end" action="{{ route('projects.activities.create', $projects->first()) }}" onsubmit="this.action=this.dataset.urlTemplate.replace('__ID__', this.project.value)" data-url-template="{{ route('projects.activities.create', ['project' => '__ID__']) }}">
+                    <div class="flex-grow-1"><label class="visually-hidden" for="a-p">Project</label>
+                        <select id="a-p" name="project" class="form-select">@foreach($projects as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach</select></div>
+                    <button class="btn btn-primary" type="submit"><x-icon name="plus"/> Catat aktivitas</button>
+                </form>
+            @endif
+        </section>
     @endif
     <div class="panel">
         <ul class="timeline">

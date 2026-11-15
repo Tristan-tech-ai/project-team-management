@@ -9,13 +9,13 @@
             <div class="col-md-4"><x-field name="project_type" label="Tipe" type="select" :options="Codes::PROJECT_TYPE" :value="$template->project_type" required/></div>
             <div class="col-12"><x-field name="description" label="Keterangan" type="textarea" :value="$template->description"/></div>
             <div class="col-12">
-                <label class="form-label" for="rows">Task dan subtask <span class="text-danger" aria-hidden="true">*</span></label>
-                <textarea id="rows" name="rows" rows="10" class="form-control font-monospace @error('rows') is-invalid @enderror" required aria-describedby="rows-b">{{ old('rows', $rows) }}</textarea>
+                <span class="form-label d-block" id="rows-label">Task dan checklist <span class="text-danger" aria-hidden="true">*</span></span><p class="small muted mb-2">Seret untuk mengubah urutan. Deadline hari ke- dihitung dari tanggal mulai project atau periode.</p><label class="visually-hidden" for="rows">Task dan checklist dalam teks</label>
+                <textarea id="rows" name="rows" rows="10" class="form-control font-monospace @error('rows') is-invalid @enderror" required aria-describedby="rows-b" data-template-builder>{{ old('rows', $rows) }}</textarea>
                 <div id="rows-b" class="form-text">Satu task per baris: <code>Judul task | hari ke- | subtask; subtask</code>. Contoh: <code>Desain UI/UX | 5 | Wireframe; Mockup</code>. Hari ke- dihitung dari tanggal mulai project atau periode.</div>
                 @error('rows')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
         </div>
-        <div class="form-check my-3"><input type="hidden" name="is_active" value="0"><input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $template->is_active))><label class="form-check-label" for="is_active">Aktif</label></div>
+        <x-switch class="my-3" :checked="(bool) ($template->is_active ?? true)" help="Template nonaktif tidak muncul saat membuat project atau task."/>
         <p class="small muted">Mengubah template tidak mengubah project yang sudah dibuat dari template ini.</p>
         <button class="btn btn-primary" type="submit">Simpan template</button>
     </form>

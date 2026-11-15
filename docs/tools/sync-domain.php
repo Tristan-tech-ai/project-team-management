@@ -13,7 +13,7 @@ const SHARED = [
     'app/Http/Controllers/Shared', 'app/Http/Controllers/Auth', 'app/Http/Controllers/AccountController.php', 'app/Http/Controllers/Controller.php',
     'app/Providers/AppServiceProvider.php', 'lang/id', 'resources/icons', 'resources/views/shared', 'resources/views/errors',
     'resources/views/components/icon.blade.php', 'resources/views/components/badge.blade.php', 'resources/views/components/field.blade.php',
-    'resources/views/components/confirm.blade.php', 'resources/views/components/layouts/guest.blade.php', 'resources/views/auth', 'resources/views/account/form.blade.php',
+    'resources/views/components/confirm.blade.php', 'resources/views/components/hint.blade.php', 'resources/views/components/layouts/guest.blade.php', 'resources/views/auth', 'resources/views/account/form.blade.php',
     'resources/js/core.js', 'resources/js/table.js', 'resources/js/kanban.js', 'resources/js/calendar.js', 'resources/css/app.css', 'tests/Domain',
 ];
 

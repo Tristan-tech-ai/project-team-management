@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\MenuItem;
 use App\Models\User;
+use App\Support\MenuIcons;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +31,8 @@ class MenuService
                 if ($m->permission && ! $gate->allows($m->permission->slug)) {
                     continue;
                 }
-                $children[] = ['slug' => $m->slug, 'title' => $m->title, 'route' => $m->route_name, 'url' => route($m->route_name)];
+                $children[] = ['slug' => $m->slug, 'title' => $m->title, 'route' => $m->route_name, 'url' => route($m->route_name),
+                    'icon' => $m->icon ?: MenuIcons::forRoute($m->route_name, $parent->icon)];
             }
             if ($children !== []) {
                 $result[] = ['slug' => $parent->slug, 'title' => $parent->title, 'icon' => $parent->icon, 'children' => $children];
@@ -38,5 +40,20 @@ class MenuService
         }
 
         return $result;
+    }
+
+    /**
+     * The submenu route to highlight for the current page: the exact route, otherwise the first submenu with the same route prefix
+     * (projects.show -> projects.index, templates.projects.edit -> templates.projects.index, settings.audit -> settings.general).
+     */
+    public static function activeRoute(array $menu, string $current): ?string
+    {
+        $routes = collect($menu)->pluck('children')->flatten(1)->pluck('route');
+        if ($routes->contains($current)) {
+            return $current;
+        }
+        $prefix = fn (string $r) => str_contains($r, '.') ? substr($r, 0, strrpos($r, '.')) : $r;
+
+        return $routes->first(fn ($r) => $prefix($r) === $prefix($current));
     }
 }

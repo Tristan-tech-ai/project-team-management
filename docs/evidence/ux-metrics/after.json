@@ -1,0 +1,126 @@
+{
+  "label": "after",
+  "at": "2026-11-15T14:01:50.203Z",
+  "results": [
+    {
+      "key": "buka-dashboard",
+      "name": "Buka Dashboard dari halaman lain",
+      "ok": true,
+      "clicks": 1,
+      "fields": 0,
+      "steps": 1,
+      "pages": 1,
+      "ms": 8735
+    },
+    {
+      "key": "project-dari-template",
+      "name": "Buat project dari template",
+      "ok": true,
+      "clicks": 4,
+      "fields": 2,
+      "steps": 6,
+      "pages": 2,
+      "ms": 19237
+    },
+    {
+      "key": "task-dari-halaman-tasks",
+      "name": "Tambah task dari halaman Tasks",
+      "ok": true,
+      "clicks": 4,
+      "fields": 3,
+      "steps": 7,
+      "pages": 3,
+      "ms": 15705
+    },
+    {
+      "key": "mulai-task",
+      "name": "Member memulai task (HP)",
+      "ok": true,
+      "clicks": 2,
+      "fields": 0,
+      "steps": 2,
+      "pages": 2,
+      "ms": 15745
+    },
+    {
+      "key": "ajukan-deadline",
+      "name": "Member mengajukan geser deadline (HP)",
+      "ok": true,
+      "clicks": 4,
+      "fields": 2,
+      "steps": 6,
+      "pages": 3,
+      "ms": 19233
+    },
+    {
+      "key": "kirim-hasil",
+      "name": "Member mengirim hasil (HP)",
+      "ok": true,
+      "clicks": 3,
+      "fields": 2,
+      "steps": 5,
+      "pages": 3,
+      "ms": 15449
+    },
+    {
+      "key": "terima-review",
+      "name": "Manager menerima hasil",
+      "ok": true,
+      "clicks": 3,
+      "fields": 0,
+      "steps": 3,
+      "pages": 3,
+      "ms": 18418
+    },
+    {
+      "key": "catat-aktivitas",
+      "name": "Member mencatat rapat (HP)",
+      "ok": true,
+      "clicks": 4,
+      "fields": 2,
+      "steps": 6,
+      "pages": 3,
+      "ms": 16256
+    },
+    {
+      "key": "tambah-anggota",
+      "name": "Super Admin menambah anggota",
+      "ok": true,
+      "clicks": 3,
+      "fields": 3,
+      "steps": 6,
+      "pages": 3,
+      "ms": 12918
+    },
+    {
+      "key": "client-baru-di-project",
+      "name": "Buat project untuk client yang belum ada",
+      "ok": true,
+      "clicks": 4,
+      "fields": 1,
+      "steps": 5,
+      "pages": 1,
+      "ms": 6228
+    },
+    {
+      "key": "urutan-menu",
+      "name": "Pindahkan menu Kalender ke atas Task",
+      "ok": true,
+      "clicks": 3,
+      "fields": 0,
+      "steps": 3,
+      "pages": 2,
+      "ms": 22244
+    },
+    {
+      "key": "izin-hapus-task",
+      "name": "Beri Manager izin hapus task",
+      "ok": true,
+      "clicks": 3,
+      "fields": 0,
+      "steps": 3,
+      "pages": 2,
+      "ms": 20636
+    }
+  ]
+}

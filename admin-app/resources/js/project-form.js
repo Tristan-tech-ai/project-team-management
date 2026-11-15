@@ -26,6 +26,11 @@ export function initTemplatePreview() {
         try {
             const r = await fetch(`${form.dataset.previewUrl}?${q}`, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
             const d = await r.json();
+            // Smart default (U9): the project type follows the template until the person picks a type themselves.
+            if (type && d.project_type && type.dataset.touched !== '1' && type.value !== d.project_type) {
+                type.value = d.project_type;
+                type.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             const n = d.tasks.length;
             const ns = d.tasks.reduce((a, t) => a + t.subtasks.length, 0);
             preview.innerHTML = `<p class="small mb-2"><strong>${n} task</strong> dan <strong>${ns} subtask</strong> akan dibuat (template ${escape(d.type)}).</p><ol class="small mb-0">${
@@ -55,6 +60,8 @@ export function initTemplatePreview() {
     start?.addEventListener('change', load);
     company?.addEventListener('change', filterByCompany);
     type?.addEventListener('change', toggleRecurrence);
+    // A change made by the person (not by the template default above) is kept.
+    type?.addEventListener('input', () => { type.dataset.touched = '1'; });
     load();
     filterByCompany();
     toggleRecurrence();

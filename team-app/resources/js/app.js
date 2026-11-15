@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps } from './core';
 
 window.bootstrap = bootstrap;
 
@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     initConfirmations(bootstrap.Modal);
     showFlashMessages();
     fixAccessibility();
+    initDemoLogin();
+    initSidebar();
+    initShortcuts();
+    initFirstSteps();
+    initFilePickers();
+    initHints(bootstrap.Popover);
+    initSafeForms();
+    initQuickDates();
+    initAutoSubmit();
+    initTaskCreate();
     if (document.querySelector('table[data-table]')) import('./table').then((m) => m.initTables());
     if (document.querySelector('[data-kanban], [data-check-subtask], [data-change-status], [data-fill-duration], [data-fill-days]')) {
         import('./kanban').then((m) => { m.initKanban(); m.initChecklist(); });
