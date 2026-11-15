@@ -38,7 +38,7 @@ Hasil terbaru 15 Nov 2026, setelah peningkatan kegunaan. Kode yang diuji: admin-
 | `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (15 Nov 2026) | 53 halaman, 0 gagal |
 | `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (15 Nov 2026) | 38 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, dan gulir samping terhadap lebar layar yang diminta, di 390 dan 1366 px (`../ui/audit-admin.json` 40 layar, 80 pemeriksaan; `../ui/audit-team-manager.json` 2 layar, 4 pemeriksaan; `../ui/audit-team.json` 13 layar, 26 pemeriksaan) | 110 pemeriksaan, 0 masalah |
-| `clean-install.txt` | Pasang bersih dari zip serah terima ke database baru, tes dan smoke dari folder itu (13 Nov 2026) | admin 63 dan tim 40 tes lulus, 73 halaman 0 gagal |
+| `clean-install.txt` | Pasang bersih dari zip serah terima (commit publik c3fff15) ke database baru, tes dari folder itu (15 Nov 2026) | admin 97 dan tim 47 tes lulus, `/login` kedua app 200 |
 | `../performance.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
 | `../../video/ptm-demo.mp4` | Video rekaman 8 skenario 11.3 dalam satu alur (Radit manager, Putri member), direkam 12 Nov 2026 sebelum perubahan tampilan 13 Nov | 3 menit 49 detik |
 

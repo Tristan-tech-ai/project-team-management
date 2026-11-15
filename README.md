@@ -175,7 +175,7 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 - Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1, gulir samping), dan `node docs/tools/ux-metrics.mjs` (klik dan isian 12 alur inti).
 - Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 
-README ini diuji dari nol (13 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah 2-6 di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 63/63 dan tim 40/40 lulus dan semua menu tiga peran terbuka tanpa galat (`docs/evidence/tests/clean-install.txt`).
+README ini diuji dari nol (15 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah manual di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 97/97 dan tim 47/47 lulus dan `/login` kedua app 200 (`docs/evidence/tests/clean-install.txt`). Jalur cepat `php artisan ptm:setup` diuji terpisah dari salinan tanpa `.env` ke database kosong.
 
 ## Catatan
 
