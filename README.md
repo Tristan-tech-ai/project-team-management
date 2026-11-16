@@ -174,7 +174,7 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 ## Uji
 
 - Database uji: `sh docs/tools/prepare-test-db.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
-- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 97, tim 47; tes domain identik di keduanya).
+- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 115, tim 49; tes domain identik di keduanya).
 - Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1, gulir samping), dan `node docs/tools/ux-metrics.mjs` (klik dan isian 12 alur inti).
 - Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 

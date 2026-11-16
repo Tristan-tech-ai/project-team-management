@@ -14,6 +14,9 @@ Butir yang ditunda dari putaran pertama `docs/UX-PLAN.md` dikerjakan, lalu semua
 | Divisi dan jabatan baru dari formulir anggota; baris divisi mengikuti company yang dicentang | `MemberOrgQuickAddTest` |
 | Audit UI juga pada keadaan yang muncul setelah klik (13 keadaan: panel terbuka, palet terbuka, bilah aksi massal) | `../ui/audit-*.json` jalur berakhiran `@panel`, `@palette`, `@bulk` |
 | Ukuran kegunaan (halaman = pemuatan penuh): kirim hasil 1 halaman, ajukan geser deadline 1, terima hasil 1 (sebelum panel: 3 halaman tiap alur); ganti PIC 3 task 12 langkah satu per satu, 6 langkah sekaligus | `docs/evidence/ux-metrics/round2.json` |
+| Ditemukan saat pasang bersih dari zip: tes palet mengharapkan judul menu terjemahan, padahal judul itu bergantung pada `MenuLabelSeeder`; di database uji yang baru dipasang judulnya masih dari SQL. Tes kini memeriksa alamat menu | `CommandPaletteTest` lulus di database uji lama dan database uji pasang bersih |
+
+Audit UI dan ukuran kegunaan dijalankan sebelum perbaikan tes itu; sesudahnya yang berubah hanya berkas tes `admin-app/tests/Feature/CommandPaletteTest.php` (tidak dimuat aplikasi), jadi kode aplikasi yang diaudit sama. PHPUnit, e2e, dan uji asap dijalankan ulang pada kode final.
 
 ## Peningkatan kegunaan (15 Nov 2026)
 
@@ -43,7 +46,7 @@ Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm
 | Pengujian akhir | Semua tes dan bukti diperbarui (13 Nov 2026) | `phpunit-admin-app.xml` (63 tes), `phpunit-team-app.xml` (40 tes), `e2e-flow.txt` (18 lulus), `smoke-admin.txt` (53 halaman), `smoke-team.txt` (29 halaman), audit UI 102 pemeriksaan tanpa masalah |
 
 
-Hasil terbaru 16 Nov 2026, setelah peningkatan kegunaan putaran 2. Kode yang diuji: admin-app `265fd4f98420`, team-app `b70d870844d4` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_r2_1116`); pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
+Hasil terbaru 16 Nov 2026, setelah peningkatan kegunaan putaran 2. Kode yang diuji: admin-app `7c1b0b8af4f8`, team-app `b70d870844d4` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_r2_1116`); pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
 
 | Bukti | Isi | Hasil |
 |---|---|---|

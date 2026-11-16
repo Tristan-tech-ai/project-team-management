@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MenuItem;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Domain\BuildsTestData;
@@ -27,12 +28,17 @@ class CommandPaletteTest extends TestCase
         $admin = $this->actions($this->actingAs($this->user('super_admin'))->get(route('dashboard.index'))->assertOk()->getContent());
         $member = $this->actions($this->actingAs($this->user('member', $c))->get(route('dashboard.index'))->assertOk()->getContent());
 
-        $labels = fn (array $a) => array_column($a, 'label');
-        $this->assertContains('Pengaturan Menu', $labels($admin));
-        $this->assertContains('Buat project', $labels($admin));
-        $this->assertNotContains('Pengaturan Menu', $labels($member), 'a member never gets settings in the palette');
-        $this->assertNotContains('Buat project', $labels($member));
-        $this->assertContains('Dashboard', $labels($member), 'a one-item group is named like in the sidebar');
+        // Checked by address, not by title: menu titles depend on whether MenuLabelSeeder ran on this database.
+        $urls = fn (array $a) => array_column($a, 'url');
+        $this->assertContains(route('settings.menus.index'), $urls($admin));
+        $this->assertContains(route('projects.create'), $urls($admin));
+        $this->assertNotContains(route('settings.menus.index'), $urls($member), 'a member never gets settings in the palette');
+        $this->assertNotContains(route('projects.create'), $urls($member));
+        $dashboard = MenuItem::query()->where('route_name', 'dashboard.index')->firstOrFail();
+        $group = MenuItem::query()->findOrFail($dashboard->parent_id);
+        if (MenuItem::query()->where('parent_id', $group->id)->where('is_active', 1)->count() === 1) {
+            $this->assertSame($group->title, collect($member)->firstWhere('url', route('dashboard.index'))['label'], 'a one-item group is named like in the sidebar');
+        }
         foreach ($member as $a) {
             $path = parse_url($a['url'], PHP_URL_PATH) ?: '/';
             $this->actingAs($this->user('member', $c))->get($path)->assertOk();
