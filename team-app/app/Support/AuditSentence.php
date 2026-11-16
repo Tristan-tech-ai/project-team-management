@@ -53,6 +53,9 @@ final class AuditSentence
             'subtasks.toggle' => ! empty($input['done']) ? 'mencentang checklist' : 'membuka lagi checklist',
             'submissions.review' => ($input['decision'] ?? '') === 'approved' ? 'menerima hasil task' : 'meminta revisi hasil task',
             'schedule-changes.decision' => ($input['decision'] ?? '') === 'approved' ? 'menyetujui geser deadline' : 'menolak geser deadline',
+            // I13 bulk action: "mengganti PIC 3 task sekaligus".
+            'tasks.bulk' => (['start' => 'memulai', 'pic' => 'mengganti PIC', 'assignee' => 'menambah pelaksana di'][$input['action'] ?? ''] ?? 'mengubah')
+                .' '.count((array) ($input['ids'] ?? [])).' task sekaligus',
             default => null,
         };
         if ($phrase === null) {

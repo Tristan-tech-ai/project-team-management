@@ -19,7 +19,7 @@
         </div>
     </div>
     <fieldset class="mb-3"><legend class="form-label">Pelaksana</legend>
-        <div class="d-flex flex-wrap gap-2" data-assignee-list>
+        <div class="d-flex flex-wrap gap-2" data-assignee-list data-people-filter="label">
             @foreach($first as $person)
                 <input type="checkbox" class="btn-check" name="assignees[]" value="{{ $person['id'] }}" id="ta{{ $person['id'] }}" autocomplete="off" @checked(in_array($person['id'], old('assignees', [])))>
                 <label class="btn btn-sm btn-outline-primary" for="ta{{ $person['id'] }}">{{ $person['name'] }} <span class="load-count" title="Task aktif yang sedang dipegang">{{ $person['open'] ?? 0 }}</span></label>

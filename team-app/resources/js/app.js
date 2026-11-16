@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps, initTaskPanel, initPeopleFilter } from './core';
 
 window.bootstrap = bootstrap;
 
@@ -18,6 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuickDates();
     initAutoSubmit();
     initTaskCreate();
+    initPeopleFilter();
+    // I3: task detail as a side panel; what the panel loads gets the same helpers as a normal page.
+    initTaskPanel(bootstrap.Offcanvas, {
+        onContent: (root) => {
+            initFilePickers(root);
+            initQuickDates(root);
+            initHints(bootstrap.Popover, root);
+            initPeopleFilter(root);
+            import('./kanban').then((m) => m.initChecklist());
+        },
+    });
     if (document.querySelector('table[data-table]')) import('./table').then((m) => m.initTables());
     if (document.querySelector('[data-kanban], [data-check-subtask], [data-change-status], [data-fill-duration], [data-fill-days]')) {
         import('./kanban').then((m) => { m.initKanban(); m.initChecklist(); });

@@ -39,6 +39,7 @@ class TaskListFeed
         // The project PIC and company are loaded so quick-action permissions are computed without a query per row.
         $q->with(['project:id,name,pic_user_id,company_id']);
         $actions = $this->quickActions($request->user());
+        $bulk = $this->bulkTarget($request->user());
 
         return DataTables::eloquent($q)
             ->addColumn('project_name', fn (Task $t) => $t->project?->name ?? '')
@@ -51,8 +52,30 @@ class TaskListFeed
             ->addColumn('due', fn (Task $t) => Dates::dateTime($t->due_at))
             ->addColumn('period', fn (Task $t) => $t->period?->name ?? '-')
             ->addColumn('actions', $actions)
+            ->addColumn('bulk', $bulk)
             ->orderColumn('due', 'tasks.due_at $1')
             ->toJson();
+    }
+
+    /**
+     * I13: the task id when this user may include the task in a bulk action (start it, or set its PIC and assignees), else null.
+     * Mirrors TaskPolicy moveStatus/assign with data already loaded; TaskBulkService checks every task again on the server.
+     */
+    private function bulkTarget(?User $u): \Closure
+    {
+        $super = (bool) $u?->isSuperAdmin();
+        $managedCompanies = $u && ! $super && $u->hasRole('manager') ? array_map('intval', $u->activeCompanyIds()) : [];
+        $canMove = $u !== null && $u->hasPermission('tasks.move_status');
+        $canAssign = $u !== null && $u->hasPermission('tasks.assign');
+
+        return function (Task $t) use ($u, $super, $managedCompanies, $canMove, $canAssign): ?int {
+            $uid = (int) $u?->id;
+            $isManager = $super || (int) $t->project?->pic_user_id === $uid || in_array((int) $t->project?->company_id, $managedCompanies, true);
+            $isPic = (int) $t->pic_user_id === $uid;
+            $ok = ($canMove && ($isManager || $isPic || $t->assignees->contains('id', $uid))) || ($canAssign && ($isManager || $isPic));
+
+            return $ok ? (int) $t->id : null;
+        };
     }
 
     /**
@@ -77,11 +100,11 @@ class TaskListFeed
             if ($t->status === 'backlog' && $canMove && ($isManager || $isAssignee)) {
                 $result[] = ['label' => 'Mulai', 'url' => route('tasks.status', $t), 'method' => 'PATCH', 'fields' => ['status' => 'in_progress']];
             } elseif ($t->status === 'in_progress' && $canSubmit && ($isManager || $isAssignee)) {
-                $result[] = ['label' => 'Kirim hasil', 'url' => $open.'#submit-result'];
+                $result[] = ['label' => 'Kirim hasil', 'url' => $open.'#submit-result', 'panel' => true];
             } elseif ($t->status === 'review' && $canReview && ($isManager || (int) $t->pic_user_id === $uid)) {
-                $result[] = ['label' => 'Tinjau', 'url' => $open.'#review'];
+                $result[] = ['label' => 'Tinjau', 'url' => $open.'#review', 'panel' => true];
             }
-            $result[] = ['label' => 'Buka', 'url' => $open];
+            $result[] = ['label' => 'Buka', 'url' => $open, 'panel' => true];
 
             return $result;
         };

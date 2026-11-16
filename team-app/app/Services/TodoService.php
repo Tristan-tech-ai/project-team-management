@@ -19,7 +19,7 @@ class TodoService
 {
     public function __construct(private ScheduleChangeService $schedule) {}
 
-    /** @return list<array{kind:string, tone:string, title:string, detail:string, when:?string, url:string}> */
+    /** @return list<array{kind:string, tone:string, title:string, detail:string, when:?string, url:string, panel:bool}> panel: the url is a task, opened in the side panel (I3) */
     public function for(User $u, int $limit = 8): array
     {
         $items = [];
@@ -33,7 +33,7 @@ class TodoService
             foreach ($pending as $s) {
                 if ($s->task && $u->can('review', $s->task)) {
                     $items[] = ['kind' => 'review', 'tone' => 'review', 'title' => "Review hasil {$s->task->title}",
-                        'detail' => "{$s->submitter?->name} · {$s->task->project?->name}", 'when' => Dates::relative($s->submitted_at, past: true), 'url' => $taskUrl($s->task_id).'#review'];
+                        'detail' => "{$s->submitter?->name} · {$s->task->project?->name}", 'when' => Dates::relative($s->submitted_at, past: true), 'url' => $taskUrl($s->task_id).'#review', 'panel' => true];
                 }
             }
         }
@@ -44,7 +44,8 @@ class TodoService
             if ((int) $r->requested_by !== (int) $u->id && $this->schedule->canDecide($u, $r)) {
                 $items[] = ['kind' => 'schedule', 'tone' => 'review', 'title' => 'Putuskan geser deadline '.($r->task?->title ?? $r->project?->name),
                     'detail' => "{$r->requester?->name} minta ".Dates::date($r->proposed_due_at), 'when' => Dates::relative($r->requested_at, past: true),
-                    'url' => $r->task_id ? $taskUrl($r->task_id) : (Route::has('activities.impacts') ? route('activities.impacts') : route('projects.show', $r->project_id))];
+                    'url' => $r->task_id ? $taskUrl($r->task_id).'#schedule' : (Route::has('activities.impacts') ? route('activities.impacts') : route('projects.show', $r->project_id)),
+                    'panel' => (bool) $r->task_id];
             }
         }
 
@@ -54,7 +55,7 @@ class TodoService
             ->with('project:id,name')->orderBy('tasks.due_at')->limit($limit)->get(['tasks.id', 'tasks.title', 'tasks.project_id', 'tasks.due_at']);
         foreach ($returned as $t) {
             $items[] = ['kind' => 'revision', 'tone' => 'late', 'title' => "Perbaiki {$t->title}", 'detail' => "Dikembalikan untuk revisi · {$t->project?->name}",
-                'when' => $t->due_at ? Dates::relative($t->due_at) : null, 'url' => $taskUrl($t->id)];
+                'when' => $t->due_at ? Dates::relative($t->due_at) : null, 'url' => $taskUrl($t->id), 'panel' => true];
         }
 
         $open = $mine(Scope::tasks($u))->whereNull('tasks.parent_id')->whereIn('tasks.status', ['backlog', 'in_progress'])->whereNotNull('tasks.due_at')
@@ -63,7 +64,7 @@ class TodoService
         foreach ($open as $t) {
             $late = $t->due_at->isPast();
             $items[] = ['kind' => $late ? 'late' : 'due', 'tone' => $late ? 'late' : 'info',
-                'title' => ($t->status === 'backlog' ? 'Mulai ' : 'Selesaikan ').$t->title, 'detail' => $t->project?->name ?? '', 'when' => Dates::relative($t->due_at), 'url' => $taskUrl($t->id)];
+                'title' => ($t->status === 'backlog' ? 'Mulai ' : 'Selesaikan ').$t->title, 'detail' => $t->project?->name ?? '', 'when' => Dates::relative($t->due_at), 'url' => $taskUrl($t->id), 'panel' => true];
         }
 
         return array_slice($items, 0, $limit);

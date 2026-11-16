@@ -1,6 +1,7 @@
 @php use App\Support\Codes; use App\Support\Dates; @endphp
 <x-layouts.team title="Beranda">
     <div class="page-header"><div><h1 class="mb-0">Halo, {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}</h1><p>{{ Dates::date(now()) }}</p></div></div>
+    <div data-refresh-region="home">
     <div class="status-summary mb-3">
         @php($look = ['backlog' => ['list-todo', ''], 'in_progress' => ['timer', ''], 'review' => ['clipboard-check', 'is-review'], 'done' => ['circle-check', 'is-done']])
         @foreach(Codes::TASK_STATUS as $k => $v)
@@ -10,7 +11,7 @@
     </div>
     @if($revision->isNotEmpty())
         <div class="alert alert-warning" role="status"><strong>Perlu revisi:</strong>
-            @foreach($revision as $r)<a href="{{ route('tasks.show', $r->task_id) }}">{{ $r->task->title }}</a>@if(! $loop->last), @endif @endforeach</div>
+            @foreach($revision as $r)<a href="{{ route('tasks.show', $r->task_id) }}" data-task-panel>{{ $r->task->title }}</a>@if(! $loop->last), @endif @endforeach</div>
     @endif
     @if($pendingForMe)
         <a class="panel d-flex align-items-center justify-content-between mb-3 text-decoration-none text-reset" href="{{ route('review.index') }}">
@@ -28,6 +29,7 @@
         <section class="mb-3" aria-labelledby="h-review"><h2 class="mb-2" id="h-review">Sedang direview</h2>
             <div class="task-list">@foreach($inReview as $t) @include('team._card', ['t' => $t]) @endforeach</div></section>
     @endif
+    </div>
     <section aria-labelledby="h-project">
         <div class="d-flex justify-content-between align-items-center mb-2"><h2 class="mb-0" id="h-project">Project saya</h2><a class="small" href="{{ route('projects.index') }}">Semua project</a></div>
         <div class="task-list">@forelse($projects as $p)

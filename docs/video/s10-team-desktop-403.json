@@ -1,12 +1,15 @@
 {
- "name": "s9-team-desktop-403",
+ "name": "s10-team-desktop-403",
  "url": "http://127.0.0.1:8102/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
  "allowOrigins": [
   "http://127.0.0.1:8101"
  ],
  "steps": [
   {
-   "pause": 500
+   "pause": 600
   },
   {
    "type": "putri@example.test",
@@ -24,12 +27,12 @@
    "waitFor": "main"
   },
   {
-   "hover": "nav[aria-label='Menu utama'] a[href$='/tasks']",
-   "zoom": 1.4,
-   "pauseAfter": 1200
+   "hover": "css=nav.desktop-sidebar",
+   "zoom": 1.3,
+   "pauseAfter": 1400
   },
   {
-   "click": "nav[aria-label='Menu utama'] a[href$='/tasks']",
+   "click": "css=nav.desktop-sidebar a.side-link:has-text('Task Saya')",
    "pauseAfter": 900
   },
   {
@@ -67,23 +70,12 @@
    "goto": "http://127.0.0.1:8101/management"
   },
   {
-   "waitFor": "h1.h3"
+   "waitFor": "css=h1.h3"
   },
   {
-   "hover": "h1.h3",
+   "hover": "css=h1.h3",
    "zoom": 1.4,
    "pauseAfter": 2400
-  },
-  {
-   "goto": "http://127.0.0.1:8101/settings/roles"
-  },
-  {
-   "waitFor": "h1.h3"
-  },
-  {
-   "hover": "h1.h3",
-   "zoom": 1.4,
-   "pauseAfter": 2000
   }
  ]
 }

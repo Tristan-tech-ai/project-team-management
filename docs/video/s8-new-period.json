@@ -1,9 +1,12 @@
 {
  "name": "s8-new-period",
  "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
  "steps": [
   {
-   "pause": 500
+   "pause": 600
   },
   {
    "type": "radit@example.test",
@@ -15,59 +18,68 @@
   },
   {
    "click": "role=button[name='Masuk']",
-   "pauseAfter": 500
+   "pauseAfter": 600
   },
   {
-   "goto": "/projects/9"
+   "waitFor": "#todo-title"
   },
   {
-   "waitFor": "#period"
+   "press": "Mod+K",
+   "pauseAfter": 300
   },
   {
-   "select": "Semua periode",
-   "in": "#period",
-   "showList": true,
-   "pauseAfter": 800
+   "type": "pendaftaran 2027",
+   "into": "#palette-input",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=.palette-item .palette-label:text-is('Campaign Pendaftaran Sekolah 2027')"
+  },
+  {
+   "pause": 900
+  },
+  {
+   "press": "Enter",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "role=link[name='Papan Kanban']"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Ringkasan']",
+    "exact": true
+   }
+  },
+  {
+   "waitFor": "css=#period"
+  },
+  {
+   "hover": "css=#period",
+   "zoom": 1.4,
+   "pauseAfter": 1200
   },
   {
    "click": "role=button[name='Buka periode baru']",
    "pauseAfter": 600
   },
   {
-   "waitFor": "#confirm-modal [data-confirm-yes]"
+   "waitFor": "css=#confirm-modal [data-confirm-yes]"
   },
   {
    "pause": 1600
   },
   {
-   "click": "#confirm-modal [data-confirm-yes]",
-   "pauseAfter": 900
+   "click": "css=#confirm-modal [data-confirm-yes]",
+   "pauseAfter": 1200
   },
   {
    "waitFor": "[data-kanban]"
   },
   {
-   "hover": "#b-period",
+   "hover": "css=#b-period",
    "zoom": 1.4,
-   "pauseAfter": 1600
-  },
-  {
-   "hover": "[data-kanban]",
-   "zoom": false,
    "pauseAfter": 1800
-  },
-  {
-   "select": "Periode 1 Nov 2026 sampai 30 Nov 2026",
-   "in": "#b-period",
-   "showList": true,
-   "pauseAfter": 700
-  },
-  {
-   "click": "role=button[name='Saring']",
-   "pauseAfter": 900
-  },
-  {
-   "waitFor": "[data-kanban]"
   },
   {
    "hover": "[data-kanban]",

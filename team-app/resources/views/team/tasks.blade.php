@@ -23,7 +23,7 @@
     </div>
     @endif
     <div @class(['d-lg-none' => $table])>
-    <div class="status-summary mb-3">
+    <div class="status-summary mb-3" data-refresh-region="task-counts">
         @foreach(Codes::TASK_STATUS as $k => $v)
             <a class="panel text-decoration-none text-reset {{ request('status') === $k ? 'border-primary' : '' }}" href="{{ route('tasks.index', array_filter(['status' => request('status') === $k ? null : $k, 'project_id' => request('project_id')])) }}" @if(request('status') === $k) aria-current="true" @endif>
                 <div class="small muted">{{ $v }}</div><div class="number-large">{{ $counts[$k] ?? 0 }}</div></a>
@@ -35,7 +35,7 @@
         <div class="flex-grow-1"><label class="form-label small" for="t-u">Urutkan</label><select id="t-u" name="sort" class="form-select" onchange="this.form.requestSubmit()"><option value="deadline">Deadline terdekat</option><option value="new" @selected(request('sort') === 'new')>Terbaru dibuat</option></select></div>
         <noscript><button class="btn btn-outline-secondary" type="submit">Terapkan</button></noscript>
     </form>
-    <div class="task-list">
+    <div class="task-list" data-refresh-region="task-cards">
         @forelse($tasks as $t)
             @include('team._card', ['t' => $t])
         @empty

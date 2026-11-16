@@ -16,7 +16,7 @@
         <div class="small muted text-truncate min-w-0">{{ $t->project?->name }}</div>
         <x-badge :code="$late ? 'late' : $t->status" :text="$late ? 'Terlambat' : Codes::label(Codes::TASK_STATUS, $t->status)"/>
     </div>
-    <a href="{{ route('tasks.show', $t) }}" class="task-tile-title stretched-link">{{ $t->title }}</a>
+    <a href="{{ route('tasks.show', $t) }}" class="task-tile-title stretched-link" data-task-panel>{{ $t->title }}</a>
     <div class="small muted mt-1">{{ $total ? "{$done} / {$total} subtask" : 'Tanpa checklist' }} @if($people !== null) · {{ $people }} orang @endif</div>
     @if($total)<div class="meter mt-2"><span style="width:{{ round($done * 100 / $total) }}%"></span></div>@endif
     <div class="small mt-2 {{ $late ? 'text-danger fw-semibold' : 'muted' }}">Deadline: {{ Dates::date($t->due_at) }}@if($t->due_at && $t->status !== 'done') · {{ Dates::relative($t->due_at) }}@endif</div>
@@ -24,6 +24,6 @@
         <form class="task-tile-action" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
             <button class="btn btn-outline-primary btn-sm w-100" type="submit"><x-icon name="send" :size="16"/> Mulai</button></form>
     @elseif($canSend)
-        <div class="task-tile-action"><a class="btn btn-outline-primary btn-sm w-100" href="{{ route('tasks.show', $t) }}#submit-result"><x-icon name="send" :size="16"/> Kirim hasil</a></div>
+        <div class="task-tile-action"><a class="btn btn-outline-primary btn-sm w-100" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="16"/> Kirim hasil</a></div>
     @endif
 </article>

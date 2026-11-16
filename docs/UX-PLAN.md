@@ -53,7 +53,7 @@ Setiap butir punya kriteria terima yang dibuktikan dengan tes otomatis atau tang
 
 ### U5 Tambah data pendukung tanpa pindah halaman
 - [x] Tombol kecil "Company baru" dan "Client baru" di formulir project: jendela kecil, simpan, langsung terpilih.
-- [ ] Divisi dan jabatan baru dari formulir anggota (sub-rencana U5.1, ditunda ke putaran berikut).
+- [x] Divisi dan jabatan baru dari formulir anggota (U5.1, putaran 2): tombol Divisi baru dan Jabatan baru membuka dialog kecil; divisi baru langsung tercentang untuk anggota itu, jabatan baru langsung jadi pilihan di divisi company-nya. Baris divisi kini hanya tampil untuk company yang dicentang (sebelumnya semua divisi semua company tampil dan yang salah centang ditolak server).
 - [x] Hanya muncul bagi yang berizin (Company/Client: Super Admin); server tetap memeriksa.
 
 ### U6 Pengaturan menu seret-lepas
@@ -87,7 +87,7 @@ Setiap butir punya kriteria terima yang dibuktikan dengan tes otomatis atau tang
 
 ### U11 Bukti dan serah terima
 - [ ] PHPUnit kedua app, e2e, uji asap semua menu 3 peran, audit UI, pemeriksa rilis, pasang bersih dari zip.
-- [ ] Tangkapan layar baru, video diperbarui bila alur berubah, zip baru.
+- [x] Tangkapan layar baru, video diperbarui bila alur berubah (video v3 16 Nov 2026, direkam dari tampilan putaran 2), zip baru.
 
 ## Inisiatif sendiri (di luar masukan pembina)
 
@@ -99,19 +99,19 @@ Ditambahkan 15 Nov 2026 setelah Tristan menegur bahwa rencana di atas hanya menj
 ### Tingkat A: dipakai setiap hari
 - [x] **I1 Kotak "Perlu kamu kerjakan"** di Dashboard dan Beranda tim, untuk setiap peran: task saya yang jatuh tempo hari ini atau terlambat, hasil yang menunggu review saya, pengajuan geser deadline yang menunggu persetujuan saya, task yang dikembalikan untuk revisi. Satu klik ke tindakannya.
 - [x] **I2 Aksi cepat di kartu Kanban dan baris daftar task**: tombol aksi utama sesuai status (Mulai, Kirim hasil, Terima/Revisi) langsung di kartu, tanpa membuka detail; tetap lewat aturan status di server.
-- [ ] **I3 (ditunda ke putaran berikut; sebagai gantinya detail task dirapikan: revisi di atas, panel jarang dipakai dilipat) Detail task sebagai panel samping** dari Kanban dan daftar: buka, centang checklist, kirim hasil, tutup, posisi papan dan filter tidak hilang (6.3: jangan reset filter).
+- [x] **I3 (putaran 2) Detail task sebagai panel samping** dari Kanban, daftar task, Task Saya, Menunggu Review, Perlu kamu kerjakan, lonceng, Keterlambatan, dan kalender: buka, centang checklist, kirim hasil, terima atau revisi, catat waktu, tutup; posisi papan, kolom, filter, dan halaman tabel tidak hilang (6.3: jangan reset filter). Formulir di panel memakai endpoint yang sama (JSON), papan atau daftar di belakang disegarkan saat panel ditutup, Esc dan tombol Kembali HP menutup panel, Ctrl/klik tengah tetap membuka halaman penuh. Ditemukan sekalian: (a) "Putuskan geser deadline" membuka task yang tidak punya tombol Setujui/Tolak, kini keputusan ada di detail task; (b) Catat waktu kerja ditolak antara 00.00 dan 08.00 WITA karena "hari ini" dihitung UTC, kini memakai zona Pengaturan Sistem dengan pesan Indonesia.
 - [x] **I4 Tanggal yang bisa langsung dibaca**: "3 hari lagi", "terlambat 2 hari", "hari ini 17.00" di samping tanggal; pilihan cepat deadline (Hari ini, Besok, Jumat ini, +1 minggu) di setiap isian tanggal.
-- [x] **I5 (sebagian: beban kerja di samping nama PIC dan pelaksana di Tambah task; kotak pencarian orang belum) Pemilih orang yang bisa dicari** (nama + inisial + divisi) untuk PIC, pelaksana, dan tim project, menggantikan daftar centang panjang dan multi-select bawaan peramban; menampilkan **beban kerja** (jumlah task aktif dan terlambat) supaya pembagian tugas adil.
+- [x] **I5 (lengkap di putaran 2: kotak Cari nama di daftar orang yang panjang, yaitu pelaksana di detail task dan panel, Tambah task, anggota project, dan Atur tim; orang yang dicentang tetap terlihat; beban kerja juga di daftar pelaksana detail task) Pemilih orang yang bisa dicari** (nama + inisial + divisi) untuk PIC, pelaksana, dan tim project, menggantikan daftar centang panjang dan multi-select bawaan peramban; menampilkan **beban kerja** (jumlah task aktif dan terlambat) supaya pembagian tugas adil.
 - [x] **I6 Filter dan pencarian diingat** per halaman dan tercatat di alamat, sehingga kembali dari detail tidak mengulang penyaringan dan tautan bisa dibagikan.
 
 ### Tingkat B: membuat aplikasi terasa matang
 - [x] **I7 Lonceng pemberitahuan di dalam aplikasi** (bukan push notification yang dikecualikan petunjuk): review baru, hasil dikembalikan, deadline disetujui/ditolak, ditambahkan ke task; dihitung dari data yang sudah ada, ditandai sudah dibaca.
 - [x] **I8 Daftar langkah pertama** untuk Super Admin pada instalasi baru: lengkapi perusahaan, tambah anggota, cek template, buat project pertama; tercentang otomatis dari data dan bisa disembunyikan.
-- [ ] **I9 (ditunda; pencarian global dengan pintasan / sudah ada) Palet perintah (Ctrl+K)**: cari project/task/anggota sekaligus menjalankan aksi ("Buat project", "Buka Task Saya", "Pengaturan menu"); pintasan `/` cari, `n` task baru, `?` daftar pintasan.
+- [x] **I9 (putaran 2) Palet perintah (Ctrl+K)** di Admin: menu yang boleh dibuka dan aksi Buat (diambil dari menu dan tombol Buat milik pengguna, jadi tidak pernah menawarkan yang tidak diizinkan) disaring langsung saat mengetik; project, task, dan anggota dari pencarian global (JSON, cakupan data sama); panah memilih, Enter membuka, task terbuka di panel samping; `?` daftar pintasan, `n` task baru, `/` kotak cari. Dibuka tanpa animasi supaya huruf yang diketik tepat setelah Ctrl+K tidak hilang (ditemukan saat uji peramban).
 - [x] **I10 Log aktivitas berupa kalimat**: "Ayu memindahkan Desain Homepage ke Review" alih-alih metode dan alamat; disaring per orang dan per project.
 - [x] **I11 Penyusun template seret-lepas**: urutan task template diseret, checklist ditambah langsung di baris, gandakan template.
 - [x] **I12 Tambah anggota tanpa mengarang sandi**: sandi awal dibuat otomatis, ditampilkan sekali dengan tombol salin, anggota diminta menggantinya saat masuk pertama.
-- [ ] **I13 (ditunda ke putaran berikut) Aksi massal di daftar task**: pilih beberapa task lalu ganti PIC, tambah pelaksana, atau pindah status yang diizinkan.
+- [x] **I13 (putaran 2) Aksi massal di daftar task** (Semua Task dan Daftar Task project di Admin): centang beberapa task (pilihan tetap saat pindah halaman atau menyaring), lalu Mulai kerjakan, Ganti PIC, atau Tambah pelaksana. Setiap task tetap lewat izin dan aturan statusnya sendiri; yang tidak bisa diubah dilewati dengan alasan (misalnya "bukan anggota project X (tambahkan dulu lewat Tim project)"). Pilihan aksi mengikuti hak akses peran (member hanya Mulai kerjakan); orang ditampilkan dengan jumlah task aktifnya; PIC lama tetap menjadi pelaksana; di HP bilah aksi tiga baris dengan tombol Pilih semua di halaman ini; Log Aktivitas menulis "mengganti PIC 3 task sekaligus".
 - [x] **I14 Formulir aman**: peringatan sebelum meninggalkan formulir yang belum disimpan; tombol simpan menampilkan proses dan tidak bisa terklik dua kali.
 
 ### Tingkat C: rapi di semua layar
@@ -124,6 +124,27 @@ Ditambahkan 15 Nov 2026 setelah Tristan menegur bahwa rencana di atas hanya menj
 - Mode gelap: 6.1 menetapkan latar putih/off-white.
 - Obrolan langsung dan push notification: dikecualikan petunjuk teknis bagian 01 (diganti I7 di dalam aplikasi).
 - Seret deadline di kalender langsung mengubah tanggal: deadline wajib lewat pengajuan dan persetujuan; yang mungkin adalah seret membuka formulir pengajuan (calon I19 bila waktu cukup).
+
+## Putaran 2 (16 Nov 2026)
+
+Sub-rencana untuk butir yang ditunda putaran pertama, dikerjakan berurutan dengan tes per butir, uji peramban di 1366 dan 390 px, lalu bukti ulang lengkap:
+
+1. I3 panel samping detail task (kedua app), termasuk dari kalender dan lonceng.
+2. I13 aksi massal di daftar task Admin.
+3. U5.1 divisi dan jabatan baru dari formulir anggota.
+4. I9 palet perintah Ctrl+K dengan pintasan `?` dan `n`.
+5. I5 kotak Cari nama di daftar orang.
+6. Verifikasi: ukuran kegunaan diperbarui (halaman = pemuatan penuh; pembanding ganti PIC satu per satu dan sekaligus), audit UI pada keadaan setelah klik (`@panel`, `@palette`, `@bulk`), e2e dengan langkah panel dan aksi massal.
+
+Temuan yang muncul saat mengerjakan dan langsung diperbaiki:
+- "Putuskan geser deadline" di Perlu kamu kerjakan membuka task yang tidak punya tombol Setujui/Tolak.
+- Catat waktu kerja ditolak antara 00.00 dan 08.00 WITA ("Work date ... today") karena "hari ini" dihitung UTC.
+- Panel: Esc tidak menutup setelah memuat ulang (fokus hilang), task yang diklik saat panel masih menutup tidak terbuka, isi panel tampak diam selama simpan di database jauh (kini diredupkan).
+- Daftar pelaksana: butir pertama terdorong ke kanan karena legend Bootstrap mengambang.
+- Palet: huruf yang diketik tepat setelah Ctrl+K hilang selama animasi buka (kini dibuka tanpa animasi); fokus tertinggal di kotak cari setelah ditutup sehingga pintasan tidak jalan.
+- Audit keadaan baru: kotak centang aksi massal 20 px, tautan hasil di panel 16 px, tombol Terima terlipat di panel, kalender tampilan daftar (HP) membuka halaman penuh alih-alih panel.
+
+Sisa yang sengaja belum diambil: seret deadline di kalender membuka formulir pengajuan (calon I19), aksi massal di Team App (Team App dipakai pelaksana di HP; pembagian kerja dilakukan manager di Admin).
 
 ## Hasil ukuran I0 (sebelum dan sesudah)
 
@@ -156,4 +177,9 @@ Geser deadline naik satu langkah dengan sengaja: panelnya dilipat di detail task
 | 15 Nov 2026 | Bug lama | Kolom Status dan tombol Ubah/Hapus kosong di semua daftar (Company, Client, Template, dan lainnya) karena DataTables 2 membaca atribut `data-columns` sebagai opsinya sendiri; atribut diganti `data-table-columns` | `TemplateListTest` (termasuk tes yang menolak atribut lama) |
 | 15 Nov 2026 | U2, U4-U7, U9, I1 | Dashboard satu klik, kode otomatis, Client/Company baru dari formulir project, menu seret-lepas, hak akses centang, task satu layar, kotak Perlu kamu kerjakan | `SidebarTest`, `QuickAddTest`, `MenuSettingsTest`, `RoleMatrixTest`, `TaskQuickAddTest`, `TodoTest` |
 | 15 Nov 2026 | I0 sementara | Dashboard 2 jadi 1, task dari halaman Tasks 9 jadi 7, project untuk client baru 10 jadi 5, urutan menu 4 jadi 3 tanpa mengetik angka | skrip `docs/tools/ux-metrics.mjs` |
-
+| 16 Nov 2026 | I3 | Panel samping detail task di kedua app (offcanvas, penuh layar di HP); keputusan geser deadline di detail task; bug Catat waktu kerja 00.00-08.00 WITA | `TaskPanelTest` 5/5, `TeamTaskPanelTest`, `TimeEntryDateTest` (merah dengan aturan lama), uji peramban 1366 dan 390 |
+| 16 Nov 2026 | I13 | Aksi massal di daftar task Admin (Mulai kerjakan, Ganti PIC, Tambah pelaksana) dengan alasan per task yang dilewati | `TaskBulkTest` 6/6, uji peramban 1366 dan 390 |
+| 16 Nov 2026 | U5.1 | Divisi dan jabatan baru dari formulir anggota; baris divisi mengikuti company yang dicentang | `MemberOrgQuickAddTest` 2/2, uji peramban 1366 |
+| 16 Nov 2026 | I9 | Palet perintah Ctrl+K, pintasan `?` dan `n` | `CommandPaletteTest` 2/2, uji peramban 1366 |
+| 16 Nov 2026 | I5 | Kotak Cari nama di daftar orang (8 orang atau lebih), jumlah task aktif di daftar pelaksana detail task | `PeopleFilterTest`, uji peramban 1366 |
+| 16 Nov 2026 | Video v3 | 11 segmen direkam ulang dari instalasi baru (`docs/video/s1`-`s11`), disusun sebagai film 5 menit 9 detik (72% rekaman asli); dua temuan saat merekam diperbaiki: pencarian per kata, geser deadline dari deadline sekarang | `docs/video/ptm-demo.mp4`, `docs/video/README.md` |

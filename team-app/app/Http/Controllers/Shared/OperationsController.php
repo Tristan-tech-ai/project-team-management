@@ -59,7 +59,7 @@ class OperationsController extends Controller
         return back()->with('ok', $message);
     }
 
-    public function proposeSchedule(ScheduleChangeFormRequest $request): RedirectResponse
+    public function proposeSchedule(ScheduleChangeFormRequest $request): JsonResponse|RedirectResponse
     {
         $project = Project::query()->findOrFail($request->integer('project_id'));
         $task = $request->filled('task_id') ? Task::query()->findOrFail($request->integer('task_id')) : null;
@@ -72,14 +72,18 @@ class OperationsController extends Controller
         $activity = $request->filled('project_activity_id') ? ProjectActivity::query()->findOrFail($request->integer('project_activity_id')) : null;
         $this->schedule->propose($project, $task, $activity, Dates::fromInput($request->input('proposed_due_at')), $request->input('reason'), $request->user());
 
-        return back()->with('ok', 'Pengajuan deadline terkirim. Target awal tetap tercatat.');
+        $message = 'Pengajuan deadline terkirim. Target awal tetap tercatat.';
+
+        // I3: the side panel sends this form as JSON and stays open.
+        return $request->expectsJson() ? response()->json(['message' => $message]) : back()->with('ok', $message);
     }
 
-    public function decideSchedule(DecisionRequest $request, ScheduleChangeRequest $scheduleChange): RedirectResponse
+    public function decideSchedule(DecisionRequest $request, ScheduleChangeRequest $scheduleChange): JsonResponse|RedirectResponse
     {
         $r = $this->schedule->decide($scheduleChange, $request->input('decision') === 'approved', $request->input('decision_note'), $request->user());
+        $message = $r->status === 'approved' ? 'Deadline baru disetujui dan diterapkan.' : 'Pengajuan ditolak.';
 
-        return back()->with('ok', $r->status === 'approved' ? 'Deadline baru disetujui dan diterapkan.' : 'Pengajuan ditolak.');
+        return $request->expectsJson() ? response()->json(['message' => $message, 'status' => $r->status]) : back()->with('ok', $message);
     }
 
     /**
@@ -109,7 +113,7 @@ class OperationsController extends Controller
         if ($data['mode'] === 'schedule') {
             foreach ((clone $tasks)->whereBetween('tasks.due_at', [$start, $end])->get() as $t) {
                 $late = $t->status !== 'done' && $t->due_at->isPast();
-                $ev[] = ['id' => 't'.$t->id, 'title' => 'Deadline: '.$t->title, 'start' => Dates::local($t->due_at)->toIso8601String(), 'url' => $url($t),
+                $ev[] = ['id' => 't'.$t->id, 'title' => 'Deadline: '.$t->title, 'start' => Dates::local($t->due_at)->toIso8601String(), 'url' => $url($t), 'task' => $t->title,
                     'classNames' => [$late ? 'ev-late' : ($t->status === 'done' ? 'ev-done' : 'ev-deadline')],
                     'extendedProps' => ['project' => $t->project?->name, 'status' => ($late ? 'Terlambat · ' : '').Codes::label(Codes::TASK_STATUS, $t->status)]];
             }
@@ -123,14 +127,14 @@ class OperationsController extends Controller
             }
         } elseif ($data['mode'] === 'done') {
             foreach ((clone $tasks)->whereNotNull('tasks.completed_at')->whereBetween('tasks.completed_at', [$start, $end])->get() as $t) {
-                $ev[] = ['id' => 'c'.$t->id, 'title' => 'Selesai: '.$t->title, 'start' => Dates::local($t->completed_at)->toIso8601String(), 'url' => $url($t),
+                $ev[] = ['id' => 'c'.$t->id, 'title' => 'Selesai: '.$t->title, 'start' => Dates::local($t->completed_at)->toIso8601String(), 'url' => $url($t), 'task' => $t->title,
                     'classNames' => ['ev-done'], 'extendedProps' => ['project' => $t->project?->name, 'status' => 'Selesai aktual']];
             }
         } elseif ($data['mode'] === 'publication') {
             foreach ((clone $tasks)->where(fn ($w) => $w->whereBetween('tasks.scheduled_publish_at', [$start, $end])->orWhereBetween('tasks.published_at', [$start, $end]))->get() as $t) {
                 $when = $t->published_at ?? $t->scheduled_publish_at;
                 $ev[] = ['id' => 'p'.$t->id, 'title' => ($t->published_at ? 'Terbit: ' : 'Jadwal terbit: ').$t->title.($t->platform ? ' ('.$t->platform.')' : ''),
-                    'start' => Dates::local($when)->toIso8601String(), 'url' => $url($t), 'classNames' => [$t->published_at ? 'ev-done' : 'ev-publication'],
+                    'start' => Dates::local($when)->toIso8601String(), 'url' => $url($t), 'task' => $t->title, 'classNames' => [$t->published_at ? 'ev-done' : 'ev-publication'],
                     'extendedProps' => ['project' => $t->project?->name, 'status' => Codes::label(Codes::PUBLICATION_STATUS, $t->publication_status)]];
             }
         } else {

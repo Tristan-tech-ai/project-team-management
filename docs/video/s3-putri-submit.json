@@ -1,10 +1,13 @@
 {
  "name": "s3-putri-submit",
  "url": "http://127.0.0.1:8102/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
  "viewport": "phone",
  "steps": [
   {
-   "pause": 500
+   "pause": 600
   },
   {
    "type": "putri@example.test",
@@ -16,48 +19,91 @@
   },
   {
    "click": "role=button[name='Masuk']",
-   "pauseAfter": 500
-  },
-  {
-   "goto": "/tasks"
-  },
-  {
-   "waitFor": "text=Materi Iklan"
-  },
-  {
-   "pause": 1200
-  },
-  {
-   "click": "text=Materi Iklan",
    "pauseAfter": 600
   },
   {
-   "waitFor": "role=heading[name='Materi Iklan']"
+   "waitFor": "css=.mobile-bottom-nav"
   },
   {
-   "click": "#checklist li:first-child [data-check-subtask]",
+   "click": "css=.mobile-bottom-nav a:has-text('Tasks')"
+  },
+  {
+   "waitFor": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan')"
+  },
+  {
+   "scroll": {
+    "to": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan')"
+   },
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "role=button[name='Mulai']",
+    "within": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan')"
+   },
    "pauseAfter": 1200
   },
   {
+   "waitFor": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan') a:has-text('Kirim hasil')"
+  },
+  {
+   "scroll": {
+    "to": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan')"
+   },
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "text=Kirim hasil",
+    "within": "css=article.task-tile:has-text('Pendaftaran Sekolah 2027'):has-text('Materi Iklan')"
+   }
+  },
+  {
+   "waitFor": "css=#task-panel #submit-result"
+  },
+  {
+   "pause": 1000
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel #checklist"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "click": "css=#task-panel .checklist li:first-child label",
+   "pauseAfter": 1200
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel #submit-result"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
    "type": "https://drive.example.test/brosur-ppdb-v1",
-   "into": "label=Tautan hasil"
+   "into": "css=#task-panel input[name=external_url]"
   },
   {
    "type": "Draf brosur dan caption, mohon dicek.",
-   "into": "label=Catatan singkat"
+   "into": "css=#task-panel textarea[name=submission_note]"
   },
   {
-   "click": "role=button[name='Kirim untuk Review']",
-   "pauseAfter": 800
+   "click": {
+    "find": "role=button[name='Kirim untuk Review']",
+    "within": "css=#task-panel"
+   },
+   "pauseAfter": 1500
   },
   {
    "waitFor": "text=Menunggu PIC atau manager meninjau hasil."
   },
   {
-   "scroll": {
-    "to": "top"
-   },
-   "pauseAfter": 2200
+   "pause": 2200
+  },
+  {
+   "click": "css=#task-panel button[data-bs-dismiss]",
+   "pauseAfter": 2000
   }
  ]
 }

@@ -27,7 +27,7 @@
                     <select id="t-pic" name="pic_user_id" class="form-select mb-3">@foreach($people->where('company_id', $project->company_id)->unique('id') as $o)<option value="{{ $o->id }}" @selected($o->id === $project->pic_user_id)>{{ $o->name }}</option>@endforeach</select>
                     <fieldset class="mb-3"><legend class="form-label">Divisi</legend><div class="d-flex flex-wrap gap-2">
                         @foreach($divisions->where('company_id', $project->company_id) as $d)<input type="checkbox" class="btn-check" name="divisions[]" value="{{ $d->id }}" id="td-{{ $d->id }}" @checked(in_array($d->id, $teamDivisions))><label class="btn btn-sm btn-outline-primary" for="td-{{ $d->id }}">{{ $d->name }}</label>@endforeach</div></fieldset>
-                    <fieldset class="mb-3"><legend class="form-label">Anggota</legend><div class="d-flex flex-wrap gap-2">
+                    <fieldset class="mb-3"><legend class="form-label">Anggota</legend><div class="d-flex flex-wrap gap-2" data-people-filter="label">
                         @foreach($people->where('company_id', $project->company_id)->unique('id') as $o)<input type="checkbox" class="btn-check" name="members[]" value="{{ $o->id }}" id="tm-{{ $o->id }}" @checked(in_array($o->id, $teamMembers))><label class="btn btn-sm btn-outline-primary" for="tm-{{ $o->id }}">{{ $o->name }}</label>@endforeach</div>
                         @error('members')<div class="text-danger small mt-1">{{ $message }}</div>@enderror</fieldset>
                     <button class="btn btn-primary" type="submit">Simpan tim</button>

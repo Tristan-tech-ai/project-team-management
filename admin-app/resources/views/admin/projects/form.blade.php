@@ -58,7 +58,7 @@
                                 <label class="btn btn-sm btn-outline-primary" for="dv-{{ $d->id }}">{{ $d->name }}</label></span>@endforeach</div>
                         @error('divisions')<div class="text-danger small mt-1">{{ $message }}</div>@enderror</fieldset>
                     <fieldset><legend class="form-label">Anggota project</legend>
-                        <div class="d-flex flex-wrap gap-2">@foreach($people->unique('id') as $o)
+                        <div class="d-flex flex-wrap gap-2" data-people-filter="span[data-company]">@foreach($people->unique('id') as $o)
                             <span data-company="{{ $o->company_id }}"><input type="checkbox" class="btn-check" name="members[]" value="{{ $o->id }}" id="mb-{{ $o->id }}" @checked(in_array($o->id, old('members', $teamMembers)))>
                                 <label class="btn btn-sm btn-outline-primary" for="mb-{{ $o->id }}">{{ $o->name }}</label></span>@endforeach</div>
                         <div class="form-text">Orang yang membantu beberapa divisi tetap dihitung satu kali.</div>

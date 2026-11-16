@@ -29,7 +29,7 @@
             </ol>
         </section>
     @endif
-    <div class="row g-3 mb-3">
+    <div class="row g-3 mb-3" data-refresh-region="stats">
         @foreach($stats as [$label, $value, $hint, $icon, $tone, $url])
             <div class="col-6 col-xl-3">
                 @if($url)<a href="{{ $url }}" class="panel stat-card stat-link h-100 {{ $tone }}">@else<div class="panel stat-card h-100 {{ $tone }}">@endif
@@ -41,10 +41,10 @@
     </div>
     <div class="row g-3 mb-3">
         <div class="col-xl-7">@include('shared.todo', ['todo' => $todo])</div>
-        <div class="col-xl-5"><div class="panel h-100"><div class="panel-head"><h2 class="panel-title">Keterlambatan</h2>
+        <div class="col-xl-5"><div class="panel h-100" data-refresh-region="overdue"><div class="panel-head"><h2 class="panel-title">Keterlambatan</h2>
                 @if($overdue->isNotEmpty())<a class="small" href="{{ route('tasks.index', ['overdue' => 1]) }}">Lihat semua</a>@endif</div>
             @forelse($overdue as $t)
-                <div class="list-row"><div class="min-w-0 flex-grow-1"><a class="fw-semibold" href="{{ route('tasks.show', $t) }}">{{ $t->title }}</a>
+                <div class="list-row"><div class="min-w-0 flex-grow-1"><a class="fw-semibold" href="{{ route('tasks.show', $t) }}" data-task-panel>{{ $t->title }}</a>
                     <div class="small muted text-truncate">{{ $t->project?->name }} · PIC {{ $t->pic?->name }}</div></div>
                     <span class="pill pill-late text-nowrap">{{ Dates::relative($t->due_at) }}</span></div>
             @empty

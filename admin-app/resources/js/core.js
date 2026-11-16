@@ -195,12 +195,12 @@ export function initAutoSubmit() {
 }
 
 // I4 quick deadline choices under a date field: today, tomorrow, Friday, one week later (17.00, end of the working day).
-export function initQuickDates() {
+export function initQuickDates(root = document) {
     const pad = (n) => String(n).padStart(2, '0');
     const value = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T17:00`;
     const at = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return d; };
     const friday = () => { const d = new Date(); const add = (5 - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + (d.getDay() === 5 && d.getHours() < 17 ? 0 : add)); return d; };
-    document.querySelectorAll('[data-quick-dates]').forEach((wrapper) => {
+    root.querySelectorAll('[data-quick-dates]').forEach((wrapper) => {
         const input = wrapper.querySelector('input[type="datetime-local"], input[type="date"]');
         if (!input || wrapper.querySelector('.quick-dates')) return;
         const box = document.createElement('div');
@@ -343,8 +343,8 @@ export function initSafeForms() {
 }
 
 // I16 term explanations: Bootstrap popovers that open on click, tap, or keyboard focus (never hover only).
-export function initHints(Popover) {
-    document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new Popover(el));
+export function initHints(Popover, root = document) {
+    root.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => Popover.getOrCreateInstance(el));
 }
 
 // I7 bell in the header: the "Perlu kamu kerjakan" list, fetched after the page is shown (no extra wait on every page).
@@ -362,6 +362,7 @@ export async function initTodoBell() {
         button.setAttribute('aria-label', items.length ? `Perlu kamu kerjakan: ${items.length}` : 'Perlu kamu kerjakan: tidak ada');
         box.replaceChildren(...(items.length ? items.map((item) => {
             const a = Object.assign(document.createElement('a'), { className: `dropdown-item todo-menu-item tone-${item.tone}`, href: item.url });
+            if (item.panel) a.dataset.taskPanel = ''; // I3: a task opens in the side panel
             const text = document.createElement('span');
             text.className = 'min-w-0';
             text.append(Object.assign(document.createElement('span'), { className: 'd-block fw-semibold text-truncate', textContent: item.title }),
@@ -387,8 +388,8 @@ export function initFirstSteps() {
 }
 
 // File picker with an Indonesian label: shows the chosen file name.
-export function initFilePickers() {
-    document.querySelectorAll('[data-file-input]').forEach((input) => {
+export function initFilePickers(root = document) {
+    root.querySelectorAll('[data-file-input]').forEach((input) => {
         const name = input.closest('.file-pick')?.querySelector('[data-file-name]');
         input.addEventListener('change', () => { if (name) name.textContent = input.files[0]?.name ?? 'Belum ada berkas dipilih'; });
     });
@@ -427,5 +428,267 @@ export function fixAccessibility() {
             el.setAttribute('aria-label', title ? `Tabel ${title}` : 'Tabel data');
         }
         el.setAttribute('role', 'region');
+    });
+}
+
+// I3: after the side panel changed a task, the page behind refreshes in place. Regions marked data-refresh-region are
+// replaced from a fresh copy of this page (scroll positions of data-keep-scroll parts are kept); DataTables reload
+// their current page on the ptm:tasks-changed event. If the refresh fails the page simply stays as it was.
+export async function refreshRegions() {
+    const regions = [...document.querySelectorAll('[data-refresh-region]')];
+    if (!regions.length) return;
+    try {
+        const r = await fetch(window.location.href, { headers: { Accept: 'text/html' }, credentials: 'same-origin' });
+        if (!r.ok) return;
+        const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+        regions.forEach((old) => {
+            const fresh = doc.querySelector(`[data-refresh-region="${CSS.escape(old.dataset.refreshRegion)}"]`);
+            if (!fresh || !document.body.contains(old)) return;
+            const kept = new Map([...old.querySelectorAll('[data-keep-scroll]')].map((x) => [x.dataset.keepScroll, [x.scrollLeft, x.scrollTop]]));
+            const [left, top] = [old.scrollLeft, old.scrollTop];
+            old.replaceWith(fresh);
+            fresh.scrollLeft = left;
+            fresh.scrollTop = top;
+            fresh.querySelectorAll('[data-keep-scroll]').forEach((x) => {
+                const at = kept.get(x.dataset.keepScroll);
+                if (at) [x.scrollLeft, x.scrollTop] = at;
+            });
+            document.dispatchEvent(new CustomEvent('ptm:region-replaced', { detail: fresh }));
+        });
+    } catch {
+        // Network trouble: the page keeps what it showed; a reload shows the latest.
+    }
+}
+
+// I3 task detail as a side panel. Links marked data-task-panel open the task over the board, list, or dashboard, so the
+// column, filters, and scroll position stay. Ctrl/Cmd/Shift or middle click still opens the full page. Forms inside are
+// sent to the same endpoints as JSON (same permission and status rules) and the panel reloads with the result.
+// On phones the panel fills the screen and the Back button closes it.
+export function initTaskPanel(Offcanvas, { onContent } = {}) {
+    const el = document.getElementById('task-panel');
+    if (!el) return;
+    const panel = Offcanvas.getOrCreateInstance(el);
+    const body = el.querySelector('[data-task-panel-body]');
+    const title = el.querySelector('#task-panel-title');
+    const project = el.querySelector('[data-task-panel-project]');
+    const full = el.querySelector('[data-task-panel-full]');
+    let current = '';
+    let trigger = null;
+    let triggerHref = '';
+    let changed = false;
+    let pushed = false;
+
+    const message = (text) => {
+        const box = Object.assign(document.createElement('div'), { className: 'empty-state py-4' });
+        box.append(Object.assign(document.createElement('strong'), { textContent: text }),
+            Object.assign(document.createElement('a'), { href: current || '#', textContent: 'Buka halaman task' }));
+        body.replaceChildren(box);
+    };
+    const skeleton = () => {
+        const box = Object.assign(document.createElement('div'), { className: 'placeholder-glow task-panel-loading' });
+        box.setAttribute('aria-hidden', 'true');
+        ['col-5', 'col-12', 'col-9', 'col-12', 'col-7', 'col-10'].forEach((w) => box.append(Object.assign(document.createElement('span'), { className: `placeholder ${w}` })));
+        const status = Object.assign(document.createElement('p'), { className: 'visually-hidden', textContent: 'Memuat task...' });
+        status.setAttribute('role', 'status');
+        body.replaceChildren(status, box);
+    };
+    const jumpTo = (hash) => {
+        if (!hash || hash === '#') return;
+        const target = body.querySelector(`#${CSS.escape(hash.slice(1))}`);
+        if (!target) return;
+        target.scrollIntoView({ block: 'start' });
+        target.querySelector('input:not([type=hidden]):not([type=checkbox]), textarea')?.focus({ preventScroll: true });
+    };
+
+    async function load(url, hash = '') {
+        current = url;
+        full.href = url + hash;
+        const address = new URL(url, window.location.href);
+        address.searchParams.set('panel', '1');
+        try {
+            const r = await fetch(address, { headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            if (r.status === 403) throw new Error('Kamu tidak punya akses ke task ini.');
+            if (r.status === 404) throw new Error('Task ini sudah tidak ada.');
+            if (!r.ok) throw new Error('Task belum bisa dimuat. Coba lagi sebentar.');
+            const content = new DOMParser().parseFromString(await r.text(), 'text/html').querySelector('[data-task-panel-content]');
+            if (!content) throw new Error('Sesimu sudah berakhir. Muat ulang halaman untuk masuk lagi.');
+            if (current !== url) return; // another task was opened meanwhile
+            body.replaceChildren(content);
+            // The button that was pressed is gone after a reload: keep focus inside the panel so Esc and Tab still work there.
+            if (!el.contains(document.activeElement) || document.activeElement === document.body) el.focus({ preventScroll: true });
+            title.textContent = content.dataset.title;
+            project.textContent = content.dataset.project ?? '';
+            onContent?.(content);
+            jumpTo(hash);
+        } catch (error) {
+            if (current === url) message(error.message);
+        }
+    }
+
+    const showErrors = (form, data, status) => {
+        form.querySelectorAll('.is-invalid').forEach((x) => x.classList.remove('is-invalid'));
+        form.querySelectorAll('[data-panel-error]').forEach((x) => x.remove());
+        let first = null;
+        Object.entries(data.errors ?? {}).forEach(([name, texts]) => {
+            const field = form.querySelector(`[name="${CSS.escape(name)}"], [name="${CSS.escape(name)}[]"]`)
+                ?? (name === 'status' || name === 'decision' ? form.querySelector('[type=submit]') : null);
+            const text = [texts].flat()[0];
+            if (!field) { first ??= { text }; return; }
+            if (field.type !== 'submit' && field.type !== 'hidden') field.classList.add('is-invalid');
+            first ??= { text, field };
+            // One rule can name two fields (link or file): the sentence is shown once.
+            if ([...form.querySelectorAll('[data-panel-error]')].some((x) => x.textContent === text)) return;
+            const note = Object.assign(document.createElement('div'), { className: 'invalid-feedback d-block', textContent: text });
+            note.dataset.panelError = '';
+            (field.closest('.file-pick, .form-check') ?? field).insertAdjacentElement('afterend', note);
+        });
+        const fallback = status === 403 ? 'Kamu tidak punya izin untuk aksi ini.'
+            : status === 419 ? 'Halaman sudah lama terbuka. Muat ulang, lalu coba lagi.'
+                : (data.message && status < 500 ? data.message : 'Perubahan tidak tersimpan. Coba lagi.');
+        notify(first?.text ?? fallback, 'error');
+        first?.field?.focus?.();
+    };
+
+    let closing = false;
+    el.addEventListener('hide.bs.offcanvas', () => { closing = true; });
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[data-task-panel]');
+        if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        openTask(link.href, link.textContent.trim(), link);
+    });
+    // Scripts that draw their own task links (calendar, command palette) ask for the panel with this event.
+    document.addEventListener('ptm:open-task', (e) => openTask(e.detail.url, e.detail.title ?? ''));
+    function openTask(href, label = '', link = null) {
+        // A task picked while the panel is still closing opens once it has closed (the close would otherwise clear it).
+        if (closing) { el.addEventListener('hidden.bs.offcanvas', () => openTask(href, label, link), { once: true }); return; }
+        const address = new URL(href, window.location.href);
+        const hash = address.hash;
+        address.hash = '';
+        trigger = link ?? document.activeElement;
+        triggerHref = link?.getAttribute('href') ?? '';
+        skeleton();
+        title.textContent = label || 'Detail task';
+        project.textContent = '';
+        if (!el.classList.contains('show')) panel.show();
+        load(address.toString(), hash);
+    }
+
+    // Links to a part of the same task (#submit-result, #review) scroll inside the panel instead of adding history entries.
+    body.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link) return;
+        e.preventDefault();
+        jumpTo(link.getAttribute('href'));
+    });
+
+    body.addEventListener('change', (e) => { if (e.target.matches?.('[data-check-subtask]')) changed = true; });
+
+    body.addEventListener('submit', async (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement) || form.method !== 'post') return;
+        if (form.dataset.confirm && form.dataset.confirmed !== '1') return; // the confirmation dialog asks first, then submits again
+        e.preventDefault();
+        delete form.dataset.confirmed;
+        const data = new FormData(form, e.submitter ?? undefined);
+        const buttons = [...form.querySelectorAll('button[type=submit], button:not([type])')];
+        if (form.contains(document.activeElement)) el.focus({ preventScroll: true }); // a disabled button would drop focus to the page
+        buttons.forEach((b) => { b.disabled = true; b.setAttribute('aria-busy', 'true'); });
+        try {
+            const r = await fetch(form.action, {
+                method: 'POST', body: data, credentials: 'same-origin',
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken() },
+            });
+            let result = {};
+            try { result = await r.json(); } catch { result = {}; }
+            if (!r.ok) { showErrors(form, result, r.status); return; }
+            changed = true;
+            document.querySelectorAll('.toast-area .alert-danger').forEach((x) => x.remove()); // an earlier error no longer applies
+            notify(result.message ?? 'Tersimpan.');
+            if (result.deleted) { panel.hide(); return; }
+            const statusBefore = body.querySelector('[data-task-panel-content]')?.dataset.status;
+            body.setAttribute('aria-busy', 'true'); // the saved result is on its way: the old content is dimmed until it arrives
+            await load(current);
+            body.removeAttribute('aria-busy');
+            // A new status (started, sent for review, accepted) is shown from the top, where the status and next step are.
+            if (body.querySelector('[data-task-panel-content]')?.dataset.status !== statusBefore) body.scrollTop = 0;
+        } catch {
+            notify('Perubahan tidak tersimpan. Periksa koneksi, lalu coba lagi.', 'error');
+        } finally {
+            body.removeAttribute('aria-busy');
+            buttons.forEach((b) => { b.disabled = false; b.removeAttribute('aria-busy'); });
+        }
+    });
+
+    el.addEventListener('shown.bs.offcanvas', () => {
+        if (!pushed) {
+            window.history.pushState({ ...(window.history.state ?? {}), taskPanel: true }, '');
+            pushed = true;
+        }
+    });
+    // Esc closes the panel wherever focus is (a dialog on top, such as the confirmation, closes first).
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && el.classList.contains('show') && !document.querySelector('.modal.show')) panel.hide();
+    });
+    let ownBack = false; // the Back step taken by closing the panel ourselves must not close a panel opened right after
+    window.addEventListener('popstate', () => {
+        if (ownBack) { ownBack = false; return; }
+        if (!pushed) return;
+        pushed = false;
+        panel.hide();
+    });
+    el.addEventListener('hidden.bs.offcanvas', async () => {
+        closing = false;
+        body.replaceChildren();
+        current = '';
+        const [lastTrigger, lastHref] = [trigger, triggerHref]; // another task may be opened while the page refreshes
+        if (pushed) { pushed = false; ownBack = true; window.history.back(); }
+        if (!changed) { lastTrigger?.focus({ preventScroll: true }); return; }
+        changed = false;
+        document.dispatchEvent(new CustomEvent('ptm:tasks-changed'));
+        await refreshRegions();
+        if (el.classList.contains('show')) return;
+        const again = lastHref && [...document.querySelectorAll('a[data-task-panel]')].find((a) => a.getAttribute('href') === lastHref);
+        again?.focus({ preventScroll: true });
+    });
+}
+
+// I5 long people lists (pills or check boxes): a "Cari nama" box narrows the list while typing. Ticked people always stay
+// visible, so the filter never hides a choice that will be saved. Lists shorter than 8 people get no box. The box belongs
+// to no form, so typing in it never submits or marks the form as changed.
+export function initPeopleFilter(root = document) {
+    root.querySelectorAll('[data-people-filter]').forEach((list) => {
+        if (list.dataset.peopleFilterReady) return;
+        list.dataset.peopleFilterReady = '1';
+        const itemSelector = list.dataset.peopleFilter || 'label';
+        const id = `people-filter-${Math.random().toString(36).slice(2, 8)}`;
+        const box = Object.assign(document.createElement('div'), { className: 'people-filter' });
+        const label = Object.assign(document.createElement('label'), { className: 'visually-hidden', htmlFor: id, textContent: 'Cari nama' });
+        const input = Object.assign(document.createElement('input'), { type: 'search', id, className: 'form-control form-control-sm', placeholder: 'Cari nama', autocomplete: 'off' });
+        input.setAttribute('form', `${id}-none`);
+        const count = Object.assign(document.createElement('span'), { className: 'small muted' });
+        count.setAttribute('aria-live', 'polite');
+        box.append(label, input, count);
+        list.before(box);
+        const checkbox = (item) => (item.matches('label') ? document.getElementById(item.htmlFor) : item.querySelector('input[type=checkbox]'));
+        const apply = () => {
+            const q = input.value.trim().toLowerCase();
+            let total = 0;
+            let shown = 0;
+            list.querySelectorAll(itemSelector).forEach((item) => {
+                if (item.closest('[hidden]')) return; // hidden by another rule, such as people of another company
+                total += 1;
+                const match = !q || item.textContent.toLowerCase().includes(q) || checkbox(item)?.checked;
+                item.toggleAttribute('data-filtered', !match);
+                shown += match ? 1 : 0;
+            });
+            box.hidden = total < 8 && !q;
+            count.textContent = q ? `${shown} dari ${total}` : '';
+        };
+        input.addEventListener('input', apply);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+        // Lists that are rebuilt (Tambah task after choosing a project) or narrowed by company are filtered again.
+        new MutationObserver(apply).observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+        apply();
     });
 }

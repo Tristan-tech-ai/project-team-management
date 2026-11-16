@@ -77,6 +77,32 @@ try {
         await Promise.all([a.waitForNavigation(), a.click('form[action$="/subtasks"] button[type=submit]')]);
     }
     record(true, 'task punya 2 pelaksana + 2 checklist');
+
+    // 3b. I3 side panel: a task opens over the board, a checklist item is added there, Esc closes it; the board stays and
+    // shows the new count. I13 bulk: two other To Do tasks are started together from the project task list.
+    await a.goto(`${ADMIN}/projects/${projectId}/board`);
+    const backlogIds = await a.locator('[data-kanban-column][data-status=backlog] [data-task-id]').evaluateAll((els) => els.map((e) => e.dataset.taskId));
+    const others = backlogIds.filter((id) => id !== secondId);
+    const boardUrl = a.url();
+    await a.locator(`[data-task-id="${others[0]}"] a.task-title`).click();
+    const panel = a.locator('#task-panel');
+    await panel.locator('#new-subtask').waitFor({ timeout: 30_000 });
+    await panel.locator('#new-subtask').fill('Cek ejaan materi');
+    await panel.locator('form[action$="/subtasks"] button[type=submit]').click();
+    await expect(panel.locator('[data-checklist-count]')).toHaveText('0 / 1', { timeout: 30_000 });
+    await a.screenshot({ path: `${EVIDENCE}/02b-side-panel.png` });
+    await a.keyboard.press('Escape');
+    await expect(a.locator(`[data-task-id="${others[0]}"] [data-sub-count]`)).toContainText('0 / 1', { timeout: 30_000 });
+    if (a.url() !== boardUrl) throw new Error(`panel mengubah alamat: ${a.url()}`);
+    record(true, 'panel samping: checklist ditambah tanpa meninggalkan papan, Esc menutup, kartu menampilkan 0 / 1');
+    await a.goto(`${ADMIN}/projects/${projectId}/tasks`);
+    for (const id of others.slice(1, 3)) await a.locator(`[data-bulk-row][value="${id}"]`).check({ timeout: 30_000 });
+    await a.selectOption('[data-bulk-action]', 'start');
+    await a.locator('[data-bulk-form]').getByRole('button', { name: 'Terapkan' }).click();
+    await expect(a.locator('.toast-area')).toContainText('2 task diperbarui', { timeout: 30_000 });
+    await a.goto(`${ADMIN}/projects/${projectId}/board`);
+    for (const id of others.slice(1, 3)) await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${id}"]`)).toHaveCount(1);
+    record(true, 'aksi massal: 2 task Antrian dimulai sekaligus dari Daftar Task (aturan status tiap task tetap berlaku)');
     await adminContext.close();
 
     // 4. Member in the Team App, 390 px phone: status dropdown, checklist ticked without opening an edit page, submit result.

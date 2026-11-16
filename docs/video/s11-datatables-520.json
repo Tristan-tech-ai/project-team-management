@@ -1,9 +1,12 @@
 {
- "name": "s10-datatables-520",
+ "name": "s11-datatables-520",
  "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
  "steps": [
   {
-   "pause": 500
+   "pause": 600
   },
   {
    "type": "radit@example.test",
@@ -18,30 +21,33 @@
    "pauseAfter": 600
   },
   {
+   "waitFor": "#todo-title"
+  },
+  {
    "goto": "/projects/4/tasks"
   },
   {
-   "waitFor": ".dt-info"
+   "waitFor": "css=.dt-info"
   },
   {
-   "hover": ".dt-info",
+   "hover": "css=.dt-info",
    "zoom": 1.4,
    "pauseAfter": 1600
   },
   {
    "scroll": {
-    "to": ".dt-paging"
+    "to": "css=.dt-paging"
    },
    "zoom": false,
    "pauseAfter": 600
   },
   {
-   "click": ".dt-paging button[data-dt-idx='1']",
+   "click": "css=.dt-paging button[data-dt-idx='1']",
    "zoom": 1.4,
    "pauseAfter": 1400
   },
   {
-   "hover": ".dt-info",
+   "hover": "css=.dt-info",
    "zoom": 1.4,
    "pauseAfter": 1400
   },
@@ -54,14 +60,14 @@
   },
   {
    "type": "512",
-   "into": ".dt-search input",
+   "into": "css=.dt-search input",
    "zoom": 1.4,
    "pauseAfter": 1600
   },
   {
-   "hover": ".dt-info",
+   "hover": "css=.dt-info",
    "zoom": 1.4,
-   "pauseAfter": 2200
+   "pauseAfter": 2400
   }
  ]
 }

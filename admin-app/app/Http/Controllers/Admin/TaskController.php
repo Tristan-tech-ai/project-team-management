@@ -9,7 +9,9 @@ use App\Models\TaskSubmission;
 use App\Models\TaskTemplate;
 use App\Support\ProjectPeople;
 use App\Models\User;
+use App\Http\Requests\Work\BulkTaskRequest;
 use App\Services\Scope;
+use App\Services\TaskBulkService;
 use App\Services\TaskWorkflowService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +26,20 @@ class TaskController extends Controller
         $this->authorize('viewAny', Task::class);
 
         return view('admin.tasks.index', ['title' => 'Semua Task', 'feed' => route('tasks.data'), 'mine' => false,
-            'people' => Scope::filterAssignees($request->user())]);
+            'people' => Scope::filterAssignees($request->user()),
+            'bulk' => TaskBulkService::options($request->user(), Scope::projects($request->user())->select('projects.id'))]);
+    }
+
+    /** I13: POST /tasks/bulk starts several tasks, changes their PIC, or adds an assignee; skipped tasks come back with the reason. */
+    public function bulk(BulkTaskRequest $request, TaskBulkService $bulk): JsonResponse
+    {
+        $result = $bulk->apply($request->user(), (array) $request->input('ids'), $request->input('action'), $request->integer('user_id') ?: null);
+        $message = $result['done'] ? "{$result['done']} task diperbarui." : 'Tidak ada task yang berubah.';
+        if ($result['skipped']) {
+            $message .= ' '.count($result['skipped']).' dilewati.';
+        }
+
+        return response()->json(['message' => $message] + $result);
     }
 
     public function data(Request $request): JsonResponse
@@ -93,7 +108,8 @@ class TaskController extends Controller
             'timeEntries' => fn ($t) => $t->with('user:id,name')->latest('work_date')->limit(20)]);
         $u = $request->user();
 
-        return view('admin.tasks.show', [
+        // I3: ?panel=1 returns only the detail for the side panel (same data, same permissions).
+        return view($request->boolean('panel') ? 'shared.task-panel-content' : 'admin.tasks.show', [
             'task' => $task,
             'actions' => TaskWorkflowService::primaryAction($task),
             'can' => ['update' => $u->can('update', $task), 'status' => $u->can('moveStatus', $task), 'send' => $u->can('submit', $task),

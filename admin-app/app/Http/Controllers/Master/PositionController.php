@@ -51,9 +51,14 @@ class PositionController extends Controller
         return $this->form(new Position(['is_active' => true]));
     }
 
-    public function store(PositionRequest $request): RedirectResponse
+    public function store(PositionRequest $request): RedirectResponse|JsonResponse
     {
-        Position::create($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $position = Position::create($request->validated() + ['is_active' => $request->boolean('is_active', true)]);
+        if ($request->expectsJson()) {
+            // U5.1 quick add from the member form: the new position becomes a choice for that company's divisions.
+            return response()->json(['id' => $position->id, 'name' => $position->name, 'company_id' => $position->company_id,
+                'message' => "Jabatan {$position->name} ditambahkan."], 201);
+        }
 
         return redirect()->route('positions.index')->with('ok', 'Jabatan tersimpan.');
     }

@@ -34,6 +34,19 @@ export function initCalendar() {
         eventDidMount: (info) => {
             const p = info.event.extendedProps;
             info.el.title = [info.event.title, p.project, p.status].filter(Boolean).join(' · ');
+            // I3: a task opens in the side panel, so the month and mode stay where they were.
+            // The month grid renders the event itself as a link; the list view (phones) puts the link inside the row.
+            const link = info.el.matches('a[href]') ? info.el : info.el.querySelector('a[href]');
+            if (link && /\/tasks\/\d+/.test(link.getAttribute('href'))) link.dataset.taskPanel = '';
+        },
+        // I3: a task opens in the side panel, so the month and mode stay. FullCalendar itself follows an event link in the
+        // list view (phones), so the click is taken over here; Ctrl or Cmd click still opens the full page.
+        eventClick: (info) => {
+            const url = info.event.url;
+            const e = info.jsEvent;
+            if (!url || !/\/tasks\/\d+/.test(url) || !document.getElementById('task-panel') || e.ctrlKey || e.metaKey || e.shiftKey || e.button > 0) return;
+            e.preventDefault();
+            document.dispatchEvent(new CustomEvent('ptm:open-task', { detail: { url, title: info.event.extendedProps.task ?? info.event.title } }));
         },
         noEventsContent: 'Tidak ada jadwal di rentang ini.',
         // Accessibility: day cell labels follow the visible text; arrow icons are decorative (buttons are labelled).
@@ -41,6 +54,7 @@ export function initCalendar() {
         datesSet: () => { el.querySelectorAll('.fc-icon').forEach((i) => { i.setAttribute('aria-hidden', 'true'); i.removeAttribute('role'); }); },
     });
     calendar.render();
+    document.addEventListener('ptm:tasks-changed', () => calendar.refetchEvents());
     document.querySelectorAll('[data-calendar-mode]').forEach((button) => button.addEventListener('click', () => {
         mode = button.dataset.calendarMode;
         document.querySelectorAll('[data-calendar-mode]').forEach((x) => {

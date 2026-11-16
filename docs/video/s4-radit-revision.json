@@ -1,9 +1,12 @@
 {
  "name": "s4-radit-revision",
  "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
  "steps": [
   {
-   "pause": 500
+   "pause": 600
   },
   {
    "type": "radit@example.test",
@@ -15,35 +18,46 @@
   },
   {
    "click": "role=button[name='Masuk']",
-   "pauseAfter": 500
+   "pauseAfter": 600
   },
   {
-   "goto": "/tasks/review"
+   "waitFor": "css=.todo a:has-text('Review hasil Materi Iklan'):has-text('Pendaftaran Sekolah 2027')"
   },
   {
-   "waitFor": "text=Draf brosur dan caption, mohon dicek."
+   "hover": "css=.todo a:has-text('Review hasil Materi Iklan'):has-text('Pendaftaran Sekolah 2027')",
+   "zoom": 1.4,
+   "pauseAfter": 1600
   },
   {
-   "hover": "text=Draf brosur dan caption, mohon dicek.",
-   "zoom": 1.5,
+   "click": "css=.todo a:has-text('Review hasil Materi Iklan'):has-text('Pendaftaran Sekolah 2027')"
+  },
+  {
+   "waitFor": "css=#task-panel #review"
+  },
+  {
+   "hover": "css=#task-panel #review",
+   "zoom": 1.3,
    "pauseAfter": 1800
   },
   {
    "type": "Tambahkan jadwal pendaftaran gelombang 2 dan logo sekolah.",
-   "into": "label=Alasan revisi",
+   "into": "css=#task-panel textarea[name=review_note]",
    "zoom": 1.4
   },
   {
-   "click": "role=button[name='Revisi']",
-   "pauseAfter": 900
+   "click": {
+    "find": "role=button[name='Kembalikan untuk revisi']",
+    "within": "css=#task-panel"
+   },
+   "pauseAfter": 1500
   },
   {
-   "waitFor": "text=Riwayat review"
+   "waitFor": "css=#task-panel .revision-note"
   },
   {
-   "hover": "text=Tambahkan jadwal pendaftaran gelombang 2 dan logo sekolah.",
+   "hover": "css=#task-panel .revision-note",
    "zoom": 1.4,
-   "pauseAfter": 2400
+   "pauseAfter": 2600
   }
  ]
 }

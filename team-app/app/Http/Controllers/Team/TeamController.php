@@ -111,7 +111,8 @@ class TeamController extends Controller
             'timeEntries' => fn ($t) => $t->with('user:id,name')->latest('work_date')->limit(20)]);
         $u = $request->user();
 
-        return view('team.task', [
+        // I3: ?panel=1 returns only the detail for the side panel (same data, same permissions).
+        return view($request->boolean('panel') ? 'shared.task-panel-content' : 'team.task', [
             'task' => $task, 'actions' => TaskWorkflowService::primaryAction($task),
             'can' => ['update' => $u->can('update', $task), 'status' => $u->can('moveStatus', $task), 'send' => $u->can('submit', $task),
                 'review' => $u->can('review', $task), 'assign' => $u->can('assign', $task), 'delete' => $u->can('delete', $task)],

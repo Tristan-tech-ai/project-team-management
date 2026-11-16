@@ -1,0 +1,85 @@
+{
+ "name": "s9-admin-settings",
+ "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
+ "steps": [
+  {
+   "pause": 600
+  },
+  {
+   "type": "admin@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "css=.admin-sidebar.desktop"
+  },
+  {
+   "click": "css=.admin-sidebar.desktop a.side-link:has-text('Pengaturan Menu')"
+  },
+  {
+   "waitFor": "[data-menu-editor]"
+  },
+  {
+   "hover": "[data-menu-editor]",
+   "zoom": 1.2,
+   "pauseAfter": 1600
+  },
+  {
+   "drag": "css=.menu-group:has(input[data-group-title][value='Kalender']) [data-group-handle]",
+   "to": "css=.menu-group:has(input[data-group-title][value='Task']) .menu-group-head",
+   "pauseAfter": 1200
+  },
+  {
+   "click": "role=button[name='Simpan pengaturan']",
+   "pauseAfter": 1500
+  },
+  {
+   "hover": "css=.admin-sidebar.desktop .side-nav",
+   "zoom": 1.3,
+   "pauseAfter": 2200
+  },
+  {
+   "click": "css=.admin-sidebar.desktop a.side-link:has-text('Role & Hak Akses')"
+  },
+  {
+   "waitFor": "[data-role-matrix]"
+  },
+  {
+   "hover": "[data-role-matrix]",
+   "zoom": 1.2,
+   "pauseAfter": 1800
+  },
+  {
+   "click": {
+    "find": "label=Hapus Task",
+    "exact": true
+   },
+   "zoom": 1.4
+  },
+  {
+   "click": "role=button[name='Simpan hak akses Manager']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "css=[data-role-matrix]"
+  },
+  {
+   "hover": {
+    "find": "label=Hapus Task",
+    "exact": true
+   },
+   "zoom": 1.5,
+   "pauseAfter": 2400
+  }
+ ]
+}

@@ -6,9 +6,10 @@
     $subTotal = $task->subtasks->count();
     $subDone = $task->subtasks->where('status', 'done')->count();
     $pending = $task->submissions->firstWhere('status', 'pending');
+    $inPanel = $panel ?? false; // I3: in the side panel everything stacks in one column
 @endphp
 <div class="row g-3">
-    <div class="col-lg-8">
+    <div class="{{ $inPanel ? 'col-12' : 'col-lg-8' }}">
         <div class="panel mb-3">
             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <x-badge :code="$late ? 'late' : $task->status" :text="($late ? 'Terlambat · ' : '').Codes::label(Codes::TASK_STATUS, $task->status)"/>
@@ -97,9 +98,10 @@
                 <h2 class="panel-title">Tinjau hasil dari {{ $pending->submitter?->name }}</h2>
                 @include('shared.submission-content', ['s' => $pending])
                 <div class="row g-2 mt-2">
-                    <div class="col-md-4"><form method="post" action="{{ route('submissions.review', $pending) }}">@csrf<input type="hidden" name="decision" value="approved">
+                    {{-- Grid breakpoints follow the screen, not the panel width: in the panel both parts take the full width. --}}
+                    <div class="{{ $inPanel ? 'col-12' : 'col-md-4' }}"><form method="post" action="{{ route('submissions.review', $pending) }}">@csrf<input type="hidden" name="decision" value="approved">
                         <button class="btn btn-success w-100" type="submit"><x-icon name="circle-check"/> Terima, task selesai</button></form></div>
-                    <div class="col-md-8"><form method="post" action="{{ route('submissions.review', $pending) }}">@csrf<input type="hidden" name="decision" value="revision">
+                    <div class="{{ $inPanel ? 'col-12' : 'col-md-8' }}"><form method="post" action="{{ route('submissions.review', $pending) }}">@csrf<input type="hidden" name="decision" value="revision">
                         <label class="form-label" for="rv-{{ $pending->id }}">Alasan revisi</label>
                         <textarea id="rv-{{ $pending->id }}" name="review_note" class="form-control mb-2 @error('review_note') is-invalid @enderror" rows="2" required minlength="5" placeholder="Apa yang perlu diperbaiki?">{{ old('review_note') }}</textarea>
                         @error('review_note')<div class="invalid-feedback d-block mb-2">{{ $message }}</div>@enderror
@@ -123,7 +125,7 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
+    <div class="{{ $inPanel ? 'col-12' : 'col-lg-4' }}">
         @if($can['status'])
             <form method="post" action="{{ route('tasks.time.store', $task) }}" class="panel mb-3">@csrf
                 <h2 class="panel-title">Catat waktu kerja</h2>
@@ -138,11 +140,15 @@
             <form method="post" action="{{ route('tasks.assignees', $task) }}" class="panel mb-3">@csrf @method('PUT')
                 <h2 class="panel-title">PIC dan pelaksana</h2>
                 <x-field name="pic_user_id" label="PIC" type="select" :options="$memberOptions" :value="$task->pic_user_id" required/>
+                @php($load = \App\Support\ProjectPeople::openTasks(collect($memberOptions)->keys()->map(fn ($k) => (int) $k)->all()))
                 <fieldset class="mb-2"><legend class="form-label">Pelaksana</legend>
+                    {{-- I5: the number beside a name is how many open tasks that person holds; long lists get a name search. --}}
+                    <div data-people-filter=".form-check">
                     @foreach($memberOptions as $id => $name)
                         <div class="form-check"><input class="form-check-input" type="checkbox" name="assignees[]" value="{{ $id }}" id="as-{{ $id }}" @checked($task->assignees->contains('id', $id))>
-                            <label class="form-check-label" for="as-{{ $id }}">{{ $name }}</label></div>
+                            <label class="form-check-label" for="as-{{ $id }}">{{ $name }} <span class="load-count" title="Task aktif yang sedang dipegang">{{ $load[$id] ?? 0 }}</span></label></div>
                     @endforeach
+                    </div>
                     @error('assignees')<div class="text-danger small">{{ $message }}</div>@enderror
                 </fieldset>
                 <button class="btn btn-outline-primary btn-sm" type="submit">Simpan pelaksana</button>
@@ -154,23 +160,45 @@
             <summary class="panel-title mb-0">Butuh geser deadline?</summary>
             <form method="post" action="{{ route('schedule-changes.store') }}" class="mt-3">@csrf
                 <input type="hidden" name="project_id" value="{{ $task->project_id }}"><input type="hidden" name="task_id" value="{{ $task->id }}">
-                <x-field data-quick-dates name="proposed_due_at" label="Deadline usulan" type="datetime-local" required hint="Deadline baru yang kamu ajukan. Berlaku setelah disetujui PIC atau manager; target awal tetap tercatat."/>
+                @if($task->due_at)
+                    {{-- A shift is counted from the current deadline (+3/+7/+14 days, same time), not from today. --}}
+                    <x-field name="proposed_due_at" label="Deadline usulan" type="datetime-local" required hint="Deadline baru yang kamu ajukan. Berlaku setelah disetujui PIC atau manager; target awal tetap tercatat."/>
+                    <div class="quick-dates mt-n2 mb-3" role="group" aria-label="Geser dari deadline sekarang ({{ Dates::dateTime($task->due_at) }})" data-base-project="{{ Dates::forInput($task->due_at) }}">
+                        <span class="small muted me-1">Dari deadline sekarang:</span>
+                        @foreach([3, 7, 14] as $days)<button type="button" class="quick-date" data-fill-days="{{ $days }}" data-target="#f-proposed_due_at">+{{ $days }} hari</button>@endforeach
+                    </div>
+                @else
+                    <x-field data-quick-dates name="proposed_due_at" label="Deadline usulan" type="datetime-local" required hint="Deadline baru yang kamu ajukan. Berlaku setelah disetujui PIC atau manager; target awal tetap tercatat."/>
+                @endif
                 <x-field name="reason" label="Alasan" type="textarea" required help="Disetujui PIC berizin atau manager. Target awal tetap tercatat."/>
                 <button class="btn btn-outline-primary btn-sm" type="submit">Ajukan</button>
             </form>
             </details>
         @endif
         @if($schedule->isNotEmpty())
-            <div class="panel mb-3"><h2 class="panel-title">Perubahan jadwal</h2>
+            @php($scheduleService = app(\App\Services\ScheduleChangeService::class))
+            <div class="panel mb-3" id="schedule"><h2 class="panel-title">Perubahan jadwal</h2>
                 @foreach($schedule as $j)
                     <div class="small border-bottom pb-2 mb-2"><x-badge :code="$j->status" :text="Codes::label(Codes::SCHEDULE_STATUS, $j->status)"/>
                         <div>{{ Dates::date($j->previous_due_at) }} menjadi {{ Dates::date($j->proposed_due_at) }}</div>
-                        <div class="muted">{{ $j->reason }} · {{ $j->requester?->name }}</div></div>
+                        <div class="muted">{{ $j->reason }} · {{ $j->requester?->name }}</div>
+                        {{-- The "Putuskan geser deadline" item in Perlu kamu kerjakan opens this task, so the decision is made here too. --}}
+                        @if($j->status === 'pending' && (int) $j->requested_by !== (int) auth()->id() && $scheduleService->canDecide(auth()->user(), $j))
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <form method="post" action="{{ route('schedule-changes.decision', $j) }}">@csrf<input type="hidden" name="decision" value="approved">
+                                    <button class="btn btn-sm btn-success" type="submit"><x-icon name="circle-check" :size="16"/> Setujui</button></form>
+                                <form method="post" action="{{ route('schedule-changes.decision', $j) }}" class="d-flex gap-2 flex-grow-1">@csrf<input type="hidden" name="decision" value="rejected">
+                                    <label class="visually-hidden" for="sc-{{ $j->id }}">Alasan penolakan</label>
+                                    <input id="sc-{{ $j->id }}" name="decision_note" class="form-control form-control-sm" placeholder="Alasan penolakan" required minlength="5">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Tolak</button></form>
+                            </div>
+                        @endif
+                    </div>
                 @endforeach</div>
         @endif
 
         @if($can['update'])
-            <details class="panel mb-3"><summary class="fw-semibold">Ubah isi task</summary>
+            <details class="panel mb-3 fold-panel"><summary class="panel-title mb-0">Ubah isi task</summary>
                 <form method="post" action="{{ route('tasks.update', $task) }}" class="mt-3">@csrf @method('PUT')
                     <x-field name="title" label="Judul" :value="$task->title" required/>
                     <x-field name="description" label="Deskripsi" type="textarea" :value="$task->description"/>

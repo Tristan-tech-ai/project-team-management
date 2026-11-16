@@ -156,3 +156,53 @@
 .first-steps-list li.is-done { color: var(--ptm-ink-3); text-decoration: line-through; }
 .first-steps-list li.is-done .icon { color: var(--ptm-done); }
 
+
+/* I13 bulk actions on task lists: a narrow tick column and a bar that sticks to the bottom while tasks are ticked. */
+.table .col-select { width: 44px; text-align: center; }
+.table .col-select .form-check-input { width: 1.25rem; height: 1.25rem; margin: 0; }
+/* The whole cell around the tick box is clickable (click area 44/40 px, Technical Guide 6.1). */
+.bulk-tick { display: inline-flex; align-items: center; justify-content: center; min-width: var(--ptm-hit); min-height: var(--ptm-hit); margin: -6px 0; cursor: pointer; }
+.bulk-bar { position: sticky; bottom: 0; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; padding: 12px 16px;
+    background: #fff; border: 1px solid var(--ptm-line); border-radius: var(--ptm-radius); box-shadow: var(--ptm-shadow-lg); }
+.bulk-bar[hidden] { display: none; }
+.bulk-count { white-space: nowrap; }
+.bulk-result { font-size: .875rem; color: var(--ptm-ink-2); border-top: 1px solid var(--ptm-line); padding-top: 8px; }
+.bulk-result ul { padding-left: 1.1rem; }
+.bulk-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex-grow: 1; }
+.bulk-controls .form-select { width: auto; max-width: 100%; }
+@media (max-width: 767.98px) {
+    /* Phone: three short rows (action + apply, person, select all + clear) instead of five full-width ones. */
+    .bulk-bar { gap: 8px; padding: 10px 12px; }
+    .bulk-controls { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "action apply" "user user" "page clear"; width: 100%; }
+    .bulk-controls [data-bulk-action] { grid-area: action; width: 100%; }
+    .bulk-controls [data-bulk-apply] { grid-area: apply; }
+    .bulk-controls [data-bulk-user] { grid-area: user; width: 100%; }
+    .bulk-controls [data-bulk-page] { grid-area: page; }
+    .bulk-controls [data-bulk-clear] { grid-area: clear; }
+    .bulk-controls .btn { width: 100%; white-space: normal; line-height: 1.2; }
+    .table-cards td.col-select { text-align: left; }
+}
+
+/* I9 command palette (Ctrl+K): a search box on top, grouped results, keyboard hints at the bottom. */
+.command-palette .modal-dialog { margin-top: 10vh; }
+.command-palette .modal-content { border: 0; border-radius: 16px; overflow: hidden; box-shadow: var(--ptm-shadow-lg); }
+.palette-search { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--ptm-line); }
+.palette-search > svg { color: var(--ptm-ink-3); flex-shrink: 0; }
+.palette-search .form-control { border: 0; box-shadow: none; padding-left: 0; font-size: 1.0625rem; min-height: var(--ptm-hit, 44px); }
+.palette-search .kbd { display: inline-flex; }
+.palette-list { list-style: none; margin: 0; padding: 6px 8px 8px; max-height: min(60vh, 460px); overflow-y: auto; }
+.palette-group { padding: 10px 8px 4px; font-size: .75rem; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--ptm-ink-3); }
+.palette-item { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 8px; border-radius: 10px; cursor: pointer; }
+.palette-item[aria-selected="true"] { background: var(--ptm-action-soft); }
+.palette-item[aria-disabled="true"] { cursor: default; }
+.palette-icon { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--ptm-sidebar-2); color: var(--ptm-ink-2); flex-shrink: 0; }
+.palette-icon svg { width: 18px; height: 18px; }
+.palette-key { display: inline-flex; min-width: 48px; flex-shrink: 0; }
+.palette-text { display: flex; flex-direction: column; min-width: 0; }
+.palette-label { font-weight: 600; color: var(--ptm-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-detail { font-size: .8125rem; color: var(--ptm-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-status { margin: 0; padding: 0 16px 8px; }
+.palette-status:empty { display: none; }
+.palette-foot { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 16px; border-top: 1px solid var(--ptm-line); background: var(--ptm-bg); }
+.palette-foot .kbd { display: inline-flex; margin-right: 4px; }
+.dropdown-item .kbd { display: inline-flex; }

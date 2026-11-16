@@ -65,7 +65,7 @@ class TaskActionController extends Controller
         return $this->respond($request, "Task {$task->title} ditambahkan ke Antrian.", ['task_id' => $task->id]);
     }
 
-    public function update(TaskUpdateRequest $request, Task $task): RedirectResponse
+    public function update(TaskUpdateRequest $request, Task $task): JsonResponse|RedirectResponse
     {
         $d = $request->validated();
         foreach (['scheduled_publish_at', 'published_at'] as $k) {
@@ -78,7 +78,7 @@ class TaskActionController extends Controller
         $task->update($d);
         $this->workflow->log($task, $request->user(), 'updated', 'Isi task diubah');
 
-        return back()->with('ok', 'Task tersimpan.');
+        return $this->respond($request, 'Task tersimpan.');
     }
 
     public function status(StatusRequest $request, Task $task): JsonResponse|RedirectResponse
@@ -88,11 +88,11 @@ class TaskActionController extends Controller
         return $this->respond($request, 'Status: '.Codes::label(Codes::TASK_STATUS, $t->status).'.', ['status' => $t->status, 'label' => Codes::label(Codes::TASK_STATUS, $t->status)]);
     }
 
-    public function assignees(AssigneeRequest $request, Task $task): RedirectResponse
+    public function assignees(AssigneeRequest $request, Task $task): JsonResponse|RedirectResponse
     {
         $this->teamService->setAssignees($task, (int) $request->input('pic_user_id'), (array) $request->input('assignees', []), $request->user());
 
-        return back()->with('ok', 'PIC dan pelaksana tersimpan.');
+        return $this->respond($request, 'PIC dan pelaksana tersimpan.');
     }
 
     public function subtask(SubtaskRequest $request, Task $task): JsonResponse|RedirectResponse
@@ -134,21 +134,21 @@ class TaskActionController extends Controller
         return $this->respond($request, $t->status === 'done' ? 'Hasil diterima. Task selesai.' : 'Dikembalikan untuk revisi.', ['status' => $t->status]);
     }
 
-    public function time(TimeEntryRequest $request, Task $task): RedirectResponse
+    public function time(TimeEntryRequest $request, Task $task): JsonResponse|RedirectResponse
     {
         TaskTimeEntry::create(['task_id' => $task->id, 'user_id' => $request->user()->id, 'work_date' => $request->date('work_date'),
             'minutes_spent' => $request->integer('minutes_spent'), 'description' => $request->input('description')]);
 
-        return back()->with('ok', 'Waktu kerja tercatat: '.$request->integer('minutes_spent').' menit.');
+        return $this->respond($request, 'Waktu kerja tercatat: '.$request->integer('minutes_spent').' menit.');
     }
 
-    public function destroy(Request $request, Task $task): RedirectResponse
+    public function destroy(Request $request, Task $task): JsonResponse|RedirectResponse
     {
         $this->authorize('delete', $task);
         $task->delete();
         $this->workflow->log($task, $request->user(), 'deleted', 'Task dihapus (bisa dipulihkan)');
 
-        return redirect()->back()->with('ok', "Task {$task->title} dihapus.");
+        return $this->respond($request, "Task {$task->title} dihapus.", ['deleted' => true]);
     }
 
     /** Download an attachment file: only users who can see its task. External links open directly. */
@@ -165,6 +165,7 @@ class TaskActionController extends Controller
         return $disk->download($attachment->storage_path, $attachment->original_name ?: basename($attachment->storage_path));
     }
 
+    /** JSON for the board, the side panel (I3), and other script callers; a redirect with a flash message for plain forms. */
     private function respond(Request $request, string $message, array $data = [], int $code = 200): JsonResponse|RedirectResponse
     {
         if ($request->expectsJson()) {

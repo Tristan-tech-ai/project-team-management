@@ -57,9 +57,14 @@ class DivisionController extends Controller
         return $this->form(new Division(['is_active' => true]));
     }
 
-    public function store(DivisionRequest $request): RedirectResponse
+    public function store(DivisionRequest $request): RedirectResponse|JsonResponse
     {
-        Division::create($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $division = Division::create($request->validated() + ['is_active' => $request->boolean('is_active', true)]);
+        if ($request->expectsJson()) {
+            // U5.1 quick add from the member form: the new division appears there, ticked, right away.
+            return response()->json(['id' => $division->id, 'name' => $division->name, 'company_id' => $division->company_id,
+                'company' => $division->company?->name, 'message' => "Divisi {$division->name} ditambahkan."], 201);
+        }
 
         return redirect()->route('divisions.index')->with('ok', 'Divisi tersimpan.');
     }

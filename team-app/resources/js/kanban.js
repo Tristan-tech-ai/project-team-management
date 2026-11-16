@@ -17,39 +17,51 @@ function statusUrl(card) {
     return card.querySelector('[data-change-status]')?.dataset.changeStatus ?? `/tasks/${card.dataset.taskId}/status`;
 }
 
-export function initKanban() {
-    document.querySelectorAll('[data-kanban]').forEach((board) => {
-        board.querySelectorAll('[data-kanban-column]').forEach((column) => {
-            new Sortable(column, {
-                group: 'tasks',
-                animation: 150,
-                handle: '.task-handle',
-                draggable: '[data-task-id]',
-                ghostClass: 'card-ghost',
-                onEnd: async (e) => {
-                    if (e.from === e.to) return;
-                    const card = e.item;
-                    const target = e.to.dataset.status;
-                    card.classList.add('is-saving');
-                    try {
-                        const result = await sendJson(statusUrl(card), 'PATCH', { status: target });
-                        card.dataset.status = result.status;
-                        card.querySelector('.card-actions')?.remove(); // its next step belonged to the old column
-                        const select = card.querySelector('[data-change-status]');
-                        if (select) select.value = result.status;
-                        notify(result.message);
-                    } catch (err) {
-                        // Put the card back into its original column and position.
-                        const anchor = e.from.querySelectorAll('[data-task-id]')[e.oldDraggableIndex] ?? e.from.querySelector('.kanban-empty');
-                        e.from.insertBefore(card, anchor ?? null);
-                        notify(err.message, 'error');
-                    } finally {
-                        card.classList.remove('is-saving');
-                        updateCounts(board);
-                    }
-                },
-            });
+function initBoard(board) {
+    board.querySelectorAll('[data-kanban-column]').forEach((column) => {
+        new Sortable(column, {
+            group: 'tasks',
+            animation: 150,
+            handle: '.task-handle',
+            draggable: '[data-task-id]',
+            ghostClass: 'card-ghost',
+            onEnd: async (e) => {
+                if (e.from === e.to) return;
+                const card = e.item;
+                const target = e.to.dataset.status;
+                card.classList.add('is-saving');
+                try {
+                    const result = await sendJson(statusUrl(card), 'PATCH', { status: target });
+                    card.dataset.status = result.status;
+                    card.querySelector('.card-actions')?.remove(); // its next step belonged to the old column
+                    const select = card.querySelector('[data-change-status]');
+                    if (select) select.value = result.status;
+                    notify(result.message);
+                } catch (err) {
+                    // Put the card back into its original column and position.
+                    const anchor = e.from.querySelectorAll('[data-task-id]')[e.oldDraggableIndex] ?? e.from.querySelector('.kanban-empty');
+                    e.from.insertBefore(card, anchor ?? null);
+                    notify(err.message, 'error');
+                } finally {
+                    card.classList.remove('is-saving');
+                    updateCounts(board);
+                }
+            },
         });
+    });
+}
+
+let kanbanReady = false;
+let checklistReady = false;
+
+export function initKanban() {
+    document.querySelectorAll('[data-kanban]').forEach(initBoard);
+    if (kanbanReady) return; // page-wide listeners are added once (the side panel may load this module again)
+    kanbanReady = true;
+    // I3: a board refreshed after the side panel closed gets drag and drop again.
+    document.addEventListener('ptm:region-replaced', (e) => {
+        const region = e.detail;
+        [region, ...region.querySelectorAll('[data-kanban]')].filter((x) => x.matches('[data-kanban]')).forEach(initBoard);
     });
 
     // Status dropdown (phones, or when dragging fails): same endpoint.
@@ -82,6 +94,8 @@ export function initKanban() {
 
 // Subtask checklist items are ticked directly without opening an edit page (Technical Guide 6.3).
 export function initChecklist() {
+    if (checklistReady) return;
+    checklistReady = true;
     document.addEventListener('change', async (e) => {
         const box = e.target;
         if (!(box instanceof HTMLInputElement) || !box.dataset.checkSubtask) return;

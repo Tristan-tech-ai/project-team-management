@@ -91,7 +91,7 @@ p a:not(.btn), .form-text a, .crumb a, .alert a { text-decoration: underline; te
    Links, labels of checkboxes, disclosure summaries, table sort headers, and calendar controls all follow --ptm-hit. */
 :root { --ptm-hit: 44px; }
 @media (min-width: 992px) { :root { --ptm-hit: 40px; } }
-:where(.content-area, .app-main, .toast-area) a:not(.btn):not(.panel):not(.page-link):not(.fc-event):not(.fc-daygrid-day-number):not(.fc-col-header-cell-cushion):not(.fc-daygrid-more-link) {
+:where(.content-area, .app-main, .toast-area, .task-panel .offcanvas-body) a:not(.btn):not(.panel):not(.page-link):not(.fc-event):not(.fc-daygrid-day-number):not(.fc-col-header-cell-cushion):not(.fc-daygrid-more-link) {
     display: inline-flex; align-items: center; min-height: var(--ptm-hit); min-width: var(--ptm-hit); }
 .form-check { display: flex; align-items: center; gap: .5rem; min-height: var(--ptm-hit); padding-left: 0; }
 .form-check .form-check-input { float: none; margin: 0; flex: none; }
@@ -352,3 +352,21 @@ td details > summary:hover { background: var(--ptm-sidebar-2); }
 .load-count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-left: 4px; border-radius: 10px; background: var(--ptm-sidebar-2); color: var(--ptm-ink-2); font-size: .72rem; font-weight: 700; }
 .btn-check:checked + .btn .load-count { background: rgba(255, 255, 255, .25); color: #fff; }
 
+
+/* I3 task detail side panel: wide enough for the detail in one column; full screen on phones. */
+.task-panel.offcanvas-end { --bs-offcanvas-width: min(600px, 100vw); --bs-offcanvas-bg: var(--ptm-bg); border-left: 1px solid var(--ptm-line); }
+.task-panel .offcanvas-header { gap: .5rem; background: #fff; border-bottom: 1px solid var(--ptm-line); padding: .75rem 1rem; }
+.task-panel .offcanvas-title { font-size: 1.125rem; font-weight: 600; }
+.task-panel .offcanvas-body { padding: 1rem; }
+.task-panel .offcanvas-body[aria-busy="true"] > * { opacity: .55; pointer-events: none; transition: opacity .15s; }
+.task-panel-loading { display: grid; gap: .75rem; }
+.task-panel-loading .placeholder { height: 1rem; border-radius: var(--ptm-radius-sm); }
+.task-panel-loading .placeholder:nth-child(2), .task-panel-loading .placeholder:nth-child(4) { height: 6rem; }
+
+/* I5 "Cari nama" above long people lists. */
+.people-filter { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; max-width: 360px; }
+/* Bootstrap floats a legend; the list after the (possibly hidden) search box must still start below it. */
+.people-filter, [data-people-filter] { clear: left; }
+.people-filter[hidden] { display: none; }
+.people-filter .muted { white-space: nowrap; }
+[data-filtered] { display: none !important; }

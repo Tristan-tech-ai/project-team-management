@@ -21,7 +21,9 @@ class Session {
         this.clicks = 0;
         this.fields = 0;
         this.pages = 0;
-        page.on('framenavigated', (f) => { if (f === page.mainFrame()) this.pages++; });
+        // Full page loads only. Same-document history entries (the side panel adds one so the phone Back button closes it,
+        // filters rewrite the address) are not pages the person waits for.
+        page.on('domcontentloaded', () => { this.pages++; });
     }
     reset() { this.clicks = 0; this.fields = 0; this.pages = 0; this.frozen = null; }
     // Stop counting: what follows only verifies the result (it may open another page directly).
@@ -44,6 +46,21 @@ async function open(browser, base, email, password, phone = false) {
     await page.click('form[data-login-form] button[type=submit], form button[type=submit]');
     await page.waitForLoadState('networkidle');
     return new Session(page);
+}
+
+// Daftar Task of the showcase project; two of its members are noted for the PIC flows (looked up before counting starts).
+async function projectTasks(s) {
+    const found = await s.page.request.get(`${ADMIN}/search?keyword=${encodeURIComponent('Campaign PPDB')}`, { headers: { Accept: 'application/json' } });
+    const project = (await found.json()).projects[0];
+    const path = `${new URL(project.url).pathname}/tasks`;
+    if (!shared.picOne) {
+        await s.page.goto(`${ADMIN}${path}`);
+        const options = s.page.locator('[data-bulk-user] option[value]:not([value=""])');
+        await options.first().waitFor({ state: 'attached' });
+        const people = await options.evaluateAll((os) => os.map((o) => [o.value, o.textContent.split(' (')[0]]));
+        [[, shared.picOne], [shared.picTwoId]] = people;
+    }
+    return path;
 }
 
 const inFuture = (days) => new Date(Date.now() + days * 864e5).toISOString().slice(0, 16);
@@ -101,13 +118,15 @@ const FLOWS = {
         name: 'Member mengajukan geser deadline (HP)', who: member, start: '/',
         async run(s) {
             await s.click(s.page.locator('.mobile-bottom-nav a', { hasText: 'Tasks' }));
+            // I3: the task opens in the side panel over Task Saya.
             await s.click(s.page.getByRole('link', { name: shared.taskTitle }));
-            // The deadline request is folded on the task page (rarely needed), so it opens first.
-            await s.click(s.page.locator('summary:has-text("Butuh geser deadline")'));
-            await s.fill(s.page.locator('form[action$="/schedule-changes"] input[name=proposed_due_at]'), inFuture(14));
-            await s.fill(s.page.locator('form[action$="/schedule-changes"] [name=reason]'), 'Menunggu materi dari klien');
-            await s.click(s.page.getByRole('button', { name: 'Ajukan' }));
-            await expect(s.page.locator('body')).toContainText('Menunggu materi dari klien');
+            const panel = s.page.locator('#task-panel');
+            // The deadline request is folded on the task (rarely needed), so it opens first.
+            await s.click(panel.locator('summary:has-text("Butuh geser deadline")'));
+            await s.fill(panel.locator('form[action$="/schedule-changes"] input[name=proposed_due_at]'), inFuture(14));
+            await s.fill(panel.locator('form[action$="/schedule-changes"] [name=reason]'), 'Menunggu materi dari klien');
+            await s.click(panel.getByRole('button', { name: 'Ajukan' }));
+            await expect(panel).toContainText('Menunggu materi dari klien', { timeout: 20000 });
         },
     },
     'kirim-hasil': {
@@ -115,10 +134,11 @@ const FLOWS = {
         async run(s) {
             await s.click(s.page.locator('.mobile-bottom-nav a', { hasText: 'Tasks' }));
             await s.click(s.page.getByRole('link', { name: shared.taskTitle }));
-            await s.fill(s.page.locator('input[name=external_url]'), 'https://drive.contoh.test/riset-kompetitor');
-            await s.fill(s.page.locator('textarea[name=submission_note]'), 'Riset 5 kompetitor');
-            await s.click(s.page.getByRole('button', { name: 'Kirim untuk Review' }));
-            await expect(s.page.locator('main .pill').first()).toContainText('Review');
+            const panel = s.page.locator('#task-panel');
+            await s.fill(panel.locator('input[name=external_url]'), 'https://drive.contoh.test/riset-kompetitor');
+            await s.fill(panel.locator('textarea[name=submission_note]'), 'Riset 5 kompetitor');
+            await s.click(panel.getByRole('button', { name: 'Kirim untuk Review' }));
+            await expect(panel.locator('.pill').first()).toContainText('Review', { timeout: 20000 });
         },
     },
     'terima-review': {
@@ -126,8 +146,9 @@ const FLOWS = {
         async run(s) {
             await s.click(s.page.locator('.admin-sidebar.desktop a.side-link', { hasText: 'Menunggu Review' }));
             await s.click(s.page.getByRole('link', { name: shared.taskTitle }));
-            await s.click(s.page.locator('#review').getByRole('button', { name: 'Terima' }));
-            await expect(s.page.locator('main .pill').first()).toContainText('Selesai');
+            const panel = s.page.locator('#task-panel');
+            await s.click(panel.locator('#review').getByRole('button', { name: 'Terima' }));
+            await expect(panel.locator('.pill').first()).toContainText('Selesai', { timeout: 20000 });
         },
     },
     'catat-aktivitas': {
@@ -196,6 +217,35 @@ const FLOWS = {
             await expect(s.page.locator('.admin-sidebar.desktop .side-nav > *').nth(2)).not.toContainText('Kalender');
         },
     },
+    // I13: the same change (a new PIC for three tasks) one task at a time through the side panel, then in one go.
+    'pic-satu-satu': {
+        name: 'Ganti PIC 3 task satu per satu', who: manager, start: projectTasks,
+        async run(s) {
+            const panel = s.page.locator('#task-panel');
+            const row = (i) => s.page.locator('tbody tr').nth(i);
+            for (let i = 0; i < 3; i++) {
+                await s.click(row(i).locator('a[data-task-panel]', { hasText: 'Buka' }));
+                await panel.locator('select[name=pic_user_id]').waitFor({ timeout: 30000 });
+                await s.choose(panel.locator('select[name=pic_user_id]'), { label: shared.picOne });
+                await s.click(panel.getByRole('button', { name: 'Simpan pelaksana' }));
+                // The panel reloads the saved task (two server round trips; slow on a remote database).
+                await expect(panel.locator('dd').first()).toHaveText(shared.picOne, { timeout: 30000 });
+                await s.click(panel.locator('button[data-bs-dismiss]'));
+                // The list behind reloads with the new PIC (third cell, after the tick box and the title) before the next task.
+                await expect(row(i).locator('td').nth(2)).toHaveText(shared.picOne, { timeout: 30000 });
+            }
+        },
+    },
+    'pic-massal': {
+        name: 'Ganti PIC 3 task sekaligus', who: manager, start: projectTasks,
+        async run(s) {
+            for (let i = 0; i < 3; i++) await s.check(s.page.locator('tbody tr').nth(i).locator('[data-bulk-row]'));
+            await s.choose(s.page.locator('[data-bulk-action]'), 'pic');
+            await s.choose(s.page.locator('[data-bulk-user]'), shared.picTwoId);
+            await s.click(s.page.locator('[data-bulk-form]').getByRole('button', { name: 'Terapkan' }));
+            await expect(s.page.locator('.toast-area')).toContainText('3 task diperbarui', { timeout: 30000 });
+        },
+    },
     'izin-hapus-task': {
         name: 'Beri Manager izin hapus task', who: admin, start: '/dashboard',
         async run(s) {
@@ -223,7 +273,8 @@ try {
         const id = who.slice(0, 2).join(' ');
         if (!sessions.has(id)) sessions.set(id, await open(browser, ...who));
         const s = sessions.get(id);
-        await s.page.goto(`${who[0]}${flow.start}`);
+        const start = typeof flow.start === 'function' ? await flow.start(s) : flow.start;
+        await s.page.goto(`${who[0]}${start}`);
         await s.page.waitForLoadState('networkidle');
         s.reset();
         const t0 = Date.now();

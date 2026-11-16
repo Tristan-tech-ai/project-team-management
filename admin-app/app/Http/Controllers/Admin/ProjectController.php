@@ -199,7 +199,7 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        return view('admin.projects.tasks', $this->header($project));
+        return view('admin.projects.tasks', $this->header($project) + ['bulk' => \App\Services\TaskBulkService::options(request()->user(), [$project->id])]);
     }
 
     public function tasksData(Request $request, Project $project): JsonResponse

@@ -73,6 +73,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li class="dropdown-header d-md-none">{{ $user->name }} · {{ $roleNames }}</li>
                         <li><a class="dropdown-item" href="{{ route('account.edit') }}"><x-icon name="user"/> Profil &amp; kata sandi</a></li>
+                        <li class="d-none d-lg-block"><button class="dropdown-item" type="button" data-open-palette><x-icon name="search"/> Perintah cepat <kbd class="kbd ms-auto">Ctrl K</kbd></button></li>
                         <li><a class="dropdown-item" href="{{ config('app.team_url') }}"><x-icon name="external-link"/> Buka Team App</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><form method="post" action="{{ route('logout') }}">@csrf<button class="dropdown-item" type="submit"><x-icon name="log-out"/> Keluar</button></form></li>
@@ -90,6 +91,8 @@
 </div>
 <x-confirm/>
 <x-quick-add-modal/>
+<x-task-panel/>
+<x-command-palette :menu="$menu" :create="$create"/>
 @stack('script')
 </body>
 </html>

@@ -1,5 +1,7 @@
 // LV-06 UI audit: 390 and 1366 px screenshots, axe (serious/critical), horizontal scroll, click-area size, and bottom nav on phones only.
 // Usage: AUDIT_EMAIL=... AUDIT_PASSWORD=... node docs/tools/ui-audit.mjs <base-url> <app-name> <path1,path2,...>
+// A path may end with @panel (task side panel open), @palette (Ctrl+K palette open with results) or @bulk (a task ticked,
+// bulk bar shown), so the same checks also cover what only appears after a click.
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
@@ -11,6 +13,25 @@ const paths = pathList.split(',').filter(Boolean);
 const outDir = process.env.AUDIT_OUTPUT ?? 'docs/evidence/ui';
 mkdirSync(outDir, { recursive: true });
 const summary = [];
+
+async function applyState(page, state) {
+    if (state === 'panel') {
+        // Lists and the calendar load their rows after the page; wait for the first task link.
+        await page.locator('a[data-task-panel]:visible').first().waitFor({ timeout: 30_000 });
+        await page.locator('a[data-task-panel]:visible').first().click();
+        await page.locator('#task-panel [data-task-panel-content]').waitFor({ timeout: 30_000 });
+    } else if (state === 'palette') {
+        await page.keyboard.press('Control+k');
+        await page.keyboard.type('la');
+        await page.locator('#command-palette .palette-group').nth(1).waitFor({ timeout: 30_000 });
+    } else if (state === 'bulk') {
+        await page.locator('tbody [data-bulk-row]').first().waitFor({ timeout: 30_000 });
+        await page.locator('tbody [data-bulk-row]').first().check();
+        await page.locator('[data-bulk-form]:not([hidden])').waitFor();
+    }
+    await page.waitForTimeout(400);
+}
+
 const b = await chromium.launch();
 for (const width of [390, 1366]) {
     const context = await b.newContext({ viewport: { width: width, height: width < 600 ? 844 : 900 }, isMobile: width < 600, hasTouch: width < 600 });
@@ -21,9 +42,11 @@ for (const width of [390, 1366]) {
     await h.click('button[type=submit]');
     await h.waitForLoadState('networkidle');
     for (const j of paths) {
-        const r = await h.goto(`${baseUrl}${j}`);
+        const [path, state] = j.split('@');
+        const r = await h.goto(`${baseUrl}${path}`);
         await h.waitForLoadState('networkidle');
         await h.waitForTimeout(300);
+        if (state) await applyState(h, state);
         const name = `${app}-${width}-${j.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '') || 'home'}`;
         try {
             await h.screenshot({ path: `${outDir}/${name}.png`, fullPage: true, animations: 'disabled', timeout: 15_000 });

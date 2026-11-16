@@ -1,0 +1,92 @@
+{
+ "name": "s6-radit-decide",
+ "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
+ "steps": [
+  {
+   "pause": 600
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "css=.todo a:has-text('Putuskan geser deadline Materi Iklan')"
+  },
+  {
+   "hover": "css=section.todo",
+   "zoom": 1.3,
+   "pauseAfter": 2000
+  },
+  {
+   "click": "css=.todo a:has-text('Putuskan geser deadline Materi Iklan')"
+  },
+  {
+   "waitFor": "css=#task-panel #schedule"
+  },
+  {
+   "hover": "css=#task-panel #schedule",
+   "zoom": 1.4,
+   "pauseAfter": 2000
+  },
+  {
+   "click": {
+    "find": "role=button[name='Setujui']",
+    "within": "css=#task-panel #schedule"
+   },
+   "pauseAfter": 1500
+  },
+  {
+   "waitFor": "css=#task-panel .pill-risk:has-text('bergeser')"
+  },
+  {
+   "scroll": {
+    "to": "top"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "hover": "css=#task-panel dl",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel #review"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "hover": "css=#task-panel #review",
+   "zoom": 1.3,
+   "pauseAfter": 1600
+  },
+  {
+   "click": {
+    "find": "role=button[name='Terima, task selesai']",
+    "within": "css=#task-panel"
+   },
+   "pauseAfter": 1500
+  },
+  {
+   "waitFor": "css=#task-panel .pill:has-text('Selesai')"
+  },
+  {
+   "pause": 1800
+  },
+  {
+   "press": "Escape",
+   "pauseAfter": 1800
+  }
+ ]
+}

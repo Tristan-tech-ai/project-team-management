@@ -14,7 +14,19 @@ Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yan
 
 Server dijalankan dengan `DEBUGBAR_ENABLED=false` supaya tangkapan bersih. Rincian per halaman ada di `audit-admin.json`, `audit-team.json`, dan `audit-team-manager.json` (kolom `serious`, `smallTargets`, `styleIssues`).
 
-## Hasil akhir (15 Nov 2026, setelah peningkatan kegunaan)
+## Hasil akhir (16 Nov 2026, putaran 2)
+
+Diulang pada database baru hasil `php artisan ptm:setup` (`ptm_r2_1116`) setelah panel samping detail task, aksi massal, palet Ctrl+K, kotak Cari nama, dan divisi/jabatan dari formulir anggota. Alat kini juga memeriksa keadaan yang muncul setelah klik: jalur berakhiran `@panel` (panel samping terbuka dari tautan task pertama), `@palette` (palet terbuka dengan hasil cari) dan `@bulk` (satu task dicentang, bilah aksi massal tampil).
+
+| App | Peran | Layar | Pemeriksaan (390 + 1366 px) | Di antaranya keadaan setelah klik | Masalah |
+|---|---|---:|---:|---:|---:|
+| Admin | Super Admin | 48 | 96 | 8 | 0 |
+| Tim | Manager (Review Task) | 3 | 6 | 1 | 0 |
+| Tim | Member | 17 | 34 | 4 | 0 |
+
+Temuan putaran 2 sebelum lulus: kotak centang aksi massal 20 px (kini seluruh sel 44/40 px), tombol Pilih semua dua baris di HP, tautan hasil kiriman di panel 16 px (aturan area klik tautan kini juga berlaku di panel), tombol Terima terlipat di panel karena kolom mengikuti lebar layar bukan lebar panel, dan kalender tampilan daftar (HP) yang membuka halaman penuh alih-alih panel.
+
+## Hasil sebelumnya (15 Nov 2026, setelah peningkatan kegunaan)
 
 Diulang pada database baru hasil `php artisan ptm:setup` (data contoh agensi dan project contoh akun demo), dengan tampilan baru: sidebar terang satu klik, tombol Buat, kotak Perlu kamu kerjakan, tabel jadi kartu di HP, pengaturan menu seret-lepas, hak akses centang, penyusun template, penjelasan istilah. Pemeriksa gulir samping kini membandingkan lebar halaman dengan lebar layar yang diminta (390 atau 1366 px); sebelumnya dibandingkan dengan `innerWidth` yang ikut membesar saat HP memperkecil tampilan, sehingga kartu Team App yang melebar 21 px sempat lolos. Temuan itu sudah diperbaiki.
 

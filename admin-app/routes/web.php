@@ -69,6 +69,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/tasks/mine/data', [TaskController::class, 'mineData'])->name('tasks.mine.data');
         Route::get('/tasks/review', [TaskController::class, 'review'])->middleware('can:tasks.review')->name('tasks.review');
         Route::get('/tasks/create', [TaskController::class, 'create'])->middleware('can:tasks.create')->name('tasks.create');
+        Route::post('/tasks/bulk', [TaskController::class, 'bulk'])->name('tasks.bulk');
         Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
         Route::put('/tasks/{task}', [TaskActionController::class, 'update'])->name('tasks.update');
         Route::delete('/tasks/{task}', [TaskActionController::class, 'destroy'])->name('tasks.destroy');

@@ -25,6 +25,18 @@
  },
  {
   "app": "team-manager",
+  "width": 390,
+  "paths": "/review@panel",
+  "http": 200,
+  "serious": [],
+  "horizontalOverflow": 0,
+  "bottomNavVisible": true,
+  "minTarget": 44,
+  "smallTargets": [],
+  "styleIssues": []
+ },
+ {
+  "app": "team-manager",
   "width": 1366,
   "paths": "/tasks/1",
   "http": 200,
@@ -39,6 +51,18 @@
   "app": "team-manager",
   "width": 1366,
   "paths": "/review",
+  "http": 200,
+  "serious": [],
+  "horizontalOverflow": 0,
+  "bottomNavVisible": false,
+  "minTarget": 40,
+  "smallTargets": [],
+  "styleIssues": []
+ },
+ {
+  "app": "team-manager",
+  "width": 1366,
+  "paths": "/review@panel",
   "http": 200,
   "serious": [],
   "horizontalOverflow": 0,

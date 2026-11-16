@@ -52,5 +52,6 @@
     <a href="{{ route('account.edit') }}" @if(request()->routeIs('account.*')) aria-current="page" @endif><x-icon name="user" :size="22"/>Profil</a>
 </nav>
 <x-confirm/>
+<x-task-panel/>
 </body>
 </html>

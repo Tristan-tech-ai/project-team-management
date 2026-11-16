@@ -1,0 +1,92 @@
+{
+ "name": "s7-bulk",
+ "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 30000,
+ "steps": [
+  {
+   "pause": 600
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email"
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi"
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "#todo-title"
+  },
+  {
+   "press": "Mod+K",
+   "pauseAfter": 300
+  },
+  {
+   "type": "pendaftaran 2027",
+   "into": "#palette-input",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=.palette-item .palette-label:text-is('Campaign Pendaftaran Sekolah 2027')"
+  },
+  {
+   "pause": 900
+  },
+  {
+   "press": "Enter",
+   "pauseAfter": 600
+  },
+  {
+   "waitFor": "role=link[name='Papan Kanban']"
+  },
+  {
+   "click": "role=link[name='Daftar Task']"
+  },
+  {
+   "waitFor": "css=tbody [data-bulk-row]"
+  },
+  {
+   "click": "css=tbody tr:has-text('Strategi Campaign') .bulk-tick",
+   "zoom": 1.3
+  },
+  {
+   "click": "css=tbody tr:has-text('Monitoring') .bulk-tick"
+  },
+  {
+   "click": "css=tbody tr:has-text('Laporan') .bulk-tick"
+  },
+  {
+   "select": "Tambah pelaksana",
+   "in": "css=[data-bulk-action]",
+   "zoom": 1.3
+  },
+  {
+   "select": "Ayu Lestari (2 task aktif)",
+   "in": "css=[data-bulk-user]"
+  },
+  {
+   "click": {
+    "find": "role=button[name='Terapkan']",
+    "within": "css=[data-bulk-form]"
+   },
+   "pauseAfter": 400
+  },
+  {
+   "waitFor": "text=3 task diperbarui"
+  },
+  {
+   "waitFor": "css=tbody tr:has-text('Laporan'):has-text('Ayu Lestari')"
+  },
+  {
+   "hover": "css=tbody tr:has-text('Monitoring')",
+   "zoom": 1.4,
+   "pauseAfter": 2400
+  }
+ ]
+}

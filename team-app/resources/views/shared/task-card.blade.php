@@ -18,7 +18,7 @@
         @if($canMoveStatus)<span class="task-handle d-none d-lg-inline-flex" title="Seret untuk memindah kolom" aria-hidden="true"><x-icon name="grip-vertical" :size="16"/></span>@endif
         <div class="flex-grow-1 min-w-0">
             @if(! empty($showProject))<div class="small muted text-truncate">{{ $t->project?->name }}</div>@endif
-            <a href="{{ route('tasks.show', $t) }}" class="task-title no-stretch">{{ $t->title }}</a>
+            <a href="{{ route('tasks.show', $t) }}" class="task-title no-stretch" data-task-panel>{{ $t->title }}</a>
         </div>
         @if($t->priority === 'high' || $t->priority === 'urgent')<span class="pill pill-risk">{{ Codes::label(Codes::PRIORITY, $t->priority) }}</span>@endif
     </div>
@@ -44,9 +44,9 @@
         <form class="card-actions" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
             <button class="btn btn-sm btn-outline-primary" type="submit"><x-icon name="send" :size="16"/> Mulai</button></form>
     @elseif($t->status === 'in_progress' && $user->can('submit', $t))
-        <div class="card-actions"><a class="btn btn-sm btn-outline-primary" href="{{ route('tasks.show', $t) }}#submit-result"><x-icon name="send" :size="16"/> Kirim hasil</a></div>
+        <div class="card-actions"><a class="btn btn-sm btn-outline-primary" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="16"/> Kirim hasil</a></div>
     @elseif($t->status === 'review' && $user->can('review', $t))
-        <div class="card-actions"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review"><x-icon name="clipboard-check" :size="16"/> Review hasil</a></div>
+        <div class="card-actions"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review" data-task-panel><x-icon name="clipboard-check" :size="16"/> Review hasil</a></div>
     @endif
     @if($canMoveStatus)
         <div class="mt-2 d-lg-none">
