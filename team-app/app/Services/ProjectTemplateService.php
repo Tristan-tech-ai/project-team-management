@@ -9,9 +9,9 @@ use App\Models\Task;
 use App\Models\TaskActivity;
 use App\Models\TaskTemplate;
 use App\Models\User;
+use App\Support\CodeGenerator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -54,7 +54,7 @@ class ProjectTemplateService
             $project = Project::create([
                 'company_id' => $d['company_id'], 'client_id' => $d['client_id'] ?? null, 'project_template_id' => $d['project_template_id'] ?? null,
                 'pic_user_id' => $d['pic_user_id'], 'created_by' => $by->id,
-                'code' => $d['code'] ?: $this->newCode(), 'name' => $d['name'], 'description' => $d['description'] ?? null,
+                'code' => ($d['code'] ?? null) ?: self::codeFor($d['name']), 'name' => $d['name'], 'description' => $d['description'] ?? null,
                 'project_type' => $d['project_type'], 'status' => $d['status'] ?? 'active', 'priority' => $d['priority'] ?? 'normal',
                 'start_at' => $d['start_at'] ?? now(), 'baseline_due_at' => $d['due_at'] ?? null, 'due_at' => $d['due_at'] ?? null,
                 'recurrence_unit' => $d['project_type'] === 'one_time' ? null : ($d['recurrence_unit'] ?? 'month'),
@@ -169,12 +169,9 @@ class ProjectTemplateService
         });
     }
 
-    private function newCode(): string
+    /** U4: a project code is made from its name like company and client codes (unique, soft-deleted projects included). */
+    public static function codeFor(string $name): string
     {
-        do {
-            $code = 'PRJ-'.now()->format('ym').'-'.Str::upper(Str::random(4));
-        } while (Project::withTrashed()->where('code', $code)->exists());
-
-        return $code;
+        return CodeGenerator::unique($name, fn (string $code) => Project::withTrashed()->where('code', $code)->exists());
     }
 }

@@ -79,15 +79,133 @@ export function codeFromName(name) {
     return code || (words[0] ?? '').slice(0, 24);
 }
 
+// U4: the code field fills itself while the name is typed (the exact unique code comes from the server) and can still be
+// changed. Once the person types a code of their own it is left alone; emptying the field makes it automatic again.
+// An existing record keeps its code. code_auto=1 tells the server to make the code unique again when it saves.
 export function initCodePreview() {
     document.querySelectorAll('[data-code-from]').forEach((wrapper) => {
         const input = wrapper.querySelector('input');
         const source = input?.form?.querySelector(`[name="${wrapper.dataset.codeFrom}"]`);
         if (!input || !source) return;
-        const update = () => { const code = codeFromName(source.value); input.placeholder = code ? `Otomatis: ${code}` : 'Otomatis dari nama'; };
-        source.addEventListener('input', update);
-        update();
+        const flag = Object.assign(document.createElement('input'), { type: 'hidden', name: 'code_auto' });
+        input.after(flag);
+        const url = wrapper.dataset.codeUrl;
+        let auto = false;
+        let timer = null;
+        let ticket = 0;
+        const setAuto = (on) => { auto = on; flag.value = on ? '1' : '0'; };
+        const fill = () => {
+            if (!auto) return;
+            input.value = codeFromName(source.value);
+            clearTimeout(timer);
+            if (!url || !source.value.trim()) return;
+            const mine = ++ticket;
+            timer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${url}&name=${encodeURIComponent(source.value)}`, { headers: { Accept: 'application/json' } });
+                    const data = res.ok ? await res.json() : null;
+                    if (auto && mine === ticket && data?.code) input.value = data.code;
+                } catch { /* the code made in the browser stays */ }
+            }, 300);
+        };
+        setAuto(input.value.trim() === '' || wrapper.dataset.codeAuto === '1');
+        input.placeholder = 'Terisi otomatis dari nama';
+        input.addEventListener('input', () => { setAuto(input.value.trim() === ''); fill(); });
+        source.addEventListener('input', fill);
+        fill();
     });
+}
+
+// Simple formatting for a description (bold, italic, underline, lists): the editor shows the text as it will look and
+// writes its HTML back into the textarea, which stays the real form field. The server keeps only the RichText allowlist.
+export function initRichText(root = document) {
+    root.querySelectorAll('[data-rich-text]').forEach((field) => {
+        const area = field.querySelector('[data-rich-source]');
+        const box = field.querySelector('[data-rich-editor]');
+        const editor = box?.querySelector('[contenteditable]');
+        if (!area || !editor || field.dataset.richReady) return;
+        field.dataset.richReady = '1';
+        editor.innerHTML = area.dataset.richHtml ?? '';
+        box.hidden = false;
+        area.hidden = true;
+        field.querySelector('label')?.addEventListener('click', (e) => { e.preventDefault(); editor.focus(); });
+        const tools = [...box.querySelectorAll('[data-command]')];
+        const sync = (changed = true) => {
+            const empty = editor.textContent.trim() === '' && !editor.querySelector('li');
+            area.value = empty ? '' : editor.innerHTML;
+            editor.classList.toggle('is-empty', empty);
+            if (changed) area.dispatchEvent(new Event('input', { bubbles: true })); // the unsaved-changes guard sees the edit
+        };
+        const state = () => tools.forEach((b) => {
+            if (!b.hasAttribute('aria-pressed')) return;
+            let on = false;
+            try { on = editor.contains(document.getSelection()?.anchorNode ?? null) && document.queryCommandState(b.dataset.command); } catch { /* not supported */ }
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        tools.forEach((b) => {
+            b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the selection in the text
+            b.addEventListener('click', () => {
+                editor.focus();
+                document.execCommand(b.dataset.command, false);
+                sync();
+                state();
+            });
+        });
+        // Pasted text arrives without the colours and fonts of the page it came from.
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? '');
+        });
+        editor.addEventListener('input', () => sync());
+        editor.addEventListener('keyup', state);
+        editor.addEventListener('mouseup', state);
+        area.form?.addEventListener('submit', () => sync(false));
+        sync(false);
+    });
+}
+
+// Dashboard: each person chooses which parts they see (a checklist), remembered in this browser per account.
+export function initDashboardWidgets() {
+    const page = document.querySelector('[data-dashboard]');
+    const menu = document.querySelector('[data-widget-menu]');
+    if (!page || !menu) return;
+    const key = `ptm.dashboard.hidden.${page.dataset.dashboard}`;
+    const widgets = [...page.querySelectorAll('[data-widget]')];
+    let hidden = [];
+    try {
+        hidden = JSON.parse(localStorage.getItem(key) ?? '[]');
+        if (localStorage.getItem('ptm.firstSteps.hidden') === '1') hidden.push('first-steps'); // hidden earlier with its own button
+    } catch { hidden = []; }
+    if (!Array.isArray(hidden)) hidden = [];
+    const empty = page.querySelector('[data-widgets-empty]');
+    const apply = () => {
+        widgets.forEach((w) => { w.hidden = hidden.includes(w.dataset.widget); });
+        // A part whose neighbour in the same row is hidden takes the full width.
+        page.querySelectorAll('[data-widget-row]').forEach((row) => {
+            const visible = [...row.querySelectorAll(':scope > [data-widget]')].filter((w) => !w.hidden);
+            row.hidden = visible.length === 0;
+            visible.forEach((w) => w.classList.toggle('widget-full', visible.length === 1));
+        });
+        if (empty) empty.hidden = widgets.some((w) => !w.hidden);
+        menu.querySelectorAll('input[data-widget-toggle]').forEach((box) => { box.checked = !hidden.includes(box.value); });
+    };
+    menu.querySelectorAll('input[data-widget-toggle]').forEach((box) => {
+        if (!widgets.some((w) => w.dataset.widget === box.value)) box.closest('li')?.remove();
+        box.addEventListener('change', () => {
+            hidden = box.checked ? hidden.filter((h) => h !== box.value) : [...new Set([...hidden, box.value])];
+            try {
+                localStorage.setItem(key, JSON.stringify(hidden));
+                if (box.value === 'first-steps') localStorage.removeItem('ptm.firstSteps.hidden');
+            } catch { /* storage unavailable */ }
+            apply();
+        });
+    });
+    menu.querySelector('[data-widgets-all]')?.addEventListener('click', () => {
+        hidden = [];
+        try { localStorage.removeItem(key); localStorage.removeItem('ptm.firstSteps.hidden'); } catch { /* storage unavailable */ }
+        apply();
+    });
+    apply();
 }
 
 // U5: quick add of a missing master record (company, client) inside another form; the new record is selected right away.
@@ -380,6 +498,12 @@ export function initFirstSteps() {
     const card = document.querySelector('[data-first-steps]');
     if (!card) return;
     const key = 'ptm.firstSteps.hidden';
+    // On the Dashboard the card is one of the parts in the "Atur tampilan" checklist, so hiding goes through that list.
+    const toggle = () => document.querySelector('[data-widget-menu] input[data-widget-toggle][value="first-steps"]');
+    if (card.dataset.widget && document.querySelector('[data-widget-menu]')) {
+        card.querySelector('[data-first-steps-hide]')?.addEventListener('click', () => { const box = toggle(); if (box?.checked) box.click(); });
+        return;
+    }
     try { if (localStorage.getItem(key) === '1') card.hidden = true; } catch { /* storage unavailable */ }
     card.querySelector('[data-first-steps-hide]')?.addEventListener('click', () => {
         card.hidden = true;

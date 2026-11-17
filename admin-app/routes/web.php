@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\CodeSuggestController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ManagementController;
 use App\Http\Controllers\Admin\ProjectController;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/', fn () => redirect()->route('dashboard.index'))->name('home');
     // Global search in the header (prototypes 7.1-7.3); each group follows the user's data scope.
     Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/codes/suggest', CodeSuggestController::class)->name('codes.suggest');
     Route::get('/todo', \App\Http\Controllers\Admin\TodoController::class)->name('todo');
 
     // 1. Dashboard

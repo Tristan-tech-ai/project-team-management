@@ -19,7 +19,7 @@
                         <div class="col-md-6"><x-field name="client_id" label="Client" type="select" :options="$clients" :value="$project->client_id" empty="Tanpa client (project internal)">
                             <x-slot:action>@can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru"/>@endcan</x-slot:action></x-field></div>
                         <div class="col-md-8"><x-field name="name" label="Nama project" :value="$project->name" required/></div>
-                        <div class="col-md-4"><x-field name="code" label="Kode" :value="$project->code" help="Kosongkan untuk kode otomatis."/></div>
+                        <div class="col-md-4"><x-field name="code" label="Kode" :value="$project->code" data-code-from="name" :data-code-url="route('codes.suggest', ['for' => 'projects'])" :data-code-auto="old('code_auto')" help="Terisi otomatis dari nama. Boleh diganti."/></div>
                         @if($new)
                             <div class="col-md-4"><x-field name="project_type" label="Klasifikasi" type="select" :options="Codes::PROJECT_TYPE" :value="$project->project_type" required hint="Sekali jadi: selesai lalu ditutup. Berulang: task dibuat ulang tiap periode, misalnya konten bulanan. Berkelanjutan: berjalan terus dan dipantau per periode."/></div>
                         @else
@@ -47,7 +47,7 @@
                                 <div class="col-md-6"><x-field name="recurrence_interval" label="Setiap" type="number" :value="$project->recurrence_interval ?? 1" help="Misalnya 1 = setiap bulan."/></div>
                             </div>
                         </div>
-                        <div class="col-12"><x-field name="description" label="Deskripsi" type="textarea" :value="$project->description"/></div>
+                        <div class="col-12"><x-rich-text name="description" label="Deskripsi" :value="$project->description"/></div>
                     </div>
                 </div>
                 <div class="panel mb-3">

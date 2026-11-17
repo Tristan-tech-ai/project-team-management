@@ -13,12 +13,12 @@
     $people = $t->relationLoaded('assignees') ? $t->assignees : collect();
     $initials = fn ($name) => \Illuminate\Support\Str::of($name)->explode(' ')->filter()->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
 @endphp
-<article class="task-card" data-task-id="{{ $t->id }}" data-status="{{ $t->status }}" aria-label="{{ $t->title }}">
+<article class="task-card" data-task-id="{{ $t->id }}" data-status="{{ $t->status }}" @if($canMoveStatus) data-movable @endif aria-label="{{ $t->title }}">
     <div class="d-flex align-items-start gap-2">
         @if($canMoveStatus)<span class="task-handle d-none d-lg-inline-flex" title="Seret untuk memindah kolom" aria-hidden="true"><x-icon name="grip-vertical" :size="16"/></span>@endif
         <div class="flex-grow-1 min-w-0">
             @if(! empty($showProject))<div class="small muted text-truncate">{{ $t->project?->name }}</div>@endif
-            <a href="{{ route('tasks.show', $t) }}" class="task-title no-stretch" data-task-panel>{{ $t->title }}</a>
+            <a href="{{ route('tasks.show', $t) }}" class="task-title no-stretch" data-task-panel draggable="false">{{ $t->title }}</a>
         </div>
         @if($t->priority === 'high' || $t->priority === 'urgent')<span class="pill pill-risk">{{ Codes::label(Codes::PRIORITY, $t->priority) }}</span>@endif
     </div>

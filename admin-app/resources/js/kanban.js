@@ -22,8 +22,16 @@ function initBoard(board) {
         new Sortable(column, {
             group: 'tasks',
             animation: 150,
-            handle: '.task-handle',
+            // The whole card can be dragged, not only the grip: a press that moves less than 6 px is still a click on the
+            // title or a button, and on a touch screen a short hold starts the drag so the board can still be scrolled.
+            // Buttons, form fields and cards the person may not move never start a drag.
             draggable: '[data-task-id]',
+            forceFallback: true,
+            fallbackTolerance: 6,
+            delay: 220,
+            delayOnTouchOnly: true,
+            filter: 'button, select, input, textarea, label, .card-actions, .task-card:not([data-movable])',
+            preventOnFilter: false,
             ghostClass: 'card-ghost',
             onEnd: async (e) => {
                 if (e.from === e.to) return;

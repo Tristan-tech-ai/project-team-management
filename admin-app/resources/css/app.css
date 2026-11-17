@@ -167,6 +167,8 @@ div.dt-container .dt-paging .page-link { min-width: var(--ptm-hit); min-height: 
 .task-card .task-title:hover { color: var(--ptm-action); }
 .task-card.is-saving { opacity: .6; }
 .card-ghost { opacity: .4; }
+@media (hover: hover) { .task-card[data-movable] { cursor: grab; } .task-card[data-movable] a, .task-card[data-movable] button, .task-card[data-movable] select { cursor: pointer; } }
+.task-card.sortable-fallback { box-shadow: var(--ptm-shadow-lg); opacity: .95; }
 .task-handle { cursor: grab; color: var(--ptm-ink-2); border-radius: 8px; min-width: var(--ptm-hit); min-height: var(--ptm-hit); display: inline-flex; align-items: center; justify-content: center; }
 .task-handle:hover { background: #eef1f5; }
 .min-w-0 { min-width: 0; }
@@ -370,3 +372,29 @@ td details > summary:hover { background: var(--ptm-sidebar-2); }
 .people-filter[hidden] { display: none; }
 .people-filter .muted { white-space: nowrap; }
 [data-filtered] { display: none !important; }
+
+/* Formatted description (RichText): what the editor shows is what the project page shows. */
+.rich-text > :last-child { margin-bottom: 0; }
+.rich-text p { margin: 0 0 .5rem; }
+.rich-text ul, .rich-text ol { margin: 0 0 .5rem; padding-left: 1.4rem; }
+.rich-text li { margin-bottom: .15rem; }
+.rich-text-editor { border: 1px solid var(--ptm-line-strong); border-radius: var(--ptm-radius-sm); background: var(--ptm-surface); }
+.rich-text-editor:focus-within { border-color: var(--ptm-action); box-shadow: 0 0 0 .2rem var(--ptm-action-soft); }
+.rich-text-editor.is-invalid { border-color: var(--ptm-late); }
+.rich-text-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; border-bottom: 1px solid var(--ptm-line); }
+.rich-text-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; border: 0; border-radius: 8px;
+    background: transparent; color: var(--ptm-ink-2); }
+.rich-text-tool:hover { background: var(--ptm-bg); color: var(--ptm-ink); }
+.rich-text-tool[aria-pressed="true"] { background: var(--ptm-action-soft); color: var(--ptm-action-dark); }
+.rich-text-tool:focus-visible { outline: 2px solid var(--ptm-action); outline-offset: 1px; }
+.rich-text-sep { width: 1px; height: 22px; margin: 0 4px; background: var(--ptm-line); }
+.rich-text-input { min-height: 7.5rem; padding: .6rem .75rem; outline: none; overflow-wrap: anywhere; }
+.rich-text-input.is-empty::before { content: attr(data-placeholder); color: var(--ptm-ink-3); pointer-events: none; }
+
+/* Dashboard parts chosen with "Atur tampilan"; a part alone in its row takes the full width. */
+[data-widget][hidden], [data-widget-row][hidden], [data-widgets-empty][hidden] { display: none !important; }
+.row > .widget-full { flex: 0 0 auto; width: 100%; }
+.widget-menu { min-width: 260px; padding: .75rem 1rem; }
+.widget-menu li { display: flex; align-items: center; gap: .6rem; min-height: 40px; }
+.widget-menu li label { flex: 1; cursor: pointer; padding: .4rem 0; }
+.widget-menu .form-check-input { margin: 0; flex: none; }

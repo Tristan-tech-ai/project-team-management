@@ -5,7 +5,7 @@
         @csrf @if($company->exists) @method('PUT') @endif
         <div class="row g-3">
             <div class="col-md-8"><x-field name="name" label="Nama" :value="$company->name" required/></div>
-            <div class="col-md-4"><x-field name="code" label="Kode" :value="$company->code" data-code-from="name" help="Kosongkan, dibuat otomatis dari nama."/></div>
+            <div class="col-md-4"><x-field name="code" label="Kode" :value="$company->code" data-code-from="name" :data-code-url="route('codes.suggest', ['for' => 'companies'])" :data-code-auto="old('code_auto')" help="Terisi otomatis dari nama. Boleh diganti."/></div>
             <div class="col-md-6"><x-field name="email" label="Email" type="email" :value="$company->email"/></div>
             <div class="col-md-6"><x-field name="phone" label="Telepon" :value="$company->phone"/></div>
             <div class="col-12"><x-field name="address" label="Alamat" type="textarea" :value="$company->address"/></div>

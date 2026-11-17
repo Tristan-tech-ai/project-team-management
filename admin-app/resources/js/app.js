@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initRichText, initDashboardWidgets } from './core';
 
 import { initPalette } from './palette';
 
@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initAutoSubmit();
     initTaskCreate();
     initCodePreview();
+    initRichText();
+    initDashboardWidgets();
     initQuickAdd(bootstrap.Modal);
     initRoleMatrix();
     initPalette(bootstrap.Modal);

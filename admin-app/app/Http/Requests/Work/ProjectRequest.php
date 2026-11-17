@@ -3,12 +3,22 @@
 namespace App\Http\Requests\Work;
 
 use App\Support\Codes;
+use App\Support\RichText;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /** Create/update a project (Technical Guide 8.1). PIC and members are checked by ProjectTeamService (active company members). */
 class ProjectRequest extends FormRequest
 {
+    /** The description editor sends simple HTML (RichText allowlist); a code still filled in automatically is made unique on save. */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['description' => RichText::clean($this->input('description'))]);
+        if ($this->boolean('code_auto')) {
+            $this->merge(['code' => null]);
+        }
+    }
+
     public function authorize(): bool
     {
         $p = $this->route('project');

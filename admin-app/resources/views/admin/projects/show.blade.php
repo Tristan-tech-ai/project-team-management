@@ -34,7 +34,7 @@
                     <dt class="col-sm-4 muted fw-normal">Penugasan</dt><dd class="col-sm-8 numeric">{{ $counts['assignments'] }} penugasan untuk {{ $counts['people'] }} orang unik</dd>
                 </dl>
             </div>
-            @if($project->description)<div class="panel mb-3"><h2 class="panel-title">Deskripsi</h2><p class="mb-0" style="white-space:pre-line">{{ $project->description }}</p></div>@endif
+            @if($project->description)<div class="panel mb-3"><h2 class="panel-title">Deskripsi</h2><div class="rich-text">{!! \App\Support\RichText::toHtml($project->description) !!}</div></div>@endif
         </div>
         <div class="col-lg-4">
             <div class="panel mb-3">

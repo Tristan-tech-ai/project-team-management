@@ -14,7 +14,7 @@
             </dl>
         </div></div>
         <div class="col-lg-6"><div class="panel h-100"><h2 class="panel-title">Tim</h2><p class="mb-0">{{ $team->implode(', ') }}</p>
-            @if($project->description)<h2 class="panel-title mt-3">Catatan project</h2><p class="small mb-0" style="white-space:pre-line">{{ $project->description }}</p>@endif</div></div>
+            @if($project->description)<h2 class="panel-title mt-3">Catatan project</h2><div class="rich-text small">{!! \App\Support\RichText::toHtml($project->description) !!}</div>@endif</div></div>
         <div class="col-12"><div class="panel"><h2 class="panel-title">Catatan operasional</h2>
             <ul class="timeline">@forelse($notes as $a)
                 <li class="{{ $a->impact_type === 'blocked' ? 'blocked' : ($a->impact_type !== 'none' ? 'impact' : '') }}"><div class="small fw-semibold">{{ Codes::label(Codes::ACTIVITY_TYPE, $a->activity_type) }}: {{ $a->title }}</div>

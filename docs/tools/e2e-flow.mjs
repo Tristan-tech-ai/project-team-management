@@ -53,13 +53,14 @@ try {
     // 2. Drag To Do -> In Progress (accepted), then In Progress -> Done (refused, the card goes back).
     const card = a.locator('[data-kanban-column][data-status=backlog] [data-task-id]').first();
     const cardId = await card.getAttribute('data-task-id');
-    await card.locator('.task-handle').dragTo(a.locator('[data-kanban-column][data-status=in_progress]'));
+    // Dragged by the PIC line, not the grip: the whole card is the drag area.
+    await card.getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=in_progress]'));
     await expect(a.locator('.toast-area .alert-success').last()).toContainText('Dikerjakan', { timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await a.reload();
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     record(true, 'seret ke Dikerjakan tersimpan di server (bertahan setelah muat ulang)');
-    await a.locator(`[data-task-id="${cardId}"] .task-handle`).dragTo(a.locator('[data-kanban-column][data-status=done]'));
+    await a.locator(`[data-task-id="${cardId}"]`).getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=done]'));
     await expect(a.locator('.toast-area .alert-danger').last()).toBeVisible({ timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await expect(a.locator(`[data-kanban-column][data-status=done] [data-task-id="${cardId}"]`)).toHaveCount(0);
