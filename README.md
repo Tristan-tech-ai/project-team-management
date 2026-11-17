@@ -116,7 +116,45 @@ Versi yang bisa dicoba langsung:
 | Admin App | https://ptm-admin.vercel.app |
 | Team App | https://ptm-team.vercel.app |
 
-Akun masuk tidak diumumkan di sini; minta ke pemilik repositori.
+### Akun demo
+
+Semua data di dalamnya sintetis. Setiap pengunjung memakai akun yang sama. Jangan mengganti sandi, menonaktifkan akun, atau mencabut hak akses peran, supaya pengunjung berikutnya tetap bisa mencoba.
+
+| Peran | Email | Sandi | Masuk di |
+|---|---|---|---|
+| Super Admin | `admin@example.test` | `F1A7YS31ZOT0G4MaaEmoBbmv` | Admin App |
+| Manager | `demo.manager@example.test` | `pmkB5rtCJ4n31f4GHsa7H5-q` | Admin App |
+| Member | `demo.member@example.test` | `pmkB5rtCJ4n31f4GHsa7H5-q` | Team App (juga Admin App, dengan menu terbatas) |
+
+Sebelum mencoba:
+- Sandi lokal `ptm-demo-2026` tidak berlaku di versi online.
+- Manager di Admin App dan Member di Team App bisa masuk bersamaan karena alamatnya berbeda. Super Admin dan Manager sama-sama di Admin App: pakai jendela penyamaran, atau keluar dulu sebelum ganti akun.
+- Kirim hasil kerja berupa tautan. Berkas yang diunggah di versi online bersifat sementara (lihat batasan di bawah).
+
+### Alur coba (sekitar 25 menit)
+
+1. **Super Admin**
+   - Data Master > Anggota Tim > + Buat: coba Divisi baru dan Jabatan baru dari formulir. Sandi awal dibuat otomatis.
+   - Template > Template Project > Digital Marketing Campaign > Pakai template.
+   - Di formulir project: tekan Client baru, pilih Demo Manager sebagai PIC, centang Demo Member, lalu Simpan.
+   - Lihat juga Pengaturan Menu (seret-lepas), Role & Hak Akses (tabel centang), dan Pengaturan Sistem > Log aktivitas.
+2. **Manager**
+   - Dashboard: lihat Perlu kamu kerjakan.
+   - Papan Kanban project tadi: seret kartu dari Antrian ke Dikerjakan (diterima), lalu ke Selesai (ditolak, karena Selesai hanya lewat review).
+   - Klik kartu untuk membuka panel samping: tambah checklist dan pelaksana.
+   - Task > Semua Task: centang beberapa task > Ganti PIC > Demo Member > Terapkan.
+   - Tekan `Ctrl K` untuk mencari project, task, atau orang.
+3. **Member di HP**
+   - Task: Mulai, centang checklist, isi Catat waktu kerja, lalu kirim hasil berupa tautan.
+   - Task lain: Butuh geser deadline? > +3/+7/+14 hari > Ajukan.
+4. **Manager**
+   - Buka lonceng, lalu review hasil: Kembalikan untuk revisi dengan alasan.
+   - Member mengirim ulang hasilnya.
+   - Manager memilih Terima, task selesai, lalu menyetujui pengajuan deadline. Target awal tetap tercatat.
+   - Lihat Monitoring Project, Laporan Operasional, dan Kalender mode Selesai aktual.
+5. **Aturan**
+   - Member membuka `/settings/menus` di Admin App dan mendapat halaman 403.
+   - Opsional: buat project Berulang, lalu tekan Buka periode baru.
 
 Susunannya tetap sama dengan petunjuk teknis: satu database MySQL bersama untuk dua aplikasi yang dideploy terpisah, skema dari migrasi + SQL modul yang diimpor satu kali, nama tabel dan kolom tidak berubah. Kode aplikasi tidak diubah; yang ditambahkan hanya `Dockerfile`, `.dockerignore`, dan folder `docker/` di tiap app.
 
@@ -178,7 +216,7 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 - Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1, gulir samping), dan `node docs/tools/ux-metrics.mjs` (klik dan isian 12 alur inti).
 - Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
 
-README ini diuji dari nol (16 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah manual di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 115/115 dan tim 49/49 lulus dan `/login` kedua app 200 (`docs/evidence/tests/clean-install.txt`). Jalur cepat `php artisan ptm:setup` diuji terpisah dari salinan tanpa `.env` ke database kosong. Jalur cepat `php artisan ptm:setup` diuji terpisah dari salinan tanpa `.env` ke database kosong.
+README ini diuji dari nol (16 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah manual di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 115/115 dan tim 49/49 lulus dan `/login` kedua app 200 (`docs/evidence/tests/clean-install.txt`). Jalur cepat `php artisan ptm:setup` diuji terpisah dari salinan tanpa `.env` ke database kosong.
 
 ## Catatan
 
