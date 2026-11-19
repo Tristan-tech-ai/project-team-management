@@ -46,8 +46,9 @@ export function initTemplatePreview() {
             const shown = d.tasks.filter((t) => !(skipping && isPast(t)));
             const ns = shown.reduce((a, t) => a + t.subtasks.length, 0);
             const routines = shown.filter((t) => t.routine).length;
-            preview.innerHTML = `<p class="small mb-2"><strong>${shown.length} task</strong> dan <strong>${ns} subtask</strong> akan dibuat (template ${escape(d.type)})${
-                routines ? `, termasuk <strong>${routines} task rutin</strong> dengan checklist per hari` : ''}${skipping ? `; ${past} task yang sudah lewat dilewati` : ''}.</p><ol class="small mb-0">${
+            const routineNote = routines ? ', termasuk <strong>' + routines + ' task rutin</strong> dengan checklist per hari' : '';
+            const skipNote = skipping ? '; ' + past + ' task yang sudah lewat dilewati' : '';
+            preview.innerHTML = `<p class="small mb-2"><strong>${shown.length} task</strong> dan <strong>${ns} subtask</strong> akan dibuat (template ${escape(d.type)})${routineNote}${skipNote}.</p><ol class="small mb-0">${
                 d.tasks.map((t) => `<li class="${skipping && isPast(t) ? 'text-decoration-line-through muted' : ''}">${escape(t.title)}${t.routine ? ` <span class="pill pill-plain pill-info">${escape(t.routine)}</span>`
                     : (t.due !== '-' ? ` <span class="muted">· deadline ${escape(t.due)}</span>` : '')}${
                     t.subtasks.length ? `<ul>${t.subtasks.map((x) => `<li>${escape(x)}</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>`;

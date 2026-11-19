@@ -1,5 +1,18 @@
 # Hasil uji LV-07
 
+## Studi kasus putaran 3 (19 Nov 2026)
+
+Dua catatan tulisan tangan dari lapangan (digital marketing berulang dan KPI Web PPDB Sekolah) dicoba dari instalasi baru sebagai pengguna yang belum pernah memakai PTM; setiap kesulitan diperbaiki dengan tes, lalu semua bukti dibuat ulang pada kode yang sama (hash tree di bawah): tes Laravel ke database uji TiDB `ptm_test`; audit UI, e2e, uji asap, dan ukuran kegunaan ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_ev_1119`). Rincian kesulitan dan perubahannya di `docs/UX-PLAN.md` bagian Putaran 3; video satu alur `docs/video/ptm-case-study.mp4`.
+
+| Perubahan | Bukti |
+|---|---|
+| Kode terisi otomatis dari nama dan bisa diganti (saran kode unik dari server), editor deskripsi project sederhana yang membersihkan HTML, pilihan bagian Dashboard, kartu Kanban diseret dari bagian mana pun | `EditorAndCodesTest` |
+| Template berulang memakai tanggal; task rutin Setiap hari atau Setiap hari kerja dengan jam (checklist satu per hari, tabel `template_task_routines` lewat migrasi admin-app); deadline template akhir hari; pratinjau dari awal periode; project yang dimulai di tengah periode bisa melewati task yang sudah lewat; periode baru meneruskan PIC dan pelaksana; KPI tepat waktu dan hari rutin | `CaseStudyTemplateTest` |
+| Rutin hari ini di Beranda Team App dicentang langsung; centang pertama memulai task | `TeamRoutineTest`, `CaseStudyTemplateTest` |
+| Ganti PIC menyerahkan task yang belum dimulai, task yang berjalan tetap menyimpan PIC lama | `TaskBulkTest` |
+| Pemasangan dari nol: tabel rutin tanpa kunci asing ke tabel SQL modul, karena migrasi berjalan sebelum SQL modul diimpor (ditemukan oleh `ptm:setup` ke database kosong) | `ptm:setup` dua kali ke database baru `ptm_ev_1119` |
+| Ukuran kegunaan putaran 3 (alur yang sama, setelah perubahan) | `docs/evidence/ux-metrics/round3.json` |
+
 ## Peningkatan kegunaan putaran 2 (16 Nov 2026)
 
 Butir yang ditunda dari putaran pertama `docs/UX-PLAN.md` dikerjakan, lalu semua bukti dibuat ulang pada kode yang sama (hash tree di bawah): tes Laravel ke database uji TiDB `ptm_test`; audit UI, e2e, uji asap, dan ukuran kegunaan ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_r2_1116`).
@@ -46,15 +59,15 @@ Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm
 | Pengujian akhir | Semua tes dan bukti diperbarui (13 Nov 2026) | `phpunit-admin-app.xml` (63 tes), `phpunit-team-app.xml` (40 tes), `e2e-flow.txt` (18 lulus), `smoke-admin.txt` (53 halaman), `smoke-team.txt` (29 halaman), audit UI 102 pemeriksaan tanpa masalah |
 
 
-Hasil terbaru 16 Nov 2026, setelah peningkatan kegunaan putaran 2. Kode yang diuji: admin-app `7c1b0b8af4f8`, team-app `b70d870844d4` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_r2_1116`); pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
+Hasil terbaru 19 Nov 2026, setelah studi kasus putaran 3. Kode yang diuji: admin-app `18f5bbf1c5b7`, team-app `9994db0a561f` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_r2_1116`); pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
 
 | Bukti | Isi | Hasil |
 |---|---|---|
-| `phpunit-admin-app.xml` | `php artisan test --log-junit` admin-app (tes domain bersama + tes fitur Admin), 16 Nov 2026 | 115 lulus, 0 gagal |
-| `phpunit-team-app.xml` | `php artisan test --log-junit` team-app (tes domain bersama identik + tes fitur Tim), 16 Nov 2026 | 49 lulus, 0 gagal |
-| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366: project dari template, seret Kanban dan penolakan, pelaksana dan checklist, panel samping, aksi massal, kirim hasil dari HP, revisi dan terima, aktivitas dan persetujuan deadline, kalender, periode baru, 403 member, DataTables 520 baris (16 Nov 2026) | 20 lulus, 0 gagal |
-| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (16 Nov 2026) | 53 halaman, 0 gagal |
-| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (16 Nov 2026) | 38 halaman, 0 gagal |
+| `phpunit-admin-app.xml` | `php artisan test --log-junit` admin-app (tes domain bersama + tes fitur Admin), 19 Nov 2026 | 125 lulus, 0 gagal |
+| `phpunit-team-app.xml` | `php artisan test --log-junit` team-app (tes domain bersama identik + tes fitur Tim), 19 Nov 2026 | 50 lulus, 0 gagal |
+| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366: project dari template, seret Kanban dan penolakan, pelaksana dan checklist, panel samping, aksi massal, kirim hasil dari HP, revisi dan terima, kartu diseret dari badan kartu, aktivitas dan persetujuan deadline, kalender, periode baru, 403 member, DataTables 520 baris (19 Nov 2026) | 20 lulus, 0 gagal |
+| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (19 Nov 2026) | 53 halaman, 0 gagal |
+| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (19 Nov 2026) | 38 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, dan gulir samping terhadap lebar layar yang diminta, di 390 dan 1366 px, termasuk panel, palet, dan aksi massal yang terbuka (`../ui/audit-admin.json` 48 layar, 96 pemeriksaan; `../ui/audit-team-manager.json` 3 layar, 6 pemeriksaan; `../ui/audit-team.json` 17 layar, 34 pemeriksaan) | 136 pemeriksaan, 0 masalah |
 | `clean-install.txt` | Pasang bersih dari zip serah terima (commit publik d862950) ke database baru, tes dari folder itu (16 Nov 2026) | admin 115 dan tim 49 tes lulus, `/login` kedua app 200 |
 | `../performance.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |

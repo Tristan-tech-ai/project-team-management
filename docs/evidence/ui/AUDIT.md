@@ -14,7 +14,19 @@ Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yan
 
 Server dijalankan dengan `DEBUGBAR_ENABLED=false` supaya tangkapan bersih. Rincian per halaman ada di `audit-admin.json`, `audit-team.json`, dan `audit-team-manager.json` (kolom `serious`, `smallTargets`, `styleIssues`).
 
-## Hasil akhir (16 Nov 2026, putaran 2)
+## Hasil akhir (19 Nov 2026, putaran 3 studi kasus)
+
+Diulang pada database baru hasil `php artisan ptm:setup` (`ptm_ev_1119`) setelah studi kasus digital marketing dan web PPDB: penyusun template (Dikerjakan, Deadline tgl, Ulangi, Tempel daftar), editor deskripsi project, pilihan bagian Dashboard, Rutin hari ini, KPI per anggota, dan judul yang bisa diklik di daftar.
+
+| App | Peran | Layar | Pemeriksaan (390 + 1366 px) | Di antaranya keadaan setelah klik | Masalah |
+|---|---|---:|---:|---:|---:|
+| Admin | Super Admin | 48 | 96 | 8 | 0 |
+| Tim | Manager (Review Task) | 3 | 6 | 1 | 0 |
+| Tim | Member | 17 | 34 | 4 | 0 |
+
+Temuan putaran 3 sebelum lulus: tombol format di editor deskripsi dan tombol Ulangi di penyusun template 40 px di HP (kini mengikuti area klik 44 px di HP).
+
+## Hasil sebelumnya (16 Nov 2026, putaran 2)
 
 Diulang pada database baru hasil `php artisan ptm:setup` (`ptm_r2_1116`) setelah panel samping detail task, aksi massal, palet Ctrl+K, kotak Cari nama, dan divisi/jabatan dari formulir anggota. Alat kini juga memeriksa keadaan yang muncul setelah klik: jalur berakhiran `@panel` (panel samping terbuka dari tautan task pertama), `@palette` (palet terbuka dengan hasil cari) dan `@bulk` (satu task dicentang, bilah aksi massal tampil).
 

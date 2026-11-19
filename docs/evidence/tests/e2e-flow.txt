@@ -17,6 +17,6 @@ ok   kalender: mode Jadwal 5 kejadian, mode Selesai aktual menampilkan task yang
 ok   project berulang: periode baru dibuka (5 task dari template), project induk tetap Berjalan, periode lama tetap ada
 ok   Tim 1366 px: bottom nav tersembunyi, sidebar tampil, padding bawah 28px
 ok   Member memaksa /management, /settings/roles, /master/companies: semua 403 dengan halaman ramah
-ok   DataTables: recordsTotal 520, tiap permintaan hanya 25 baris (length=25), halaman 2 start=25 (25 baris), cari "512" difilter server menjadi 1
+ok   DataTables: recordsTotal 520, tiap permintaan hanya 25 baris (length=25), halaman 2 start=25 (25 baris), Cari judul "512" difilter server menjadi 1
 
 20 lulus, 0 gagal
