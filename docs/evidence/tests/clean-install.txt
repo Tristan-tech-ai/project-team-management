@@ -1,7 +1,7 @@
-Pasang bersih dari zip serah terima (16 Nov 2026, setelah peningkatan kegunaan putaran 2)
-Zip: git archive HEAD repositori publik (commit d862950), 61.601.150 byte, diekstrak ke folder baru.
+Pasang bersih dari zip serah terima (19 Nov 2026, setelah studi kasus putaran 3)
+Zip: git archive HEAD repositori publik (commit d941bc0), 89.935.288 byte, diekstrak ke folder baru.
 Langkah README "Memasang dari nol (langkah manual)" dijalankan apa adanya ke dua database TiDB baru yang kosong:
-ptm_clean2_1116 (aplikasi) dan ptm_clean2_test_1116 (bagian Uji). Koneksi database lewat variabel lingkungan; nilainya tidak dicetak.
+ptm_clean4_1119 (aplikasi) dan ptm_clean4t_1119 (bagian Uji). Koneksi database lewat variabel lingkungan; nilainya tidak dicetak.
 Sesudah pasang: kedua app dijalankan dari folder itu, /login Admin 200 dan /login Team 200.
 
 extracted <folder>/project-team-management.zip -> <folder baru>/project-team-management
@@ -12,14 +12,14 @@ $ composer install --no-interaction --no-progress  (cwd project-team-management/
 $ npm install --no-audit --no-fund  (cwd project-team-management/team-app) -> 0
 $ php artisan key:generate --no-interaction  (cwd project-team-management/team-app) -> 0
 APP_KEY generated for both apps, different: True
-$ <folder baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_clean2_1116'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
+$ <folder baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_clean4_1119'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
 $ <folder baru>/project-team-management/admin-app php artisan tinker --execute echo 'tables='.count(DB::select('show tables'));  (cwd project-team-management/admin-app) -> 0
-ptm_clean2_1116: 0 tables before install
+ptm_clean4_1119: 0 tables before install
 $ <folder baru>/project-team-management/admin-app php artisan migrate --force --no-interaction  (cwd project-team-management/admin-app) -> 0
 $ <env TiDB> php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql  (cwd project-team-management/admin-app) -> 0
-$ <folder baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_clean2_test_1116'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
+$ <folder baru>/project-team-management/admin-app php artisan tinker --execute DB::connection()->getPdo(); DB::statement('CREATE DATABASE IF NOT EXISTS ptm_clean4t_1119'); echo 'ok';  (cwd project-team-management/admin-app) -> 0
 $ <folder baru>/project-team-management/admin-app php artisan tinker --execute echo 'tables='.count(DB::select('show tables'));  (cwd project-team-management/admin-app) -> 0
-ptm_clean2_test_1116: 0 tables before install
+ptm_clean4t_1119: 0 tables before install
 $ <folder baru>/project-team-management/admin-app php artisan migrate --force --no-interaction  (cwd project-team-management/admin-app) -> 0
 $ <env TiDB> php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql  (cwd project-team-management/admin-app) -> 0
 $ <folder baru>/project-team-management/admin-app php artisan db:seed --force --no-interaction  (cwd project-team-management/admin-app) -> 0
@@ -28,8 +28,8 @@ $ <env TiDB> php artisan migrate --force  (cwd project-team-management/team-app)
 team-app migrate refused: True
 $ npm run build  (cwd project-team-management/admin-app) -> 0
 $ <folder baru>/project-team-management/admin-app php artisan test --log-junit ../admin-app-junit.xml  (cwd project-team-management/admin-app) -> 0
-admin-app tests: 115 passed (981 assertions)
+admin-app tests: 125 passed (1097 assertions)
 $ npm run build  (cwd project-team-management/team-app) -> 0
 $ <folder baru>/project-team-management/team-app php artisan test --log-junit ../team-app-junit.xml  (cwd project-team-management/team-app) -> 0
-team-app tests: 49 passed (308 assertions)
+team-app tests: 50 passed (316 assertions)
 done
