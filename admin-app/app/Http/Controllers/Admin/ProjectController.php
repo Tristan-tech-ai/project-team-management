@@ -72,6 +72,7 @@ class ProjectController extends Controller
             ->addColumn('status_label_class', fn (Project $p) => $p->status)
             ->addColumn('progress', fn (Project $p) => $p->main_tasks ? (int) round($p->done_tasks * 100 / $p->main_tasks) : 0)
             ->addColumn('due', fn (Project $p) => Dates::date($p->due_at))
+            ->addColumn('link', fn (Project $p) => route('projects.board', $p)) // the name opens the board, where the work is
             ->addColumn('actions', fn (Project $p) => [['label' => 'Buka', 'url' => route('projects.show', $p)]])
             ->toJson();
     }
@@ -95,7 +96,10 @@ class ProjectController extends Controller
         $t = ProjectTemplate::query()->where('is_active', 1)->find($request->integer('template'));
         $start = Dates::fromInput($request->input('start')) ?? now();
 
-        return response()->json(['tasks' => collect($this->templates->preview($t, $start))->map(fn ($x) => $x + ['due' => Dates::date($x['due_at'])])->all(),
+        $type = in_array($request->input('type'), array_keys(Codes::PROJECT_TYPE), true) ? $request->input('type') : null;
+        $unit = in_array($request->input('unit'), array_keys(Codes::RECURRENCE_UNIT), true) ? $request->input('unit') : null;
+
+        return response()->json(['tasks' => collect($this->templates->preview($t, $start, $type, $unit))->map(fn ($x) => $x + ['due' => Dates::date($x['due_at'])])->all(),
             'type' => $t ? Codes::label(Codes::PROJECT_TYPE, $t->project_type) : null, 'project_type' => $t?->project_type]);
     }
 
@@ -178,7 +182,7 @@ class ProjectController extends Controller
             ->when($period, fn ($x) => $x->where('project_period_id', $period))
             ->with(['pic:id,name', 'assignees:id,name'])
             ->withCount(['subtasks as sub_total', 'subtasks as sub_done' => fn ($s) => $s->where('status', 'done'),
-                'submissions as pending' => fn ($s) => $s->where('status', 'pending')])
+                'subtasks as sub_dated' => fn ($s) => $s->whereNotNull('due_at'), 'submissions as pending' => fn ($s) => $s->where('status', 'pending')])
             ->orderBy('sort_order')->orderBy('id');
         if ($request->filled('pic')) {
             $q->where('pic_user_id', $request->integer('pic'));

@@ -39,6 +39,10 @@ class TeamController extends Controller
             'counts' => (clone $ownTasks)->selectRaw('tasks.status, count(*) n')->groupBy('tasks.status')->pluck('n', 'status'),
             'today' => (clone $ownTasks)->where('tasks.status', '!=', 'done')->whereBetween('tasks.due_at', $today)->with(['project:id,name'])->withCount($this->subtaskCounts())->orderBy('tasks.due_at')->get(),
             'overdue' => (clone $ownTasks)->where('tasks.status', '!=', 'done')->where('tasks.due_at', '<', now())->with(['project:id,name'])->withCount($this->subtaskCounts())->orderBy('tasks.due_at')->limit(5)->get(),
+            // Routine tasks: today's item of each daily task I hold, ticked right here without opening the task.
+            'routine' => \App\Models\Task::query()->whereNotNull('parent_id')->where('status', '!=', 'done')->whereBetween('due_at', $today)
+                ->whereIn('parent_id', (clone $ownTasks)->whereIn('tasks.status', ['backlog', 'in_progress'])->select('tasks.id'))
+                ->with(['parent:id,title,project_id', 'parent.project:id,name'])->orderBy('due_at')->get(),
             'inReview' => (clone $ownTasks)->where('tasks.status', 'review')->with(['project:id,name'])->withCount($this->subtaskCounts())->limit(5)->get(),
             'revision' => TaskSubmission::query()->where('submitted_by', $u->id)->where('status', 'revision')->where('reviewed_at', '>=', now()->subDays(7))
                 ->with('task:id,title,status')->latest('reviewed_at')->limit(3)->get()->filter(fn ($s) => $s->task?->status === 'in_progress'),

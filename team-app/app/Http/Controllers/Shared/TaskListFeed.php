@@ -51,6 +51,8 @@ class TaskListFeed
             ->addColumn('subtask', fn (Task $t) => TaskWorkflowService::taskProgress((int) $t->sub_done, (int) $t->sub_total))
             ->addColumn('due', fn (Task $t) => Dates::dateTime($t->due_at))
             ->addColumn('period', fn (Task $t) => $t->period?->name ?? '-')
+            ->addColumn('link', fn (Task $t) => route('tasks.show', $t)) // the title opens the task in the side panel
+            ->addColumn('link_panel', true)
             ->addColumn('actions', $actions)
             ->addColumn('bulk', $bulk)
             ->orderColumn('due', 'tasks.due_at $1')

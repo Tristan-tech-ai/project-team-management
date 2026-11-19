@@ -8,7 +8,7 @@
                     @foreach($project->periods as $p)<option value="{{ $p->id }}" @selected($selectedPeriod === $p->id)>{{ $p->name }} ({{ Codes::label(Codes::PERIOD_STATUS, $p->status) }})</option>@endforeach</select></div>
             @if($canEdit)<button class="btn btn-outline-primary" type="submit" form="open-period"><x-icon name="calendar-clock"/> Buka periode baru</button>@endif
         </form>
-        @if($canEdit)<form id="open-period" method="post" action="{{ route('projects.periods.store', $project) }}" data-confirm="Buka periode baru? Periode berjalan ditutup, project induk tetap berjalan, dan task dari template dibuat untuk periode baru.">@csrf</form>@endif
+        @if($canEdit)<form id="open-period" method="post" action="{{ route('projects.periods.store', $project) }}" data-confirm="Buka periode baru? Periode berjalan ditutup, project induk tetap berjalan, dan task dari template dibuat untuk periode baru dengan PIC dan pelaksana yang sama seperti periode ini.">@csrf</form>@endif
     @endif
     <div class="row g-3">
         <div class="col-lg-8">

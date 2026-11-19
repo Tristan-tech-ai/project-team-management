@@ -9,6 +9,7 @@
     $subTotal = (int) ($t->sub_total ?? 0);
     $subDone = (int) ($t->sub_done ?? 0);
     $percent = $subTotal ? (int) round($subDone * 100 / $subTotal) : 0;
+    $routine = $subTotal > 0 && (int) ($t->sub_dated ?? 0) === $subTotal; // daily routine: one dated checklist item per day
     $canMoveStatus = $user->can('moveStatus', $t) || $user->can('review', $t);
     $people = $t->relationLoaded('assignees') ? $t->assignees : collect();
     $initials = fn ($name) => \Illuminate\Support\Str::of($name)->explode(' ')->filter()->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
@@ -33,7 +34,7 @@
         @endif
     </div>
     @if($subTotal)
-        <div class="d-flex align-items-center gap-2 mt-2"><div class="meter flex-grow-1"><span style="width:{{ $percent }}%"></span></div><span class="small numeric muted" data-sub-count>{{ $subDone }} / {{ $subTotal }} subtask</span></div>
+        <div class="d-flex align-items-center gap-2 mt-2"><div class="meter flex-grow-1"><span style="width:{{ $percent }}%"></span></div><span class="small numeric muted" data-sub-count>{{ $subDone }} / {{ $subTotal }} {{ $routine ? 'hari' : 'subtask' }}</span></div>
     @endif
     <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
         <span class="small {{ $late ? 'text-danger fw-semibold' : 'muted' }}">Deadline: {{ Dates::date($t->due_at) }}@if($t->due_at && $t->status !== 'done') · {{ Dates::relative($t->due_at) }}@endif</span>

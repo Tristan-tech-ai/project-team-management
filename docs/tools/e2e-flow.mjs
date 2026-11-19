@@ -54,13 +54,14 @@ try {
     const card = a.locator('[data-kanban-column][data-status=backlog] [data-task-id]').first();
     const cardId = await card.getAttribute('data-task-id');
     // Dragged by the PIC line, not the grip: the whole card is the drag area.
-    await card.getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=in_progress]'));
+    // The card follows the pointer (SortableJS fallback drag), so the pointer moves in steps like a hand does.
+    await card.getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=in_progress]'), { steps: 12 });
     await expect(a.locator('.toast-area .alert-success').last()).toContainText('Dikerjakan', { timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await a.reload();
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     record(true, 'seret ke Dikerjakan tersimpan di server (bertahan setelah muat ulang)');
-    await a.locator(`[data-task-id="${cardId}"]`).getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=done]'));
+    await a.locator(`[data-task-id="${cardId}"]`).getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=done]'), { steps: 12 });
     await expect(a.locator('.toast-area .alert-danger').last()).toBeVisible({ timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await expect(a.locator(`[data-kanban-column][data-status=done] [data-task-id="${cardId}"]`)).toHaveCount(0);
@@ -267,9 +268,11 @@ try {
         await expect(e.locator('table tbody tr')).toHaveCount(25);
         const [r2] = await Promise.all([waitFor((q) => q.get('start') === '25'), e.locator('.dt-paging button').filter({ hasText: /^2$/ }).click()]);
         const j2 = await r2.json();
-        const [r3] = await Promise.all([waitFor((q) => (q.get('search[value]') ?? '') === '512'), e.fill('.dt-search input', '512')]);
+        // The page has one search box, "Cari judul" (the table's own box is hidden there); it filters on the server while typing.
+        const [r3] = await Promise.all([waitFor((q) => (q.get('keyword') ?? '') === '512'), e.fill('#filter-ptask-keyword', '512')]);
         const j3 = await r3.json();
-        record(true, `DataTables: recordsTotal ${j1.recordsTotal}, tiap permintaan hanya ${j1.data.length} baris (length=25), halaman 2 start=25 (${j2.data.length} baris), cari "512" difilter server menjadi ${j3.recordsFiltered}`);
+        if (j3.recordsFiltered < 1 || j3.recordsFiltered >= j1.recordsTotal) throw new Error(`cari 512: ${j3.recordsFiltered} dari ${j1.recordsTotal}`);
+        record(true, `DataTables: recordsTotal ${j1.recordsTotal}, tiap permintaan hanya ${j1.data.length} baris (length=25), halaman 2 start=25 (${j2.data.length} baris), Cari judul "512" difilter server menjadi ${j3.recordsFiltered}`);
         await e.screenshot({ path: `${EVIDENCE}/09-datatables-520.png` });
         await tableContext.close();
     }

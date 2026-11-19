@@ -816,3 +816,39 @@ export function initPeopleFilter(root = document) {
         apply();
     });
 }
+
+// PIC and assignees form: the new PIC is ticked as an assignee at once; on a task still in the queue the previous PIC is unticked
+// (handed over completely), on a started task they stay (same rule as the bulk "Ganti PIC"). One listener for pages and the side panel.
+let picHandoverReady = false;
+export function initPicHandover() {
+    if (picHandoverReady) return;
+    picHandoverReady = true;
+    document.addEventListener('focusin', (e) => {
+        const select = e.target;
+        if (select instanceof HTMLSelectElement && select.name === 'pic_user_id' && select.closest('form[data-pic-handover]')) select.dataset.previous = select.value;
+    });
+    document.addEventListener('change', (e) => {
+        const select = e.target;
+        const form = select instanceof HTMLSelectElement && select.name === 'pic_user_id' ? select.closest('form[data-pic-handover]') : null;
+        if (!form) return;
+        const box = (id) => form.querySelector(`input[name="assignees[]"][value="${CSS.escape(id ?? '')}"]`);
+        const fresh = box(select.value);
+        if (fresh) fresh.checked = true;
+        // The PIC before this change: remembered on focus, else the saved PIC the form was drawn with.
+        const previous = box(select.dataset.previous || form.dataset.pic);
+        if (previous && previous !== fresh && form.dataset.status === 'backlog') previous.checked = false;
+        select.dataset.previous = select.value;
+    });
+}
+
+// A number field that has focus changes its value when the mouse wheel turns over it (Chrome, Edge): scrolling the page with the
+// pointer over "Deadline tgl" silently turned 28 into 10. The field gives up focus first, so the wheel only scrolls the page.
+let numberWheelReady = false;
+export function initNumberWheelGuard() {
+    if (numberWheelReady) return;
+    numberWheelReady = true;
+    document.addEventListener('wheel', (e) => {
+        const field = e.target;
+        if (field instanceof HTMLInputElement && field.type === 'number' && document.activeElement === field) field.blur();
+    }, { passive: true, capture: true });
+}

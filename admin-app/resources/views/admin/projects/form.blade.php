@@ -17,7 +17,8 @@
                             <div class="col-md-6"><div class="mb-3"><span class="form-label d-block">Company</span>{{ $project->company?->name }}</div></div>
                         @endif
                         <div class="col-md-6"><x-field name="client_id" label="Client" type="select" :options="$clients" :value="$project->client_id" empty="Tanpa client (project internal)">
-                            <x-slot:action>@can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru"/>@endcan</x-slot:action></x-field></div>
+                            <x-slot:action>@can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru"/>@endcan</x-slot:action></x-field>
+                            @cannot('clients.manage')<p class="form-text mt-n2">Client belum ada? Minta Super Admin menambahkannya di Data Master, Client.</p>@endcannot</div>
                         <div class="col-md-8"><x-field name="name" label="Nama project" :value="$project->name" required/></div>
                         <div class="col-md-4"><x-field name="code" label="Kode" :value="$project->code" data-code-from="name" :data-code-url="route('codes.suggest', ['for' => 'projects'])" :data-code-auto="old('code_auto')" help="Terisi otomatis dari nama. Boleh diganti."/></div>
                         @if($new)

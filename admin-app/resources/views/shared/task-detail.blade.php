@@ -5,6 +5,11 @@
     $late = $task->status !== 'done' && $task->due_at && $task->due_at->isPast();
     $subTotal = $task->subtasks->count();
     $subDone = $task->subtasks->where('status', 'done')->count();
+    // A routine task (made from a template task that repeats daily) has one checklist item per day, each with its own deadline.
+    $routine = $subTotal > 0 && $task->subtasks->every(fn ($s) => $s->due_at !== null);
+    $todayKey = Dates::local(now())->toDateString();
+    $routineToday = $routine ? $task->subtasks->first(fn ($s) => Dates::local($s->due_at)->toDateString() === $todayKey) : null;
+    $routineMissed = $routine ? $task->subtasks->filter(fn ($s) => $s->status !== 'done' && Dates::local($s->due_at)->toDateString() < $todayKey)->values() : collect();
     $pending = $task->submissions->firstWhere('status', 'pending');
     $inPanel = $panel ?? false; // I3: in the side panel everything stacks in one column
 @endphp
@@ -53,22 +58,36 @@
         </div>
 
         <div class="panel mb-3" id="checklist">
-            <div class="d-flex align-items-center justify-content-between mb-2"><h2 class="panel-title mb-0">Checklist</h2><span class="small muted numeric" data-checklist-count>{{ $subDone }} / {{ $subTotal }}</span></div>
+            <div class="d-flex align-items-center justify-content-between mb-2"><h2 class="panel-title mb-0">{{ $routine ? 'Checklist harian' : 'Checklist' }}</h2><span class="small muted numeric" data-checklist-count>{{ $subDone }} / {{ $subTotal }}</span></div>
             @if($subTotal)<div class="meter mb-3"><span data-checklist-progress style="width:{{ $subTotal ? round($subDone * 100 / $subTotal) : 0 }}%"></span></div>@endif
-            <ul class="list-unstyled mb-2 checklist">
-                @forelse($task->subtasks as $s)
-                    <li class="d-flex align-items-center gap-2 py-1">
-                        <form method="post" action="{{ route('subtasks.toggle', $s) }}" class="d-flex align-items-center gap-2 m-0">@csrf @method('PATCH')
-                            <input type="hidden" name="done" value="{{ $s->status === 'done' ? 0 : 1 }}">
-                            <input class="form-check-input mt-0" type="checkbox" id="s-{{ $s->id }}" data-check-subtask="{{ route('subtasks.toggle', $s) }}" @checked($s->status === 'done') @disabled(! ($can['status'] || $can['update']))>
-                            <label for="s-{{ $s->id }}" class="{{ $s->status === 'done' ? 'text-decoration-line-through muted' : '' }}">{{ $s->title }}</label>
-                            <noscript><button class="btn btn-sm btn-outline-secondary" type="submit">{{ $s->status === 'done' ? 'Buka' : 'Selesai' }}</button></noscript>
-                        </form>
-                    </li>
-                @empty
-                    <li class="muted small">Belum ada checklist.</li>
-                @endforelse
-            </ul>
+            @php($canTick = $can['status'] || $can['update'])
+            @if($routine)
+                {{-- A routine (one dated item per day): today first, then days that were missed, the rest folded away. --}}
+                <p class="small muted mb-2">Task rutin: centang setiap hari setelah dikerjakan.</p>
+                @if($routineToday)
+                    <div class="routine-today mb-2"><span class="routine-label">Hari ini</span>
+                        <ul class="list-unstyled m-0 checklist">@include('shared.checklist-item', ['s' => $routineToday, 'canTick' => $canTick])</ul></div>
+                @else
+                    <p class="small mb-2">Tidak ada jadwal hari ini.</p>
+                @endif
+                @if($routineMissed->isNotEmpty())
+                    <div class="small fw-semibold text-danger mt-2">Belum dicentang ({{ $routineMissed->count() }} hari)</div>
+                    <ul class="list-unstyled mb-2 checklist">@foreach($routineMissed as $s)@include('shared.checklist-item', ['s' => $s, 'canTick' => $canTick])@endforeach</ul>
+                @endif
+                @php($others = $task->subtasks->reject(fn ($s) => $s->is($routineToday) || $routineMissed->contains($s)))
+                @if($others->isNotEmpty())
+                    <details class="routine-all"><summary class="small">Hari lain ({{ $others->count() }})</summary>
+                        <ul class="list-unstyled mt-2 mb-0 checklist">@foreach($others as $s)@include('shared.checklist-item', ['s' => $s, 'canTick' => $canTick])@endforeach</ul></details>
+                @endif
+            @else
+                <ul class="list-unstyled mb-2 checklist">
+                    @forelse($task->subtasks as $s)
+                        @include('shared.checklist-item', ['s' => $s, 'canTick' => $canTick])
+                    @empty
+                        <li class="muted small">Belum ada checklist.</li>
+                    @endforelse
+                </ul>
+            @endif
             @if($can['update'])
                 <form method="post" action="{{ route('tasks.subtasks.store', $task) }}" class="d-flex gap-2">@csrf
                     <label class="visually-hidden" for="new-subtask">Checklist baru</label>
@@ -137,7 +156,7 @@
         @endif
 
         @if($can['assign'])
-            <form method="post" action="{{ route('tasks.assignees', $task) }}" class="panel mb-3">@csrf @method('PUT')
+            <form method="post" action="{{ route('tasks.assignees', $task) }}" class="panel mb-3" data-pic-handover data-status="{{ $task->status }}" data-pic="{{ $task->pic_user_id }}">@csrf @method('PUT')
                 <h2 class="panel-title">PIC dan pelaksana</h2>
                 <x-field name="pic_user_id" label="PIC" type="select" :options="$memberOptions" :value="$task->pic_user_id" required/>
                 @php($load = \App\Support\ProjectPeople::openTasks(collect($memberOptions)->keys()->map(fn ($k) => (int) $k)->all()))
@@ -151,7 +170,7 @@
                     </div>
                     @error('assignees')<div class="text-danger small">{{ $message }}</div>@enderror
                 </fieldset>
-                <button class="btn btn-outline-primary btn-sm" type="submit">Simpan pelaksana</button>
+                <button class="btn btn-outline-primary btn-sm" type="submit">Simpan PIC dan pelaksana</button>
             </form>
         @endif
 

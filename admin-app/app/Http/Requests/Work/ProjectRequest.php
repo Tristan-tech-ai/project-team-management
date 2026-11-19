@@ -51,6 +51,7 @@ class ProjectRequest extends FormRequest
             'divisions' => ['array'], 'divisions.*' => ['integer', 'exists:divisions,id'],
             'members' => ['array'], 'members.*' => ['integer', 'exists:users,id'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'skip_past' => [$p ? 'prohibited' : 'nullable', 'boolean'],
         ];
     }
 }

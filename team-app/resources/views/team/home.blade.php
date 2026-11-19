@@ -17,6 +17,23 @@
         <a class="panel d-flex align-items-center justify-content-between mb-3 text-decoration-none text-reset" href="{{ route('review.index') }}">
             <span><x-icon name="clipboard-check"/> <strong class="numeric">{{ $pendingForMe }}</strong> hasil menunggu review-mu</span><x-icon name="chevron-right"/></a>
     @endif
+    @if($routine->isNotEmpty())
+        <section class="mb-3" aria-labelledby="h-routine"><h2 class="mb-2" id="h-routine">Rutin hari ini</h2>
+            <div class="panel routine-today"><ul class="list-unstyled m-0 checklist">
+                @foreach($routine as $s)
+                    @php($window = preg_match('/\d{2}\.\d{2}-\d{2}\.\d{2}$/', $s->title, $m) ? $m[0] : 'hari ini')
+                    <li class="d-flex align-items-center justify-content-between gap-2 py-1">
+                        <form method="post" action="{{ route('subtasks.toggle', $s) }}" class="d-flex align-items-center gap-2 m-0 min-w-0">@csrf @method('PATCH')
+                            <input type="hidden" name="done" value="1">
+                            <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="r-{{ $s->id }}" data-check-subtask="{{ route('subtasks.toggle', $s) }}">
+                            <label for="r-{{ $s->id }}" class="routine-name min-w-0"><span class="fw-semibold d-block">{{ $s->parent?->title }}</span><span class="small muted d-block">{{ $window }} · {{ $s->parent?->project?->name }}</span></label>
+                            <noscript><button class="btn btn-sm btn-outline-secondary" type="submit">Selesai</button></noscript>
+                        </form>
+                        <a class="btn btn-sm btn-outline-primary flex-shrink-0" href="{{ route('tasks.show', $s->parent_id) }}#checklist" data-task-panel>Buka</a>
+                    </li>
+                @endforeach
+            </ul></div></section>
+    @endif
     <section class="mb-3" aria-labelledby="h-today">
         <h2 class="mb-2" id="h-today">Deadline hari ini</h2>
         <div class="task-list">@forelse($today as $t) @include('team._card', ['t' => $t]) @empty<p class="small muted mb-0">Tidak ada deadline hari ini.</p>@endforelse</div>

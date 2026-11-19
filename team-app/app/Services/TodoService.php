@@ -58,6 +58,17 @@ class TodoService
                 'when' => $t->due_at ? Dates::relative($t->due_at) : null, 'url' => $taskUrl($t->id), 'panel' => true];
         }
 
+        // Routine tasks: today's checklist item of a daily task I hold, until it is ticked.
+        $dayStart = Dates::local(now())->startOfDay()->utc();
+        $routine = Task::query()->whereNotNull('tasks.parent_id')->where('tasks.status', '!=', 'done')
+            ->whereBetween('tasks.due_at', [$dayStart, $dayStart->copy()->addDay()->subSecond()])
+            ->whereIn('tasks.parent_id', $mine(Scope::tasks($u))->whereNull('tasks.parent_id')->whereIn('tasks.status', ['backlog', 'in_progress'])->select('tasks.id'))
+            ->with(['parent:id,title,project_id', 'parent.project:id,name'])->orderBy('tasks.due_at')->limit($limit)->get(['tasks.id', 'tasks.parent_id', 'tasks.title', 'tasks.due_at']);
+        foreach ($routine as $s) {
+            $items[] = ['kind' => 'routine', 'tone' => $s->due_at->isPast() ? 'late' : 'info', 'title' => 'Rutin hari ini: '.$s->parent?->title,
+                'detail' => $s->title.' · '.($s->parent?->project?->name ?? ''), 'when' => Dates::relative($s->due_at), 'url' => $taskUrl($s->parent_id).'#checklist', 'panel' => true];
+        }
+
         $open = $mine(Scope::tasks($u))->whereNull('tasks.parent_id')->whereIn('tasks.status', ['backlog', 'in_progress'])->whereNotNull('tasks.due_at')
             ->where('tasks.due_at', '<', now()->addDays(2))->whereNotIn('tasks.id', $returned->pluck('id'))
             ->with('project:id,name')->orderBy('tasks.due_at')->limit($limit)->get(['tasks.id', 'tasks.title', 'tasks.project_id', 'tasks.due_at', 'tasks.status']);

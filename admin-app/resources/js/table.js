@@ -36,6 +36,8 @@ function escape(t) {
 
 const renderers = {
     text: DataTable.render.text(),
+    // A name that opens its record (row.link from the server); people click names more often than a button at the row end.
+    link: (data, type, row) => (type === 'display' && row.link ? `<a class="fw-semibold" href="${escape(row.link)}"${row.link_panel ? ' data-task-panel' : ''}>${escape(data)}</a>` : escape(data)),
     // I13: tick box for bulk actions; the server sends the task id only when this user may change the task.
     select: (data, type, row) => (type === 'display' && data
         ? `<label class="bulk-tick"><input class="form-check-input" type="checkbox" data-bulk-row value="${Number(data)}" aria-label="Pilih ${escape(row.title)}"></label>`
@@ -83,6 +85,9 @@ export function initTables() {
                 if (params.has(field.name)) field.value = params.get(field.name);
             });
         }
+        // One search box per page: when the page filter has its own "Cari judul", the table's built-in search box is not shown
+        // (and a search remembered from before is cleared, so no hidden filter is left).
+        const keyword = filter?.querySelector('[name="keyword"]');
         const pageLength = Number(document.body.dataset.tablePageLength);
         // I15: on phones every row becomes a card; each cell carries its column title as a label.
         const headers = [...el.querySelectorAll('thead th')].map((th) => th.textContent.trim());
@@ -105,6 +110,7 @@ export function initTables() {
             // I6: search text, sort, and page are remembered per table for this browser tab.
             stateSave: true,
             stateDuration: -1,
+            ...(keyword ? { layout: { topEnd: null }, stateLoadParams: (s, data) => { if (data.search) data.search.search = ''; } } : {}),
         });
         const rememberFilters = () => {
             const url = new URL(window.location.href);
@@ -115,6 +121,9 @@ export function initTables() {
         // I3: after the side panel changed a task, reload the rows on the same page (paging and search stay).
         document.addEventListener('ptm:tasks-changed', () => table.ajax.reload(null, false));
         filter?.addEventListener('submit', (e) => { e.preventDefault(); rememberFilters(); table.ajax.reload(); });
+        // The list follows the title search while typing (a short pause first, so the server is asked once per word).
+        let typing = null;
+        keyword?.addEventListener('input', () => { clearTimeout(typing); typing = setTimeout(() => { rememberFilters(); table.ajax.reload(); }, 350); });
         const bulk = el.id ? document.querySelector(`[data-bulk-form][data-table="#${CSS.escape(el.id)}"]`) : null;
         if (bulk) initBulk(el, table, bulk);
     });

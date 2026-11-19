@@ -44,12 +44,15 @@ final class Dates
         return $l === null ? '-' : $l->day.' '.self::MONTHS[$l->month].' '.$l->year;
     }
 
-    /** "18 Nov 2026 14.30". */
+    /** "18 Nov 2026 14.30"; a deadline at the end of the day (23.59) is just the date, "18 Nov 2026". */
     public static function dateTime(?CarbonInterface $t): string
     {
         $l = self::local($t);
+        if ($l === null) {
+            return '-';
+        }
 
-        return $l === null ? '-' : self::date($t).' '.$l->format('H.i');
+        return $l->format('H.i') === '23.59' ? self::date($t) : self::date($t).' '.$l->format('H.i');
     }
 
     /**
@@ -81,9 +84,11 @@ final class Dates
             return $days === 0 ? 'terlambat '.max(1, $hours).' jam' : 'terlambat '.abs($days).' hari';
         }
 
+        $time = $l->format('H.i') === '23.59' ? '' : ' '.$l->format('H.i'); // due at the end of the day: no time needed
+
         return match (true) {
-            $days === 0 => 'hari ini '.$l->format('H.i'),
-            $days === 1 => 'besok '.$l->format('H.i'),
+            $days === 0 => 'hari ini'.$time,
+            $days === 1 => 'besok'.$time,
             default => $days.' hari lagi',
         };
     }

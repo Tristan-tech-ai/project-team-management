@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initRichText, initDashboardWidgets } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard, initRichText, initDashboardWidgets } from './core';
 
 import { initPalette } from './palette';
 
@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initRoleMatrix();
     initPalette(bootstrap.Modal);
     initPeopleFilter();
+    initPicHandover();
+    initNumberWheelGuard();
     // I3: task detail as a side panel; what the panel loads gets the same helpers as a normal page.
     initTaskPanel(bootstrap.Offcanvas, {
         onContent: (root) => {

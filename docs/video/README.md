@@ -4,6 +4,35 @@ Rekaman sungguhan Admin App dan Team App yang berjalan di instalasi baru hasil `
 
 Hasil v3 (16 November 2026): `docs/video/ptm-demo.mp4`, direkam ulang setelah dua putaran peningkatan kegunaan, sehingga tampilan di video sama dengan aplikasi sekarang (panel samping detail task, palet Ctrl K, aksi massal, pengaturan menu seret-lepas, hak akses centang). Rekaman dirender tanpa bilah browser dan tanpa riak klik, lalu disusun sebagai film dengan gaya yang sama seperti v2: pembuka masalah kerja agensi, dua aplikasi, tiga peran, cara kerja, studi kasus Campaign Pendaftaran Sekolah 2027, 11 bab berlabel hari dan sudut pandang (Manager Radit, Member Putri di HP, Super Admin), dan momen sorot yang dibangun ulang dari teks asli rekaman. Musik: "Podcast Interview Background Music" oleh HitsLab (Pixabay, Pixabay Content License); efek suara CC0. Video v2 (12 November 2026) memakai tampilan lama dan digantikan.
 
+## Video studi kasus (19 November 2026)
+
+`docs/video/ptm-case-study.mp4` adalah satu rekaman utuh tanpa potongan adegan, dari instalasi baru (`php artisan ptm:setup`), yang menjalankan dua catatan tulisan tangan dari lapangan:
+- **Digital marketing (berulang):** kalender konten tgl 1, Konten 1 sampai 5, pengawasan insight sosmed setiap hari jam 10 sampai 15, admin sosmed setiap hari, laporan konten tgl 28.
+- **KPI Web PPDB Sekolah:** daftar fitur ditempel jadi task dan checklist, lalu debug dan QC yang mengembalikan autentikasi untuk diperbaiki.
+
+Urutannya:
+1. Super Admin menambah client SMK Bina Karya; kodenya terisi sendiri.
+2. Manager Radit menyusun kedua template: tanggal, Ulangi, Setiap hari dengan jam, dan Tempel daftar.
+3. Radit membuat kedua project. Project bulanan dimulai tanggal 19 dengan melewati task yang sudah lewat.
+4. Radit membagi kerja lewat panel samping dan aksi massal.
+5. Putri mencentang Rutin hari ini di Beranda Team App.
+6. Dika mengirim hasil Fitur pendaftar.
+7. Radit (QC) mengembalikannya dengan alasan autentikasi.
+8. Dika mengirim ulang, dan Radit menerimanya.
+9. Radit membuka KPI per anggota.
+10. Radit membuka periode baru dengan PIC dan pelaksana yang sama.
+
+Langkah rekamannya ada di `case-study.json`, ditulis ulang oleh skrip penyusun dan diuji dulu dengan `cursorcam check` di database terpisah, karena langkah-langkah ini menulis data.
+
+Cara menyusunnya:
+- Rekaman dirender tanpa pemangkasan otomatis.
+- Bagian layar yang diam lebih dari 0,9 detik dipangkas, misalnya saat menunggu server. Momen yang sengaja ditahan untuk dibaca dipertahankan sampai 3,2 detik.
+- Hasilnya diberi pembuka foto kedua catatan, label siapa yang memakai aplikasi, teks penjelas per langkah, dan musik yang sama dengan v3.
+
+Saat merekam ditemukan dan diperbaiki dua hal, keduanya dengan tes atau uji peramban:
+- Menggulir halaman dengan kursor di atas kolom angka yang sedang aktif mengubah angkanya (28 menjadi 10).
+- Memilih PIC baru di panel hanya melepas PIC lama kalau kotak pilihannya sempat diklik.
+
 ## Alur (satu cerita, berurutan)
 
 | Segmen | Siapa | Isi | Skenario 11.3 |

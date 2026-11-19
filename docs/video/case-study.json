@@ -1,0 +1,791 @@
+{
+ "name": "case-study",
+ "url": "http://127.0.0.1:8101/login",
+ "locale": "id-ID",
+ "timezone": "Asia/Makassar",
+ "timeout": 40000,
+ "allowOrigins": [
+  "http://127.0.0.1:8102"
+ ],
+ "steps": [
+  {
+   "pause": 700
+  },
+  {
+   "type": "admin@example.test",
+   "into": "label=Email",
+   "speed": 2.5
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi",
+   "speed": 2.5
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "waitFor": "css=main h1"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Client']",
+    "exact": true,
+    "within": "css=aside.admin-sidebar.desktop"
+   }
+  },
+  {
+   "click": "role=link[name='Tambah client']"
+  },
+  {
+   "type": "SMK Bina Karya",
+   "into": "label=Nama",
+   "zoom": 1.4
+  },
+  {
+   "pause": 900
+  },
+  {
+   "hover": "label=Kode",
+   "zoom": 1.6,
+   "pauseAfter": 1600
+  },
+  {
+   "click": "role=button[name='Simpan']",
+   "pauseAfter": 900
+  },
+  {
+   "click": "css=button.user-button"
+  },
+  {
+   "click": "role=button[name='Keluar']",
+   "pauseAfter": 400
+  },
+  {
+   "waitFor": "label=Email"
+  },
+  {
+   "type": "radit@example.test",
+   "into": "label=Email",
+   "speed": 2.5
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi",
+   "speed": 2.5
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 500
+  },
+  {
+   "waitFor": "#todo-title"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Template Project']",
+    "within": "css=aside.admin-sidebar.desktop"
+   }
+  },
+  {
+   "click": "role=link[name='Tambah template']"
+  },
+  {
+   "type": "Digital Marketing Bulanan",
+   "into": "label=Nama template",
+   "speed": 2.5,
+   "zoom": 1.3
+  },
+  {
+   "select": "Berulang",
+   "in": "label=Tipe",
+   "showList": true
+  },
+  {
+   "type": "Kalender konten",
+   "into": "css=.tb-row:nth-child(1) [data-tb-title]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "type": "1",
+   "into": "css=.tb-row:nth-child(1) [data-tb-day]",
+   "pauseAfter": 1200
+  },
+  {
+   "click": "css=[data-tb-add]"
+  },
+  {
+   "type": "Konten 1",
+   "into": "css=.tb-row:nth-child(2) [data-tb-title]",
+   "speed": 2.5
+  },
+  {
+   "type": "5",
+   "into": "css=.tb-row:nth-child(2) [data-tb-day]"
+  },
+  {
+   "type": "Desain dan caption, Upload konten 1",
+   "into": "css=.tb-row:nth-child(2) [data-tb-subs]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "click": "css=.tb-row:nth-child(2) [data-tb-copy-open]",
+   "zoom": 1.4
+  },
+  {
+   "hover": "css=.tb-row:nth-child(2) [data-tb-copy]",
+   "zoom": 1.6,
+   "pauseAfter": 1500
+  },
+  {
+   "click": "css=.tb-row:nth-child(2) [data-tb-copy-make]",
+   "pauseAfter": 1200
+  },
+  {
+   "scroll": {
+    "to": "css=.tb-row:nth-child(6)"
+   },
+   "pauseAfter": 1500
+  },
+  {
+   "click": "css=[data-tb-add]"
+  },
+  {
+   "type": "Pengawasan insight sosmed",
+   "into": "css=.tb-row:nth-child(7) [data-tb-title]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "select": "Setiap hari",
+   "in": "css=.tb-row:nth-child(7) [data-tb-routine]",
+   "showList": true
+  },
+  {
+   "type": "10:00",
+   "into": "css=.tb-row:nth-child(7) [data-tb-from]"
+  },
+  {
+   "type": "15:00",
+   "into": "css=.tb-row:nth-child(7) [data-tb-until]",
+   "pauseAfter": 1200
+  },
+  {
+   "click": "css=[data-tb-add]"
+  },
+  {
+   "type": "Admin sosmed",
+   "into": "css=.tb-row:nth-child(8) [data-tb-title]",
+   "speed": 2.5
+  },
+  {
+   "select": "Setiap hari",
+   "in": "css=.tb-row:nth-child(8) [data-tb-routine]"
+  },
+  {
+   "click": "css=[data-tb-add]"
+  },
+  {
+   "type": "Buat laporan konten",
+   "into": "css=.tb-row:nth-child(9) [data-tb-title]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "type": "28",
+   "into": "css=.tb-row:nth-child(9) [data-tb-day]",
+   "pauseAfter": 1500
+  },
+  {
+   "click": "role=button[name='Simpan template']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "role=link[name='Tambah template']"
+  },
+  {
+   "click": "role=link[name='Tambah template']"
+  },
+  {
+   "type": "Website PPDB Sekolah",
+   "into": "label=Nama template",
+   "speed": 2.5,
+   "zoom": 1.3
+  },
+  {
+   "click": "css=[data-tb-paste-open]"
+  },
+  {
+   "type": "Pembuatan DB\nUI/UX\nFitur publik\n- Landing page\n- Pendaftaran sekolah\n- Pembayaran DP\n- Lengkapi data siswa\n- Email\n- Pelunasan\n- Pengambilan atribut\nFitur pendaftar\n- Profil\n- Autentikasi\n- Biodata calon siswa\n- Pelunasan\n- Riwayat pembayaran\nFitur admin\n- Autentikasi\n- Dashboard\n- Manajemen user\n- Manajemen pendaftar\n- Manajemen transaksi\n- Riwayat transaksi\n- Manajemen konten\n- Manajemen artikel\nDebug dan QC",
+   "into": "css=#tb-paste-text",
+   "paste": true,
+   "zoom": 1.3,
+   "pauseAfter": 1800
+  },
+  {
+   "click": "css=[data-tb-paste-add]",
+   "pauseAfter": 1200
+  },
+  {
+   "type": "21",
+   "into": "css=.tb-row:nth-child(3) [data-tb-day]",
+   "zoom": 1.3
+  },
+  {
+   "type": "28",
+   "into": "css=.tb-row:nth-child(4) [data-tb-day]"
+  },
+  {
+   "type": "35",
+   "into": "css=.tb-row:nth-child(5) [data-tb-day]"
+  },
+  {
+   "type": "40",
+   "into": "css=.tb-row:nth-child(6) [data-tb-day]",
+   "pauseAfter": 1200
+  },
+  {
+   "click": "role=button[name='Simpan template']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "css=tr:has-text('Digital Marketing Bulanan')"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Pakai']",
+    "within": "css=tr:has-text('Digital Marketing Bulanan')"
+   },
+   "zoom": 1.3
+  },
+  {
+   "select": "SMK Bina Karya",
+   "in": "label=Client",
+   "zoom": 1.3
+  },
+  {
+   "type": "Digital Marketing SMK Bina Karya",
+   "into": "label=Nama project",
+   "speed": 2.5
+  },
+  {
+   "waitFor": "css=.preview-warning"
+  },
+  {
+   "hover": "css=[data-preview]",
+   "zoom": 1.5,
+   "pauseAfter": 2200
+  },
+  {
+   "click": "role=button[name='Lewati yang sudah lewat']",
+   "zoom": 1.5,
+   "pauseAfter": 2000
+  },
+  {
+   "click": "css=label.btn:text-is('Creative')",
+   "zoom": 1.3
+  },
+  {
+   "click": "css=label.btn:text-is('Digital Marketing')"
+  },
+  {
+   "type": "putri",
+   "into": "css=.people-filter input",
+   "zoom": 1.4
+  },
+  {
+   "click": "css=label[for^=mb-]:has-text('Putri Maharani')"
+  },
+  {
+   "type": "ayu",
+   "into": "css=.people-filter input"
+  },
+  {
+   "click": "css=label[for^=mb-]:has-text('Ayu Lestari')"
+  },
+  {
+   "type": "binda",
+   "into": "css=.people-filter input"
+  },
+  {
+   "click": "css=label[for^=mb-]:has-text('Binda Saputra')",
+   "pauseAfter": 900
+  },
+  {
+   "click": "role=button[name='Buat project dan task']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 2200
+  },
+  {
+   "click": "css=[data-task-id] a.task-title:text-is('Admin sosmed')",
+   "zoom": 1.2
+  },
+  {
+   "waitFor": "css=#task-panel form[data-pic-handover]"
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel form[data-pic-handover]"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "select": "Putri Maharani",
+   "in": "css=#task-panel select[name=pic_user_id]",
+   "showList": true,
+   "zoom": 1.3
+  },
+  {
+   "click": "css=#task-panel form[data-pic-handover] button[type=submit]",
+   "pauseAfter": 1600
+  },
+  {
+   "press": "Escape",
+   "pauseAfter": 900
+  },
+  {
+   "click": "css=[data-task-id] a.task-title:text-is('Pengawasan insight sosmed')",
+   "zoom": 1.2
+  },
+  {
+   "waitFor": "css=#task-panel form[data-pic-handover]"
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel form[data-pic-handover]"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "select": "Ayu Lestari",
+   "in": "css=#task-panel select[name=pic_user_id]",
+   "showList": true,
+   "zoom": 1.3
+  },
+  {
+   "click": "css=#task-panel form[data-pic-handover] button[type=submit]",
+   "pauseAfter": 1600
+  },
+  {
+   "press": "Escape",
+   "pauseAfter": 900
+  },
+  {
+   "click": "role=link[name='Daftar Task']"
+  },
+  {
+   "waitFor": "css=table tbody tr td a"
+  },
+  {
+   "type": "konten",
+   "into": "css=#filter-ptask-keyword",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=tbody tr:has-text('Konten 5')"
+  },
+  {
+   "click": "css=tbody tr:has-text('Konten 4') input[data-bulk-row]",
+   "zoom": 1.3
+  },
+  {
+   "click": "css=tbody tr:has-text('Konten 5') input[data-bulk-row]"
+  },
+  {
+   "select": "Ganti PIC",
+   "in": "css=[data-bulk-action]",
+   "zoom": 1.4
+  },
+  {
+   "select": "Binda Saputra (0 task aktif)",
+   "in": "css=[data-bulk-user]",
+   "showList": true
+  },
+  {
+   "click": "role=button[name='Terapkan']",
+   "pauseAfter": 2200
+  },
+  {
+   "click": {
+    "find": "role=link[name='Template Project']",
+    "within": "css=aside.admin-sidebar.desktop"
+   }
+  },
+  {
+   "waitFor": "css=tr:has-text('Website PPDB Sekolah')"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Pakai']",
+    "within": "css=tr:has-text('Website PPDB Sekolah')"
+   },
+   "zoom": 1.3
+  },
+  {
+   "select": "SMK Bina Karya",
+   "in": "label=Client"
+  },
+  {
+   "type": "Website PPDB SMK Bina Karya",
+   "into": "label=Nama project",
+   "speed": 2.5
+  },
+  {
+   "waitFor": "text=akan dibuat"
+  },
+  {
+   "hover": "css=[data-preview]",
+   "zoom": 1.5,
+   "pauseAfter": 1800
+  },
+  {
+   "click": "css=label.btn:text-is('Development')",
+   "zoom": 1.3
+  },
+  {
+   "type": "dika",
+   "into": "css=.people-filter input"
+  },
+  {
+   "click": "css=label[for^=mb-]:has-text('Dika Ramadhan')"
+  },
+  {
+   "type": "raka",
+   "into": "css=.people-filter input"
+  },
+  {
+   "click": "css=label[for^=mb-]:has-text('Raka Wijaya')",
+   "pauseAfter": 800
+  },
+  {
+   "click": "role=button[name='Buat project dan task']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "click": "role=link[name='Daftar Task']"
+  },
+  {
+   "waitFor": "css=table tbody tr td a"
+  },
+  {
+   "click": "css=thead input[type=checkbox]",
+   "zoom": 1.3
+  },
+  {
+   "select": "Ganti PIC",
+   "in": "css=[data-bulk-action]"
+  },
+  {
+   "select": "Dika Ramadhan (0 task aktif)",
+   "in": "css=[data-bulk-user]",
+   "showList": true
+  },
+  {
+   "click": "role=button[name='Terapkan']",
+   "pauseAfter": 2200
+  },
+  {
+   "goto": "http://127.0.0.1:8102/login"
+  },
+  {
+   "type": "putri@example.test",
+   "into": "label=Email",
+   "speed": 2.5
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi",
+   "speed": 2.5
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 800
+  },
+  {
+   "waitFor": "#h-routine"
+  },
+  {
+   "hover": "css=#h-routine ~ .panel",
+   "zoom": 1.6,
+   "pauseAfter": 1800
+  },
+  {
+   "click": "css=#h-routine ~ .panel input[type=checkbox]",
+   "zoom": 1.6,
+   "pauseAfter": 2000
+  },
+  {
+   "click": "css=.side-logout",
+   "pauseAfter": 400
+  },
+  {
+   "waitFor": "label=Email"
+  },
+  {
+   "type": "dika@example.test",
+   "into": "label=Email",
+   "speed": 2.5
+  },
+  {
+   "type": "$secret:PASSWORD",
+   "into": "label=Kata sandi",
+   "speed": 2.5
+  },
+  {
+   "click": "role=button[name='Masuk']",
+   "pauseAfter": 800
+  },
+  {
+   "goto": "http://127.0.0.1:8102/tasks"
+  },
+  {
+   "click": "css=a.task-tile-title:text-is('Fitur pendaftar')",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=#task-panel [data-check-subtask]"
+  },
+  {
+   "click": {
+    "find": "css=[data-check-subtask]",
+    "within": "css=#task-panel",
+    "nth": 0
+   },
+   "zoom": 1.4,
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "css=[data-check-subtask]",
+    "within": "css=#task-panel",
+    "nth": 1
+   },
+   "zoom": 1.4,
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "css=[data-check-subtask]",
+    "within": "css=#task-panel",
+    "nth": 2
+   },
+   "zoom": 1.4,
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "css=[data-check-subtask]",
+    "within": "css=#task-panel",
+    "nth": 3
+   },
+   "zoom": 1.4,
+   "pauseAfter": 900
+  },
+  {
+   "click": {
+    "find": "css=[data-check-subtask]",
+    "within": "css=#task-panel",
+    "nth": 4
+   },
+   "zoom": 1.4,
+   "pauseAfter": 900
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel #submit-result"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "type": "https://github.com/contoh/ppdb-bina-karya/pull/12",
+   "into": "css=#task-panel input[name=external_url]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "type": "Profil, autentikasi, biodata, pelunasan, dan riwayat pembayaran siap dicek.",
+   "into": "css=#task-panel textarea[name=submission_note]",
+   "speed": 2.5
+  },
+  {
+   "click": "css=#task-panel #submit-result button[type=submit]",
+   "pauseAfter": 2000
+  },
+  {
+   "goto": "http://127.0.0.1:8101/dashboard"
+  },
+  {
+   "waitFor": "text=Review hasil Fitur pendaftar"
+  },
+  {
+   "click": "text=Review hasil Fitur pendaftar",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=#task-panel #review"
+  },
+  {
+   "hover": "css=#task-panel #review",
+   "zoom": 1.4,
+   "pauseAfter": 1500
+  },
+  {
+   "type": "QC: autentikasi gagal saat email ditulis dengan huruf besar. Perbaiki lalu kirim ulang.",
+   "into": "css=#task-panel textarea[id^=rv-]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "click": {
+    "find": "role=button[name='Kembalikan untuk revisi']",
+    "within": "css=#task-panel"
+   },
+   "pauseAfter": 2000
+  },
+  {
+   "press": "Escape",
+   "pauseAfter": 600
+  },
+  {
+   "goto": "http://127.0.0.1:8102/"
+  },
+  {
+   "waitFor": "css=.alert-warning"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Fitur pendaftar']",
+    "within": "css=.alert-warning"
+   },
+   "zoom": 1.4
+  },
+  {
+   "waitFor": "css=#task-panel .revision-note"
+  },
+  {
+   "hover": "css=#task-panel .revision-note",
+   "zoom": 1.5,
+   "pauseAfter": 2000
+  },
+  {
+   "scroll": {
+    "to": "css=#task-panel #submit-result"
+   },
+   "in": "css=#task-panel .offcanvas-body"
+  },
+  {
+   "type": "https://github.com/contoh/ppdb-bina-karya/pull/13",
+   "into": "css=#task-panel input[name=external_url]",
+   "speed": 2.5,
+   "zoom": 1.4
+  },
+  {
+   "type": "Login kini tidak peka huruf besar. Sudah diuji ulang.",
+   "into": "css=#task-panel textarea[name=submission_note]",
+   "speed": 2.5
+  },
+  {
+   "click": "css=#task-panel #submit-result button[type=submit]",
+   "pauseAfter": 2000
+  },
+  {
+   "goto": "http://127.0.0.1:8101/dashboard"
+  },
+  {
+   "waitFor": "text=Review hasil Fitur pendaftar"
+  },
+  {
+   "click": "text=Review hasil Fitur pendaftar",
+   "zoom": 1.3
+  },
+  {
+   "waitFor": "css=#task-panel #review"
+  },
+  {
+   "click": {
+    "find": "role=button[name='Terima, task selesai']",
+    "within": "css=#task-panel"
+   },
+   "zoom": 1.4,
+   "pauseAfter": 2000
+  },
+  {
+   "press": "Escape",
+   "pauseAfter": 500
+  },
+  {
+   "click": {
+    "find": "role=link[name='Monitoring Divisi & Anggota']",
+    "within": "css=aside.admin-sidebar.desktop"
+   }
+  },
+  {
+   "waitFor": "text=KPI per anggota"
+  },
+  {
+   "scroll": {
+    "to": "text=KPI per anggota"
+   }
+  },
+  {
+   "hover": "css=table:has(th:text-is('Tepat waktu'))",
+   "zoom": 1.3,
+   "pauseAfter": 2600
+  },
+  {
+   "click": {
+    "find": "role=link[name='Project']",
+    "exact": true,
+    "within": "css=aside.admin-sidebar.desktop"
+   }
+  },
+  {
+   "click": "role=link[name='Digital Marketing SMK Bina Karya']"
+  },
+  {
+   "click": {
+    "find": "role=link[name='Ringkasan']",
+    "exact": true
+   }
+  },
+  {
+   "click": "role=button[name='Buka periode baru']",
+   "zoom": 1.3
+  },
+  {
+   "hover": "css=.modal.show",
+   "zoom": 1.4,
+   "pauseAfter": 1800
+  },
+  {
+   "click": "role=button[name='Ya, lanjutkan']",
+   "pauseAfter": 900
+  },
+  {
+   "waitFor": "[data-kanban]"
+  },
+  {
+   "hover": "css=[data-task-id]:has(a.task-title:text-is('Admin sosmed'))",
+   "zoom": 1.5,
+   "pauseAfter": 2600
+  },
+  {
+   "hover": "[data-kanban]",
+   "zoom": false,
+   "pauseAfter": 2600
+  }
+ ]
+}

@@ -111,12 +111,14 @@ class TaskActionController extends Controller
     public function toggle(Request $request, Task $subtask): JsonResponse|RedirectResponse
     {
         $this->authorize('view', $subtask);
+        $before = Task::query()->whereKey($subtask->parent_id)->value('status');
         $s = $this->workflow->toggleSubtask($subtask, $request->user(), $request->boolean('done', $subtask->status !== 'done'));
         $parent = $s->parent_id;
         $total = Task::query()->where('parent_id', $parent)->count();
         $done = Task::query()->where('parent_id', $parent)->where('status', 'done')->count();
+        $started = $before === 'backlog' && Task::query()->whereKey($parent)->value('status') === 'in_progress';
 
-        return $this->respond($request, $s->status === 'done' ? 'Checklist selesai.' : 'Checklist dibuka lagi.',
+        return $this->respond($request, $s->status === 'done' ? 'Checklist selesai.'.($started ? ' Task kini Dikerjakan.' : '') : 'Checklist dibuka lagi.',
             ['done' => $s->status === 'done', 'progress' => TaskWorkflowService::taskProgress($done, $total), 'total' => "{$done} / {$total}"]);
     }
 

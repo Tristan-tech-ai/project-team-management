@@ -187,6 +187,10 @@ class TaskWorkflowService
                 $s->update(['status' => $to, 'completed_at' => $done ? now() : null, 'completed_by' => $done ? $user->id : null]);
                 $this->log($parent, $user, 'subtask_toggled', ($done ? 'Checklist selesai: ' : 'Checklist dibuka: ').$s->title, null, null, ['subtask_id' => $s->id]);
             }
+            // Ticking an item means the work has started: a task still in the queue moves to In progress (same rules as dragging it).
+            if ($done && $parent->status === 'backlog' && Gate::forUser($user)->allows('moveStatus', $parent)) {
+                $this->move($parent, 'in_progress', $user);
+            }
 
             return $s->refresh();
         });

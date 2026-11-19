@@ -146,6 +146,36 @@ Temuan yang muncul saat mengerjakan dan langsung diperbaiki:
 
 Sisa yang sengaja belum diambil: seret deadline di kalender membuka formulir pengajuan (calon I19), aksi massal di Team App (Team App dipakai pelaksana di HP; pembagian kerja dilakukan manager di Admin).
 
+## Putaran 3: studi kasus dari lapangan (17 sampai 19 Nov 2026)
+
+Dua catatan tulisan tangan dicoba langsung di PTM, dari instalasi baru, sebagai pengguna yang belum pernah memakainya:
+
+- **Digital marketing (berulang):** kalender konten tgl 1, Konten 1 diulang sampai 5 (dengan upload), pengawasan insight sosmed setiap hari jam 10 sampai 15, admin sosmed setiap hari, laporan konten tgl 28.
+- **KPI Web PPDB Sekolah:** pembuatan DB, UI/UX, fitur publik (landing page, pendaftaran, pembayaran DP, lengkapi data siswa, email, pelunasan, pengambilan atribut), fitur pendaftar, fitur admin, lalu debug dan QC yang bisa mengembalikan autentikasi untuk diperbaiki.
+
+Masukan 17 Nov yang dikerjakan lebih dulu: kode langsung terisi otomatis dan bisa diganti, editor deskripsi project sederhana (tebal, miring, garis bawah, daftar), Dashboard dipilih bagiannya lewat centang, kartu Kanban diseret dari bagian mana pun.
+
+Yang dibangun atau diubah karena studi kasus (semua dengan tes):
+
+| Kesulitan yang ditemukan | Perubahan |
+|---|---|
+| "tgl 28" harus dihitung manual menjadi hari ke-27 | Template berulang meminta **Deadline tgl** (1 sampai 31); template sekali jadi tetap hari setelah mulai; keterangan "Setiap tanggal 28" di bawah isian |
+| Tidak ada cara menulis "setiap hari jam 10 sampai 15" | Pilihan **Dikerjakan: Sekali, Setiap hari, Setiap hari kerja** dengan jam; task rutin dibuat sekali per periode dengan checklist satu per hari (tabel baru `template_task_routines` lewat migrasi admin-app) |
+| Konten 1 sampai 5 diketik satu per satu | Tombol **Ulangi** pada baris: jadi N task bernomor dengan jarak hari; checklist bernomor ikut ("Upload konten 1" jadi 2, 3, ...) |
+| Daftar fitur PPDB panjang diketik per baris | **Tempel daftar**: baris biasa jadi task, baris berawalan "-" atau menjorok jadi checklist task di atasnya |
+| Deadline jam 00.00 membuat task terlambat sejak pagi hari jatuh temponya | Deadline dari template = akhir hari (23.59); tanggal tanpa jam di layar |
+| Project bulanan dibuat tanggal 19 langsung penuh kartu "terlambat" | Pratinjau memberi pilihan **Lewati yang sudah lewat** (mulai sekarang dengan task yang masih di depan) atau **Mulai periode berikutnya**; hari rutin dimulai dari tanggal mulai project |
+| Task rutin tidak terlihat oleh pelaksana di HP | **Rutin hari ini** di Beranda Team App dengan centang langsung, juga di Perlu kamu kerjakan dan lonceng; detail task menyorot Hari ini, hari yang belum dicentang, sisanya terlipat; kartu Kanban menulis "3 / 30 hari" |
+| Mencentang checklist tidak memulai task | Centang pertama memindahkan task dari Antrian ke Dikerjakan (aturan yang sama dengan seret) |
+| Setelah Ganti PIC, manager tetap tercatat pelaksana semua task template | Task yang belum dimulai diserahkan penuh ke PIC baru (PIC lama dilepas); task yang sudah berjalan tetap menyimpan PIC lama; di panel, PIC baru langsung dicentang sebagai pelaksana |
+| Setiap bulan pembagian kerja diulang dari nol | **Periode baru meneruskan PIC dan pelaksana** task yang sama dari periode sebelumnya |
+| KPI belum ada | **KPI per anggota** di Monitoring Divisi & Anggota: selesai tepat waktu (persen) dan hari rutin yang dicentang; ikut di CSV |
+| Nama project dan judul task tidak bisa diklik; dua kotak cari di daftar task | Nama membuka papan, judul membuka panel samping; kotak "Cari:" bawaan tabel disembunyikan bila halaman punya "Cari judul" (yang kini menyaring sambil mengetik) |
+| Manager tidak tahu cara menambah client | Keterangan di bawah pilihan Client: client baru ditambah Super Admin di Data Master |
+| Pemasangan dari nol gagal di tengah (ditemukan oleh `ptm:setup` ke database kosong) | Tabel rutin tanpa kunci asing ke tabel SQL modul, karena migrasi berjalan sebelum SQL modul diimpor |
+
+Video studi kasus satu alur tanpa potongan adegan: `docs/video/ptm-case-study.mp4` (langkah rekaman `docs/video/case-study.json`).
+
 ## Hasil ukuran I0 (sebelum dan sesudah)
 
 Langkah = klik + isian yang diketik/dipilih; halaman = halaman yang dimuat. Diukur dengan `docs/tools/ux-metrics.mjs` pada data yang sama (`docs/evidence/ux-metrics/before.json`, `after.json`).

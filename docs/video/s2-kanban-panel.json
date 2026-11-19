@@ -98,7 +98,7 @@
   },
   {
    "click": {
-    "find": "role=button[name='Simpan pelaksana']",
+    "find": "role=button[name='Simpan PIC dan pelaksana']",
     "within": "css=#task-panel"
    },
    "pauseAfter": 1200

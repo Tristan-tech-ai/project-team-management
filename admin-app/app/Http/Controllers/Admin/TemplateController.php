@@ -16,7 +16,8 @@ use Yajra\DataTables\Facades\DataTables;
 
 /**
  * Project Templates (tasks + subtasks to create) and Task Templates (subtask checklist).
- * Task lists are written one per line for speed: "Task title | day offset | subtask; subtask".
+ * Task lists are written one per line for speed: "Task title | day offset | subtask; subtask | routine", where routine is
+ * "daily" or "weekdays", optionally with a time window ("daily 10:00-15:00").
  */
 class TemplateController extends Controller
 {
@@ -81,8 +82,12 @@ class TemplateController extends Controller
     public function editProject(ProjectTemplate $template): View
     {
         $this->authorize('templates.manage');
-        $all = $template->tasks()->orderBy('sort_order')->orderBy('id')->get();
-        $rows = $all->whereNull('parent_id')->map(fn ($t) => trim($t->title.' | '.($t->relative_due_days ?? '').' | '.$all->where('parent_id', $t->id)->pluck('title')->implode('; '), ' |'))->implode("\n");
+        $all = $template->tasks()->with('routine')->orderBy('sort_order')->orderBy('id')->get();
+        $rows = $all->whereNull('parent_id')->map(function ($t) use ($all) {
+            $routine = $t->routine ? trim($t->routine->repeat_rule.' '.str_replace('.', ':', $t->routine->window())) : '';
+
+            return rtrim($t->title.' | '.($t->relative_due_days ?? '').' | '.$all->where('parent_id', $t->id)->pluck('title')->implode('; ').' | '.$routine, ' |');
+        })->implode("\n");
 
         return view('admin.templates.project-form', ['template' => $template, 'rows' => $rows]);
     }
@@ -106,6 +111,7 @@ class TemplateController extends Controller
         DB::transaction(function () use ($d, $tasks, $template) {
             $template->update($d);
             // Templates are only blueprints: changing the task list does not change projects created earlier.
+            \App\Models\TemplateTaskRoutine::query()->whereIn('project_template_task_id', $template->tasks()->select('id'))->delete();
             $template->tasks()->whereNotNull('parent_id')->delete();
             $template->tasks()->delete();
             $this->taskContent($template, $tasks);
@@ -157,7 +163,7 @@ class TemplateController extends Controller
         return redirect()->route('templates.tasks.index')->with('ok', 'Template task tersimpan.');
     }
 
-    /** @return array{0:array, 1:array<int,array{title:string,days:?int,sub:array<int,string>}>} */
+    /** @return array{0:array, 1:array<int,array{title:string,days:?int,sub:array<int,string>,routine:?array}>} */
     private function readProject(Request $request, ?ProjectTemplate $t = null): array
     {
         $d = $request->validate([
@@ -182,7 +188,9 @@ class TemplateController extends Controller
                 throw \Illuminate\Validation\ValidationException::withMessages(['rows' => 'Baris '.($no + 1).': hari ke- harus angka 0 sampai 3650.']);
             }
             $sub = isset($bag[2]) ? array_values(array_filter(array_map('trim', explode(';', $bag[2])), fn ($s) => $s !== '')) : [];
-            $tasks[] = ['title' => $bag[0], 'days' => $days === null ? null : (int) $days, 'sub' => array_map(fn ($s) => mb_substr($s, 0, 255), $sub)];
+            $routine = isset($bag[3]) && $bag[3] !== '' ? self::routine($bag[3], $no + 1) : null;
+            // A routine gets one checklist item per day when the project or period is created, so typed checklist items are not used.
+            $tasks[] = ['title' => $bag[0], 'days' => $days === null ? null : (int) $days, 'sub' => $routine ? [] : array_map(fn ($s) => mb_substr($s, 0, 255), $sub), 'routine' => $routine];
         }
         if ($tasks === [] || count($tasks) > 100) {
             throw \Illuminate\Validation\ValidationException::withMessages(['rows' => 'Isi 1 sampai 100 task, satu per baris.']);
@@ -193,10 +201,27 @@ class TemplateController extends Controller
         return [$d, $tasks];
     }
 
+    /** "daily", "weekdays", "daily 10:00-15:00" (also 10.00-15.00) => routine fields; anything else is a validation error for that line. */
+    private static function routine(string $text, int $line): array
+    {
+        $ok = preg_match('/^(daily|weekdays)(?:\s+(\d{1,2})[:.](\d{2})\s*-\s*(\d{1,2})[:.](\d{2}))?$/', trim($text), $m);
+        $from = isset($m[2]) ? sprintf('%02d:%02d', $m[2], $m[3]) : null;
+        $until = isset($m[4]) ? sprintf('%02d:%02d', $m[4], $m[5]) : null;
+        $validTime = fn (?string $t) => $t === null || ((int) substr($t, 0, 2) <= 23 && (int) substr($t, 3, 2) <= 59);
+        if (! $ok || ! $validTime($from) || ! $validTime($until) || ($from !== null && $from >= $until)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['rows' => "Baris {$line}: pilih Setiap hari atau Senin sampai Jumat; jam mulai harus lebih awal dari jam selesai."]);
+        }
+
+        return ['repeat_rule' => $m[1], 'start_time' => $from ? $from.':00' : null, 'end_time' => $until ? $until.':00' : null];
+    }
+
     private function taskContent(ProjectTemplate $t, array $tasks): void
     {
         foreach ($tasks as $i => $x) {
             $parent = $t->tasks()->create(['parent_id' => null, 'title' => $x['title'], 'task_type' => 'general', 'relative_due_days' => $x['days'], 'sort_order' => $i]);
+            if (! empty($x['routine'])) {
+                $parent->routine()->create($x['routine']);
+            }
             foreach ($x['sub'] as $j => $s) {
                 $t->tasks()->create(['parent_id' => $parent->id, 'title' => $s, 'task_type' => 'general', 'sort_order' => $j]);
             }

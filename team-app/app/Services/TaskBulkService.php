@@ -115,8 +115,10 @@ class TaskBulkService
         $current = $t->assignees->pluck('id')->map(fn ($n) => (int) $n)->all();
         match ($action) {
             'start' => $this->workflow->move($t, 'in_progress', $by),
-            // The previous PIC stays an assignee, so nobody silently loses a task they were working on.
-            'pic' => $this->team->setAssignees($t, (int) $person->id, $current, $by),
+            // A task that has started keeps the previous PIC as an assignee, so nobody silently loses work in progress;
+            // a task still in the queue is handed over completely (the previous PIC was only there because they were PIC).
+            'pic' => $this->team->setAssignees($t, (int) $person->id,
+                $t->status === 'backlog' ? array_values(array_diff($current, [(int) $t->pic_user_id])) : $current, $by),
             'assignee' => $this->team->setAssignees($t, (int) $t->pic_user_id, [...$current, (int) $person->id], $by),
         };
     }

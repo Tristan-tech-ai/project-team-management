@@ -28,4 +28,9 @@ class ProjectTemplateTask extends Model
     {
         return $this->hasMany(ProjectTemplateTask::class, 'parent_id');
     }
+
+    public function routine(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TemplateTaskRoutine::class, 'project_template_task_id');
+    }
 }

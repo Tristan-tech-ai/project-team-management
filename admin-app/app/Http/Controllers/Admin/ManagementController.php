@@ -84,8 +84,8 @@ class ManagementController extends Controller
             'schedule' => array_merge([['Project', 'Task', 'Target awal', 'Deadline sebelum', 'Deadline usulan', 'Alasan', 'Aktivitas terkait', 'Status', 'Pengaju', 'Diajukan', 'Pemutus', 'Diputuskan']],
                 $this->m->scheduleTrail($u, $from->copy()->utc(), $until->copy()->utc())->map(fn ($s) => [$s->project, $s->task ?? '(project)', $this->dateValue($s->baseline), $this->dateValue($s->previous_due_at),
                     $this->dateValue($s->proposed_due_at), $s->reason, $s->activities ?? '-', Codes::label(Codes::SCHEDULE_STATUS, $s->status), $s->requester, $this->dateValue($s->requested_at), $s->decider ?? '-', $this->dateValue($s->decided_at)])->all()),
-            'members' => array_merge([['Anggota', 'Project', 'Task aktif', 'Terlambat', 'Selesai', 'Menit kerja', 'Menit aktivitas']],
-                $this->m->memberWorkload($u)->map(fn ($o) => [$o->name, $o->project, $o->active, $o->overdue, $o->done, $o->work_minutes, $o->activity_minutes])->all()),
+            'members' => array_merge([['Anggota', 'Project', 'Task aktif', 'Terlambat', 'Selesai', 'Selesai tepat waktu', 'Hari rutin dicentang', 'Hari rutin lewat', 'Menit kerja', 'Menit aktivitas']],
+                $this->m->memberWorkload($u)->map(fn ($o) => [$o->name, $o->project, $o->active, $o->overdue, $o->done, $o->on_time, $o->routine_done, $o->routine_due, $o->work_minutes, $o->activity_minutes])->all()),
         };
         $name = 'laporan-'.$kind.'-'.now()->setTimezone(Dates::zone())->format('Ymd-His').'.csv';
 

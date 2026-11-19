@@ -382,7 +382,7 @@ td details > summary:hover { background: var(--ptm-sidebar-2); }
 .rich-text-editor:focus-within { border-color: var(--ptm-action); box-shadow: 0 0 0 .2rem var(--ptm-action-soft); }
 .rich-text-editor.is-invalid { border-color: var(--ptm-late); }
 .rich-text-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; border-bottom: 1px solid var(--ptm-line); }
-.rich-text-tool { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; border: 0; border-radius: 8px;
+.rich-text-tool { display: inline-flex; align-items: center; justify-content: center; min-width: var(--ptm-hit, 40px); min-height: var(--ptm-hit, 40px); border: 0; border-radius: 8px;
     background: transparent; color: var(--ptm-ink-2); }
 .rich-text-tool:hover { background: var(--ptm-bg); color: var(--ptm-ink); }
 .rich-text-tool[aria-pressed="true"] { background: var(--ptm-action-soft); color: var(--ptm-action-dark); }
@@ -398,3 +398,9 @@ td details > summary:hover { background: var(--ptm-sidebar-2); }
 .widget-menu li { display: flex; align-items: center; gap: .6rem; min-height: 40px; }
 .widget-menu li label { flex: 1; cursor: pointer; padding: .4rem 0; }
 .widget-menu .form-check-input { margin: 0; flex: none; }
+
+/* Routine task (one checklist item per day): today stands out, missed days are listed, the rest is folded away. */
+.routine-today { border: 1px solid #c9d7fb; background: var(--ptm-action-soft); border-radius: 12px; padding: 8px 12px; }
+.routine-label { display: inline-block; font-size: .75rem; font-weight: 700; color: var(--ptm-action-dark); margin-bottom: 2px; }
+.routine-all summary { cursor: pointer; color: var(--ptm-action); min-height: 40px; display: flex; align-items: center; }
+input[type="checkbox"] + label.routine-name { display: block; line-height: 1.3; } /* stronger than the hit-area rule for labels after a tick box */

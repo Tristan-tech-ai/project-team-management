@@ -47,15 +47,17 @@ class TaskBulkTest extends TestCase
         $this->assertSame('backlog', $foreign->fresh()->status);
     }
 
-    public function test_change_pic_keeps_the_previous_pic_and_requires_project_members(): void
+    public function test_change_pic_hands_over_queued_tasks_keeps_started_ones_and_requires_project_members(): void
     {
         [$manager, $ayu, $budi, $tasks] = $this->setUpProject();
         $outsider = $this->user('member', $this->company('Company Lain'));
+        $tasks[2]->update(['status' => 'in_progress']);
 
         $this->actingAs($manager)->postJson(route('tasks.bulk'), ['ids' => [$tasks[0]->id, $tasks[2]->id], 'action' => 'pic', 'user_id' => $budi->id])
             ->assertOk()->assertJson(['done' => 2, 'skipped' => []]);
         $this->assertSame($budi->id, (int) $tasks[0]->fresh()->pic_user_id);
-        $this->assertEqualsCanonicalizing([$ayu->id, $budi->id], $tasks[0]->fresh()->assignees->pluck('id')->all(), 'the previous PIC stays an assignee');
+        $this->assertSame([$budi->id], $tasks[0]->fresh()->assignees->pluck('id')->map(fn ($i) => (int) $i)->all(), 'a queued task is handed over completely');
+        $this->assertEqualsCanonicalizing([$ayu->id, $budi->id], $tasks[2]->fresh()->assignees->pluck('id')->all(), 'on a started task the previous PIC stays an assignee');
 
         $r = $this->actingAs($manager)->postJson(route('tasks.bulk'), ['ids' => [$tasks[1]->id], 'action' => 'pic', 'user_id' => $outsider->id])->assertOk()->json();
         $this->assertSame(0, $r['done']);

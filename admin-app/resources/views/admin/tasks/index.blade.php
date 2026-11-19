@@ -10,7 +10,7 @@
     @include('admin.tasks._filter', ['id' => 'filter-task', 'people' => $people])
     <div class="panel"><div class="table-responsive">
         <table class="table align-middle w-100" id="task-table" data-table="{{ $feed }}" data-filter="#filter-task" data-order='[[{{ $bulk ? 6 : 5 }},"asc"]]'
-            data-table-columns="{{ json_encode([...$selectColumn, ["data" => "title"], ["data" => "project_name", "name" => "project.name", "orderable" => false], ["data" => "pic_name", "name" => "pic.name", "orderable" => false],
+            data-table-columns="{{ json_encode([...$selectColumn, ["data" => "title", "render" => "link"], ["data" => "project_name", "name" => "project.name", "orderable" => false], ["data" => "pic_name", "name" => "pic.name", "orderable" => false],
                 ["data" => "members", "searchable" => false, "orderable" => false], ["data" => "subtask", "render" => "progress", "searchable" => false, "orderable" => false],
                 ["data" => "due", "searchable" => false], ["data" => "type", "name" => "task_type", "searchable" => false],
                 ["data" => "status_label", "name" => "status", "render" => "badge", "searchable" => false], ["data" => "actions", "render" => "actions", "searchable" => false, "orderable" => false]]) }}">

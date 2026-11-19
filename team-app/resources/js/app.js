@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps, initTaskPanel, initPeopleFilter } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard } from './core';
 
 window.bootstrap = bootstrap;
 
@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initAutoSubmit();
     initTaskCreate();
     initPeopleFilter();
+    initPicHandover();
+    initNumberWheelGuard();
     // I3: task detail as a side panel; what the panel loads gets the same helpers as a normal page.
     initTaskPanel(bootstrap.Offcanvas, {
         onContent: (root) => {

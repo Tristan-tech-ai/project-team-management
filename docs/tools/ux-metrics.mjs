@@ -227,7 +227,7 @@ const FLOWS = {
                 await s.click(row(i).locator('a[data-task-panel]', { hasText: 'Buka' }));
                 await panel.locator('select[name=pic_user_id]').waitFor({ timeout: 30000 });
                 await s.choose(panel.locator('select[name=pic_user_id]'), { label: shared.picOne });
-                await s.click(panel.getByRole('button', { name: 'Simpan pelaksana' }));
+                await s.click(panel.getByRole('button', { name: 'Simpan PIC dan pelaksana' }));
                 // The panel reloads the saved task (two server round trips; slow on a remote database).
                 await expect(panel.locator('dd').first()).toHaveText(shared.picOne, { timeout: 30000 });
                 await s.click(panel.locator('button[data-bs-dismiss]'));

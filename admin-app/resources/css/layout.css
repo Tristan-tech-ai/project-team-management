@@ -132,12 +132,22 @@
 .tb-list { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 8px; }
 .tb-row { display: flex; align-items: flex-start; gap: 8px; padding: 10px; border: 1px solid var(--ptm-line); border-radius: 12px; background: #fff; }
 .tb-number { min-width: 24px; height: 24px; margin-top: 8px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--ptm-action-soft); color: var(--ptm-action-dark); font-size: .75rem; font-weight: 700; }
-.tb-fields { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 130px; gap: 8px; }
-.tb-fields .tb-title { grid-column: 1 / -1; }
-.tb-fields .tb-day { grid-column: 2; grid-row: 2; }
-.tb-fields .tb-subs { grid-column: 1; grid-row: 2; }
+.tb-fields { flex: 1; display: grid; grid-template-columns: 190px 150px minmax(0, 1fr); gap: 8px; min-width: 0; }
+.tb-fields .tb-title, .tb-fields .tb-copy { grid-column: 1 / -1; }
+.tb-fields .tb-repeat { grid-column: 1; grid-row: 2; }
+.tb-fields .tb-day, .tb-fields .tb-time { grid-column: 2; grid-row: 2; }
+.tb-row.is-routine .tb-time { grid-column: 2 / -1; }
+.tb-fields .tb-subs { grid-column: 3; grid-row: 2; }
+.tb-fields [hidden] { display: none !important; }
+.tb-time input[type=time] { max-width: 130px; }
+.tb-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; background: var(--ptm-action-soft); }
+.tb-copy input { width: 72px; }
+.tb-row .move-buttons { align-items: center; }
+.tb-copy-open { min-height: var(--ptm-hit, 40px); }
+.tb-row.is-routine { border-color: #c9d7fb; }
+.tb-paste { width: 100%; padding: 12px; border: 1px dashed var(--ptm-line-strong); border-radius: 12px; background: var(--ptm-bg); }
 .tb-row .drag-handle { font-size: 1.1rem; line-height: 1; }
-@media (max-width: 575.98px) { .tb-fields { grid-template-columns: minmax(0, 1fr); } .tb-fields .tb-day, .tb-fields .tb-subs { grid-column: 1; grid-row: auto; } }
+@media (max-width: 767.98px) { .tb-fields { grid-template-columns: minmax(0, 1fr); } .tb-fields .tb-repeat, .tb-fields .tb-day, .tb-fields .tb-time, .tb-fields .tb-subs, .tb-row.is-routine .tb-time { grid-column: 1; grid-row: auto; } }
 /* I7 bell. */
 .bell-button { position: relative; }
 .bell-count { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--ptm-late); color: #fff; font-size: .68rem;
@@ -206,3 +216,4 @@
 .palette-foot { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 16px; border-top: 1px solid var(--ptm-line); background: var(--ptm-bg); }
 .palette-foot .kbd { display: inline-flex; margin-right: 4px; }
 .dropdown-item .kbd { display: inline-flex; }
+.preview-warning { padding: 10px 12px; border-radius: 10px; background: var(--ptm-review-soft); border: 1px solid #f3dca0; }
