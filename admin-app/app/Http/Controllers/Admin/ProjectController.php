@@ -269,7 +269,7 @@ class ProjectController extends Controller
         $this->authorize('update', $project);
         $p = $this->templates->openPeriod($project, $request->user());
 
-        return redirect()->route('projects.board', [$project, 'period' => $p->id])->with('ok', "Periode {$p->name} dibuka. Task periode lama tetap di periode lama.");
+        return redirect()->route('projects.board', [$project, 'period' => $p->id])->with('ok', "{$p->name} dibuka. Task periode lama tetap di periode lama.");
     }
 
     private function header(Project $project): array

@@ -414,6 +414,42 @@ export function initSidebar() {
     });
 }
 
+// Sidebar scrolling: the menu keeps its scroll position between pages of this tab, the current page's link is always in view,
+// and edge lines (is-scrolled / has-more) tell that there are more items above or below.
+export function initSidebarScroll() {
+    document.querySelectorAll('[data-side-scroll]').forEach((box) => {
+        const key = `ptm.nav.scroll.${box.dataset.sideScroll}`;
+        const edges = () => {
+            box.classList.toggle('is-scrolled', box.scrollTop > 1);
+            box.classList.toggle('has-more', box.scrollTop + box.clientHeight < box.scrollHeight - 1);
+        };
+        try {
+            const saved = Number(sessionStorage.getItem(key));
+            if (saved > 0) box.scrollTop = saved;
+        } catch { /* storage unavailable: start at the top */ }
+        const current = box.querySelector('[aria-current="page"]');
+        if (current && box.clientHeight > 0) {
+            const outer = box.getBoundingClientRect();
+            const link = current.getBoundingClientRect();
+            if (link.top < outer.top || link.bottom > outer.bottom) box.scrollTop += link.top - outer.top - (outer.height - link.height) / 2;
+        }
+        edges();
+        let frame = 0;
+        box.addEventListener('scroll', () => {
+            if (!frame) frame = requestAnimationFrame(() => { frame = 0; edges(); });
+        }, { passive: true });
+        const save = () => { try { sessionStorage.setItem(key, String(Math.round(box.scrollTop))); } catch { /* not remembered */ } };
+        box.addEventListener('click', save);
+        window.addEventListener('pagehide', save);
+        // Opening or folding a group changes the height of the list.
+        if ('ResizeObserver' in window) {
+            const observer = new ResizeObserver(edges);
+            observer.observe(box);
+            if (box.firstElementChild) observer.observe(box.firstElementChild);
+        }
+    });
+}
+
 // Keyboard shortcut: "/" jumps to the search box (ignored while typing in a field).
 export function initShortcuts() {
     document.addEventListener('keydown', (e) => {

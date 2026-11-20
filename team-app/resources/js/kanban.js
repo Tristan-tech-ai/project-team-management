@@ -123,6 +123,11 @@ export function initChecklist() {
             box.disabled = false;
         }
     });
+    // This module loads after the page; on a slow phone a box ticked before that had no listener and the tick was lost
+    // (seen online: "Rutin hari ini" looked ticked but was never saved). Send every box whose state already differs from the page.
+    document.querySelectorAll('input[data-check-subtask]').forEach((box) => {
+        if (box.checked !== box.defaultChecked) box.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
     document.addEventListener('click', (e) => {
         const t = e.target.closest('[data-fill-duration]');

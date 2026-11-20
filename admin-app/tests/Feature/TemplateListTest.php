@@ -49,6 +49,19 @@ class TemplateListTest extends TestCase
         }
     }
 
+    /** Regression: the server sent HTML-escaped text and the browser escaped it again, so "Testing & Deployment" read "Testing &amp; Deployment".
+     *  Text now leaves the server as plain text; resources/js/table.js puts every value in the page as text. */
+    public function test_table_text_is_sent_once_unescaped(): void
+    {
+        $template = $this->template();
+        $template->tasks()->create(['title' => 'Testing & Deployment <QA>', 'task_type' => 'general', 'sort_order' => 9]);
+        $row = collect($this->tableRequest('/templates/projects', '/templates/projects/data'))->firstWhere('id', $template->id);
+        $this->assertNotNull($row);
+        $this->assertStringContainsString('Testing & Deployment <QA>', $row['content']);
+        $this->assertStringNotContainsString('&amp;', $row['content']);
+        $this->assertStringContainsString('DataTable.render.text()', file_get_contents(resource_path('js/table.js')));
+    }
+
     /** Regression: DataTables 2 treats a data-columns attribute as its own option and drops the render functions (Status and actions went blank). */
     public function test_no_table_uses_the_datatables_option_attribute(): void
     {

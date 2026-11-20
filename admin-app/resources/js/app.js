@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard, initRichText, initDashboardWidgets } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initSidebarScroll, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard, initRichText, initDashboardWidgets } from './core';
 
 import { initPalette } from './palette';
 
@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fixAccessibility();
     initDemoLogin();
     initSidebar();
+    initSidebarScroll();
     initShortcuts();
     initFirstSteps();
     // The bell list loads when the browser is idle, so it never delays what the person does first on the page.

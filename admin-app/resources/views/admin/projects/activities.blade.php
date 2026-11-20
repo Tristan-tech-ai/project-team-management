@@ -34,7 +34,8 @@
                                 <div class="small muted">{{ Dates::dateTime($j->requested_at) }} · diajukan {{ $j->requester?->name }}</div>
                                 <div class="d-flex flex-wrap gap-2 align-items-center"><span class="fw-semibold">Usulan perubahan deadline{{ $j->task ? ': '.$j->task->title : '' }}</span>
                                     <x-badge :code="$j->status" :text="Codes::label(Codes::SCHEDULE_STATUS, $j->status)"/></div>
-                                <div class="small">Target awal <strong>{{ Dates::date($j->task?->baseline_due_at ?? $project->baseline_due_at) }}</strong> · {{ Dates::date($j->previous_due_at) }} → <strong>{{ Dates::date($j->proposed_due_at) }}</strong></div>
+                                @php($baseline = $j->task?->baseline_due_at ?? $project->baseline_due_at)
+                                <div class="small">@if($baseline || $j->previous_due_at)Target awal <strong>{{ Dates::date($baseline) }}</strong> · sebelumnya {{ Dates::date($j->previous_due_at) }}@else Sebelumnya belum ada deadline @endif → usulan <strong>{{ Dates::date($j->proposed_due_at) }}</strong></div>
                                 <div class="small muted">{{ $j->reason }}@if($j->activity) · terkait {{ $j->activity->title }}@endif</div>
                                 @if($j->status !== 'pending')<div class="small muted">Diputuskan {{ $j->decider?->name }} {{ Dates::dateTime($j->decided_at) }}@if($j->decision_note): {{ $j->decision_note }}@endif</div>@endif
                                 @if($j->status === 'pending' && $svc->canDecide(auth()->user(), $j))

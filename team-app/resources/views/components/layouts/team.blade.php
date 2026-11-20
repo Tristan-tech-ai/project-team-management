@@ -26,12 +26,12 @@
 {{-- Desktop: sidebar menggantikan bottom navigation (d-none d-lg-flex). --}}
 <nav class="desktop-sidebar d-none d-lg-flex" aria-label="Menu utama">
     <a class="brand" href="{{ route('home') }}"><span class="brand-mark"><x-icon name="folder-kanban" :size="18"/></span><span class="brand-name">Project &amp; Team<small>Team App</small></span></a>
-    <div class="side-nav">
+    <div class="side-nav side-scroll" data-side-scroll="team">
         @foreach($nav as [$r, $l, $i, $can])
             @if($can)<a class="side-link" href="{{ route($r) }}" @if($active($r)) aria-current="page" @endif><x-icon :name="$i"/><span>{{ $l }}</span></a>@endif
         @endforeach
     </div>
-    <form method="post" action="{{ route('logout') }}" class="mt-auto side-nav">@csrf<button class="side-link side-logout" type="submit"><x-icon name="log-out"/><span>Keluar</span></button></form>
+    <form method="post" action="{{ route('logout') }}" class="mt-auto side-nav side-logout-form">@csrf<button class="side-link side-logout" type="submit"><x-icon name="log-out"/><span>Keluar</span></button></form>
 </nav>
 <header class="team-header">
     <span class="avatar" aria-hidden="true">{{ $u->initials() }}</span>

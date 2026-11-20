@@ -25,12 +25,12 @@
 <aside class="admin-sidebar desktop d-none d-lg-flex" aria-label="Menu utama">
     <a class="brand" href="{{ route('dashboard.index') }}"><span class="brand-mark"><x-icon name="folder-kanban" :size="18"/></span>
         <span class="brand-name">Project &amp; Team<small>Admin</small></span></a>
-    @include('layouts.sidebar-nav', ['label' => 'Menu utama', 'idPrefix' => 'nav'])
+    <div class="side-scroll" data-side-scroll="admin">@include('layouts.sidebar-nav', ['label' => 'Menu utama', 'idPrefix' => 'nav'])</div>
 </aside>
 <div class="offcanvas offcanvas-start admin-sidebar" tabindex="-1" id="mobile-menu" aria-labelledby="mobile-menu-title">
     <div class="offcanvas-header"><span id="mobile-menu-title" class="brand-name">Project &amp; Team<small>Admin</small></span>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup menu"></button></div>
-    <div class="offcanvas-body p-0">@include('layouts.sidebar-nav', ['label' => 'Menu utama (ponsel)', 'idPrefix' => 'mnav'])</div>
+    <div class="offcanvas-body p-0 side-scroll" data-side-scroll="admin-phone">@include('layouts.sidebar-nav', ['label' => 'Menu utama (ponsel)', 'idPrefix' => 'mnav'])</div>
 </div>
 
 <div class="admin-main">

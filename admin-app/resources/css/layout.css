@@ -29,7 +29,7 @@
 
 .admin-main { min-height: 100vh; }
 @media (min-width: 992px) {
-    .admin-sidebar.desktop { position: fixed; inset: 0 auto 0 0; overflow-y: auto; z-index: 1030; }
+    .admin-sidebar.desktop { position: fixed; inset: 0 auto 0 0; overflow: hidden; z-index: 1030; }
     .admin-main { margin-left: 248px; }
 }
 .offcanvas.admin-sidebar .offcanvas-header { border-bottom: 1px solid var(--ptm-line); }

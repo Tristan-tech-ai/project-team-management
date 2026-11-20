@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initSidebarScroll, initShortcuts, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initHints, initFilePickers, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard } from './core';
 
 window.bootstrap = bootstrap;
 
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fixAccessibility();
     initDemoLogin();
     initSidebar();
+    initSidebarScroll();
     initShortcuts();
     initFirstSteps();
     initFilePickers();

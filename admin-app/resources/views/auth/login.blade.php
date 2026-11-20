@@ -16,10 +16,17 @@
                     <li><x-icon name="chart-no-axes-combined"/><span>Pantau keterlambatan dan beban tim tanpa rekap manual.</span></li>
                 @endif
             </ul>
-            <div class="guest-preview" aria-hidden="true">
-                @foreach([['Antrian', 2], ['Dikerjakan', 3], ['Review', 1]] as [$column, $cards])
-                    <div class="guest-col"><span class="guest-col-title">{{ $column }}</span>@for($i = 0; $i < $cards; $i++)<span class="guest-card-line"><i></i><i></i></span>@endfor</div>
-                @endforeach
+            {{-- The real status flow of a task, so the panel explains how work moves instead of showing a placeholder picture. --}}
+            @php($flow = $isTeamApp
+                ? [['Antrian', 'Task baru masuk ke Task Saya.'], ['Dikerjakan', 'Centang checklist pertama, status ikut berubah.'], ['Review', 'Kirim tautan atau berkas hasil.'], ['Selesai', 'Manager menerima, atau mengembalikan dengan catatan revisi.']]
+                : [['Antrian', 'Task dibuat dari template, lengkap dengan checklist dan deadline.'], ['Dikerjakan', 'Anggota mencentang checklist.'], ['Review', 'Hasil masuk lewat tautan atau berkas.'], ['Selesai', 'Manager menerima; tepat waktu ikut terhitung di KPI.']])
+            <div class="guest-flow">
+                <p class="guest-flow-title">{{ $isTeamApp ? 'Perjalanan task-mu' : 'Alur satu task' }}</p>
+                <ol class="guest-flow-steps">
+                    @foreach($flow as [$status, $text])
+                        <li><span class="guest-flow-dot" aria-hidden="true">{{ $loop->iteration }}</span><span><strong>{{ $status }}</strong><span class="d-block">{{ $text }}</span></span></li>
+                    @endforeach
+                </ol>
             </div>
         </div>
     </x-slot:aside>
