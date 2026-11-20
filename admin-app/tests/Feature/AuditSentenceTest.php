@@ -26,6 +26,8 @@ class AuditSentenceTest extends TestCase
         $this->assertSame('meminta revisi hasil task', AuditSentence::describe($this->row('submissions.review', ['decision' => 'revision'])));
         $this->assertSame('mencatat waktu kerja 30 menit', AuditSentence::describe($this->row('tasks.time.store', ['minutes_spent' => 30])));
         $this->assertSame('masuk', AuditSentence::describe($this->row('login')));
+        // Regression: the real sign-in request has no route name and was logged as "menyimpan data di login".
+        $this->assertSame('masuk', AuditSentence::describe(new AuditLog(['route' => null, 'method' => 'POST', 'path' => '/login', 'input' => [], 'status' => 302])));
         $this->assertSame('menyimpan data di something/new', AuditSentence::describe(new AuditLog(['route' => null, 'method' => 'POST', 'path' => '/something/new', 'input' => [], 'status' => 302])));
         $this->assertSame(['Ditolak: tanpa izin', 'late'], AuditSentence::outcome(403));
         $this->assertSame(['Berhasil', 'ok'], AuditSentence::outcome(302));

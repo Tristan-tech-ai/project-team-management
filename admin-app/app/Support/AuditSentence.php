@@ -48,6 +48,10 @@ final class AuditSentence
     {
         $input = is_array($log->input) ? $log->input : [];
         $route = (string) $log->route;
+        // POST /login has no route name of its own (the name belongs to the GET form), so the address tells it apart.
+        if ($route === '' && in_array(trim((string) $log->path, '/'), ['login', 'logout'], true)) {
+            $route = trim((string) $log->path, '/');
+        }
         $phrase = match ($route) {
             'tasks.status' => 'memindah task ke '.Codes::label(Codes::TASK_STATUS, $input['status'] ?? null),
             'subtasks.toggle' => ! empty($input['done']) ? 'mencentang checklist' : 'membuka lagi checklist',
