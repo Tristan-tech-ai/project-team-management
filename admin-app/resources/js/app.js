@@ -1,5 +1,5 @@
 import * as bootstrap from 'bootstrap';
-import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initSidebarScroll, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard, initRichText, initDashboardWidgets } from './core';
+import { initConfirmations, fixAccessibility, showFlashMessages, initDemoLogin, initSidebar, initSidebarScroll, initShortcuts, initCodePreview, initQuickAdd, initRoleMatrix, initTaskCreate, initAutoSubmit, initQuickDates, initSafeForms, initCopyButtons, initHints, initFilePickers, initTodoBell, initFirstSteps, initTaskPanel, initPeopleFilter, initPicHandover, initNumberWheelGuard, initRichText, initDashboardWidgets, initThemeChoice } from './core';
 
 import { initPalette } from './palette';
 
@@ -7,6 +7,7 @@ window.bootstrap = bootstrap;
 
 // Heavy modules (DataTables + jQuery, SortableJS, FullCalendar) are loaded only on pages that use them.
 document.addEventListener('DOMContentLoaded', () => {
+    initThemeChoice();
     initConfirmations(bootstrap.Modal);
     showFlashMessages();
     fixAccessibility();

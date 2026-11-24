@@ -72,6 +72,18 @@ export function initKanban() {
         [region, ...region.querySelectorAll('[data-kanban]')].filter((x) => x.matches('[data-kanban]')).forEach(initBoard);
     });
 
+    // Dense columns: reveal the next 50 waiting cards.
+    document.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-kanban-more]');
+        if (!button) return;
+        const waiting = [...button.closest('.kanban-column').querySelectorAll('[data-kanban-later][hidden]')];
+        waiting.slice(0, 50).forEach((card) => { card.hidden = false; });
+        const left = waiting.length - 50;
+        if (left <= 0) { button.remove(); return; }
+        button.querySelector('[data-more-next]').textContent = String(Math.min(50, left));
+        button.querySelector('[data-more-left]').textContent = String(left);
+    });
+
     // Status dropdown (phones, or when dragging fails): same endpoint.
     document.addEventListener('change', async (e) => {
         const select = e.target;

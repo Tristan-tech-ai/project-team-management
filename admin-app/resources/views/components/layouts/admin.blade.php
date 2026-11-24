@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Admin' }} · PTM Admin</title>
+    @include('shared.head')
     @fonts
     @vite(['resources/css/layout.css', 'resources/js/app.js'])
 </head>
@@ -21,11 +22,32 @@
         $user->can('members.manage') ? [route('members.create'), 'Anggota', 'user-plus', 'Akun dan divisi'] : null,
         $user->can('clients.manage') ? [route('clients.create'), 'Client', 'contact', 'Pemberi project'] : null,
     ]));
+    // Top bar trail from the menu: "Group › Page" for pages in a group, the page alone otherwise, the page title as a fallback.
+    $trail = [];
+    foreach ($menu as $parent) {
+        foreach ($parent['children'] as $child) {
+            if ($child['route'] === $activeRoute) {
+                $trail = count($parent['children']) === 1 ? [$parent['title']] : [$parent['title'], $child['title']];
+            }
+        }
+    }
+    if (! $trail) {
+        $trail = [$title ?? 'Admin'];
+    }
 @endphp
 <aside class="admin-sidebar desktop d-none d-lg-flex" aria-label="Menu utama">
-    <a class="brand" href="{{ route('dashboard.index') }}"><span class="brand-mark"><x-icon name="folder-kanban" :size="18"/></span>
+    <a class="brand" href="{{ route('dashboard.index') }}"><span class="brand-mark"><x-icon name="folder-kanban" :size="16"/></span>
         <span class="brand-name">Project &amp; Team<small>Admin</small></span></a>
+    <button type="button" class="side-search" data-open-palette><x-icon name="search" :size="16"/><span>Cari atau pindah...</span><kbd class="kbd">Ctrl K</kbd></button>
     <div class="side-scroll" data-side-scroll="admin">@include('layouts.sidebar-nav', ['label' => 'Menu utama', 'idPrefix' => 'nav'])</div>
+    <div class="side-foot dropup">
+        <button class="side-user" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar" aria-hidden="true">{{ $user->initials() }}</span>
+            <span class="user-text truncate"><span class="d-block fw-medium truncate">{{ $user->name }}</span><span class="d-block small truncate">{{ $roleNames }}</span></span>
+            <x-icon name="chevrons-up-down" :size="16" class="ms-auto muted"/>
+        </button>
+        @include('layouts.account-menu', ['menuClass' => 'dropdown-menu w-100'])
+    </div>
 </aside>
 <div class="offcanvas offcanvas-start admin-sidebar" tabindex="-1" id="mobile-menu" aria-labelledby="mobile-menu-title">
     <div class="offcanvas-header"><span id="mobile-menu-title" class="brand-name">Project &amp; Team<small>Admin</small></span>
@@ -37,13 +59,21 @@
     <header class="admin-header">
         <div class="content">
             <button class="btn btn-icon d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-menu" aria-label="Buka menu"><x-icon name="menu"/></button>
-            <form class="global-search" role="search" action="{{ route('search') }}" method="get">
+            <nav class="header-title truncate" aria-label="Lokasi">
+                @foreach($trail as $i => $part)
+                    @if($i > 0)<span class="sep" aria-hidden="true">/</span>@endif
+                    <span class="truncate @if($i < count($trail) - 1) muted @endif">{{ $part }}</span>
+                @endforeach
+            </nav>
+            <form class="global-search d-none d-md-block" role="search" action="{{ route('search') }}" method="get">
                 <x-icon name="search"/>
                 <label for="global-search" class="visually-hidden">Cari project, task, atau anggota</label>
-                <input id="global-search" type="search" name="keyword" value="{{ request('keyword') }}" class="form-control" placeholder="Cari project, task, atau anggota" maxlength="100" data-shortcut="/">
+                <input id="global-search" type="search" name="keyword" value="{{ request('keyword') }}" class="form-control" placeholder="Cari project, task, anggota" maxlength="100" data-shortcut="/">
                 <kbd class="kbd d-none d-lg-inline-flex" aria-hidden="true">/</kbd>
             </form>
-            <div class="header-actions">
+            <div class="header-actions ms-auto ms-md-0">
+                <a class="btn btn-icon d-md-none" href="{{ route('search') }}" aria-label="Cari"><x-icon name="search"/></a>
+                <button class="btn btn-icon theme-toggle" type="button" data-theme-toggle aria-label="Ganti tema terang atau gelap" title="Ganti tema terang atau gelap"><x-icon name="moon" class="theme-icon-moon"/><x-icon name="sun" class="theme-icon-sun"/></button>
                 <div class="dropdown" data-todo-bell data-url="{{ route('todo') }}">
                     <button class="btn btn-icon bell-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Perlu kamu kerjakan">
                         <x-icon name="bell"/><span class="bell-count numeric" data-todo-count hidden></span></button>
@@ -55,29 +85,19 @@
                 </div>
                 @if($create)
                     <div class="dropdown">
-                        <button class="btn btn-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false"><x-icon name="plus"/><span class="d-none d-sm-inline">Buat</span><span class="visually-hidden d-sm-none">Buat baru</span></button>
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false"><x-icon name="plus" :size="16"/><span class="d-none d-sm-inline">Buat</span><span class="visually-hidden d-sm-none">Buat baru</span></button>
                         <ul class="dropdown-menu dropdown-menu-end create-menu">
                             @foreach($create as [$url, $label, $icon, $hint])
-                                <li><a class="dropdown-item" href="{{ $url }}"><span class="create-icon"><x-icon :name="$icon"/></span><span><span class="d-block fw-semibold">{{ $label }}</span><span class="d-block small muted">{{ $hint }}</span></span></a></li>
+                                <li><a class="dropdown-item" href="{{ $url }}"><span class="create-icon"><x-icon :name="$icon"/></span><span><span class="d-block fw-medium">{{ $label }}</span><span class="d-block small muted">{{ $hint }}</span></span></a></li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
-                <div class="dropdown">
+                <div class="dropdown d-lg-none">
                     <button class="btn user-button" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="avatar" aria-hidden="true">{{ $user->initials() }}</span>
-                        <span class="visually-hidden">Akun</span>
-                        <span class="user-text text-start"><span class="d-block fw-semibold">{{ $user->name }}</span><span class="d-block small muted">{{ $roleNames }}</span></span>
-                        <x-icon name="chevron-down" :size="16" class="d-none d-md-block muted"/>
+                        <span class="avatar" aria-hidden="true">{{ $user->initials() }}</span><span class="visually-hidden">Akun</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li class="dropdown-header d-md-none">{{ $user->name }} · {{ $roleNames }}</li>
-                        <li><a class="dropdown-item" href="{{ route('account.edit') }}"><x-icon name="user"/> Profil &amp; kata sandi</a></li>
-                        <li class="d-none d-lg-block"><button class="dropdown-item" type="button" data-open-palette><x-icon name="search"/> Perintah cepat <kbd class="kbd ms-auto">Ctrl K</kbd></button></li>
-                        <li><a class="dropdown-item" href="{{ config('app.team_url') }}"><x-icon name="external-link"/> Buka Team App</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><form method="post" action="{{ route('logout') }}">@csrf<button class="dropdown-item" type="submit"><x-icon name="log-out"/> Keluar</button></form></li>
-                    </ul>
+                    @include('layouts.account-menu', ['menuClass' => 'dropdown-menu dropdown-menu-end'])
                 </div>
             </div>
         </div>

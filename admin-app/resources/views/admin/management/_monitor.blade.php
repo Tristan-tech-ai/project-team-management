@@ -5,7 +5,7 @@
     @forelse($rows as $p)
         <tr>
             <td><a class="fw-semibold" href="{{ route('projects.show', $p->id) }}">{{ $p->name }}</a><div class="small muted">{{ $p->client ?? 'Internal' }} · PIC {{ $p->pic }}</div></td>
-            <td class="small">{{ Codes::label(Codes::PROJECT_TYPE, $p->project_type) }}</td>
+            <td class="small text-nowrap">{{ Codes::label(Codes::PROJECT_TYPE, $p->project_type) }}</td>
             <td><div class="d-flex align-items-center gap-2"><div class="meter flex-grow-1"><span style="width:{{ $p->progress }}%"></span></div><span class="small numeric">{{ $p->progress }}%</span></div>
                 <div class="small muted numeric">{{ $p->done_tasks }} / {{ $p->main_tasks }} task utama</div></td>
             @if(! empty($full))

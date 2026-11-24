@@ -52,7 +52,7 @@
     <div data-widget="stats"><div class="row g-3 mb-3" data-refresh-region="stats">
         @foreach($stats as [$label, $value, $hint, $icon, $tone, $url])
             <div class="col-6 col-xl-3">
-                @if($url)<a href="{{ $url }}" class="panel stat-card stat-link h-100 {{ $tone }}">@else<div class="panel stat-card h-100 {{ $tone }}">@endif
+                @if($url)<a href="{{ $url }}" class="panel stat-card stat-link h-100 {{ $tone }} @if((string) $value === '0') is-zero @endif">@else<div class="panel stat-card h-100 {{ $tone }} @if((string) $value === '0') is-zero @endif">@endif
                     <span class="stat-label"><span class="stat-icon"><x-icon :name="$icon"/></span>{{ $label }}</span>
                     <span class="kpi-value">{{ $value }}</span>@if($hint)<span class="small muted">{{ $hint }}</span>@endif
                 @if($url)</a>@else</div>@endif

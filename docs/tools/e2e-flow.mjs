@@ -55,13 +55,13 @@ try {
     const cardId = await card.getAttribute('data-task-id');
     // Dragged by the PIC line, not the grip: the whole card is the drag area.
     // The card follows the pointer (SortableJS fallback drag), so the pointer moves in steps like a hand does.
-    await card.getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=in_progress]'), { steps: 12 });
+    await card.locator('.task-card-meta .avatar-pic').dragTo(a.locator('[data-kanban-column][data-status=in_progress]'), { steps: 12 });
     await expect(a.locator('.toast-area .alert-success').last()).toContainText('Dikerjakan', { timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await a.reload();
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     record(true, 'seret ke Dikerjakan tersimpan di server (bertahan setelah muat ulang)');
-    await a.locator(`[data-task-id="${cardId}"]`).getByText(/^PIC:/).dragTo(a.locator('[data-kanban-column][data-status=done]'), { steps: 12 });
+    await a.locator(`[data-task-id="${cardId}"]`).locator('.task-card-meta .avatar-pic').dragTo(a.locator('[data-kanban-column][data-status=done]'), { steps: 12 });
     await expect(a.locator('.toast-area .alert-danger').last()).toBeVisible({ timeout: 10_000 });
     await expect(a.locator(`[data-kanban-column][data-status=in_progress] [data-task-id="${cardId}"]`)).toHaveCount(1);
     await expect(a.locator(`[data-kanban-column][data-status=done] [data-task-id="${cardId}"]`)).toHaveCount(0);

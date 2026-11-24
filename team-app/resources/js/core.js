@@ -888,3 +888,40 @@ export function initNumberWheelGuard() {
         if (field instanceof HTMLInputElement && field.type === 'number' && document.activeElement === field) field.blur();
     }, { passive: true, capture: true });
 }
+
+/** Theme choice (account menu): light, dark, or follow the system. Stored per browser; the inline head script applies it before paint. */
+export function initThemeChoice() {
+    const root = document.documentElement;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const read = () => { try { return localStorage.getItem('ptm.theme') || 'system'; } catch { return 'system'; } };
+    const apply = (choice) => {
+        const dark = choice === 'dark' || (choice === 'system' && media.matches);
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        root.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        root.setAttribute('data-theme-choice', choice);
+        document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === choice)));
+        document.querySelectorAll('[data-theme-toggle]').forEach((b) => {
+            const label = dark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap';
+            b.setAttribute('aria-label', label);
+            b.setAttribute('title', label);
+        });
+    };
+    apply(read());
+    media.addEventListener('change', () => { if (read() === 'system') apply('system'); });
+    // Top bar button: one click switches light <-> dark from what is shown now.
+    document.addEventListener('click', (e) => {
+        const toggle = e.target.closest('[data-theme-toggle]');
+        if (!toggle) return;
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('ptm.theme', next); } catch { /* private mode: applies to this page only */ }
+        apply(next);
+    });
+    document.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-theme-set]');
+        if (!button) return;
+        e.preventDefault();
+        e.stopPropagation(); // keep the account menu open while choosing
+        try { localStorage.setItem('ptm.theme', button.dataset.themeSet); } catch { /* private mode: applies to this page only */ }
+        apply(button.dataset.themeSet);
+    });
+}

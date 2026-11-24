@@ -10,10 +10,13 @@ window.jQuery = window.$ = $;
 
 const language = {
     processing: 'Memuat...',
-    search: 'Cari:',
-    lengthMenu: 'Tampilkan _MENU_ baris',
-    info: '_START_ sampai _END_ dari _TOTAL_ baris',
+    search: '',
+    searchPlaceholder: 'Cari di tabel ini...',
+    lengthMenu: '_MENU_ per halaman',
+    info: '_START_-_END_ dari _TOTAL_',
     infoEmpty: 'Belum ada data',
+    thousands: '.',
+    decimal: ',',
     infoFiltered: '(disaring dari _MAX_ baris)',
     zeroRecords: 'Tidak ada yang cocok dengan pencarian ini.',
     emptyTable: 'Belum ada data. Tambahkan yang pertama.',
@@ -48,7 +51,7 @@ const renderers = {
         return pill(data ?? '-', row[`${column}_class`] ?? 'neutral');
     },
     progress: (data, type) => (type === 'display'
-        ? `<div class="d-flex align-items-center gap-2"><div class="meter flex-grow-1" style="min-width:80px"><span style="width:${Number(data) || 0}%"></span></div><span class="numeric small">${Number(data) || 0}%</span></div>`
+        ? `<div class="d-flex align-items-center gap-2"><div class="meter flex-grow-1" style="min-width:48px;max-width:96px"><span style="width:${Number(data) || 0}%"></span></div><span class="numeric small">${Number(data) || 0}%</span></div>`
         : data),
     actions: (data, type, row) => {
         if (type !== 'display') return '';
@@ -63,7 +66,7 @@ const renderers = {
             // I3: a task link opens the side panel (the list keeps its page, search, and filters).
             return `<a href="${escape(a.url)}" class="btn btn-sm ${a.primary ? 'btn-primary' : 'btn-outline-primary'}"${a.panel ? ' data-task-panel' : ''}>${escape(a.label)}</a>`;
         });
-        return `<div class="d-flex gap-1 justify-content-end flex-wrap">${buttons.join('')}</div>`;
+        return `<div class="d-flex gap-1 justify-content-end flex-nowrap">${buttons.join('')}</div>`;
     },
 };
 
@@ -93,7 +96,10 @@ export function initTables() {
         const headers = [...el.querySelectorAll('thead th')].map((th) => th.textContent.trim());
         el.classList.add('table-cards');
         const table = new DataTable(el, {
-            createdRow: (row) => row.querySelectorAll('td').forEach((td, i) => { if (headers[i]) td.dataset.label = headers[i]; }),
+            createdRow: (row) => row.querySelectorAll('td').forEach((td, i) => {
+                if (headers[i]) td.dataset.label = headers[i];
+                if (!td.querySelector('button, form, input, .meter') && td.textContent.trim()) td.title = td.textContent.trim(); // full text when the cell is cut short
+            }),
             processing: true,
             serverSide: true,
             ajax: {
@@ -110,7 +116,10 @@ export function initTables() {
             // I6: search text, sort, and page are remembered per table for this browser tab.
             stateSave: true,
             stateDuration: -1,
-            ...(keyword ? { layout: { topEnd: null }, stateLoadParams: (s, data) => { if (data.search) data.search.search = ''; } } : {}),
+            // Modern frame (Supabase grid, Vercel lists): search on the left of the toolbar, rows per page on the right, count and pages in the footer.
+            layout: { topStart: keyword ? null : 'search', topEnd: 'pageLength', bottomStart: 'info', bottomEnd: 'paging' },
+            pagingType: 'simple_numbers',
+            ...(keyword ? { stateLoadParams: (s, data) => { if (data.search) data.search.search = ''; } } : {}),
         });
         const rememberFilters = () => {
             const url = new URL(window.location.href);

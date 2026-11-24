@@ -12,43 +12,42 @@
     $routine = $subTotal > 0 && (int) ($t->sub_dated ?? 0) === $subTotal; // daily routine: one dated checklist item per day
     $canMoveStatus = $user->can('moveStatus', $t) || $user->can('review', $t);
     $people = $t->relationLoaded('assignees') ? $t->assignees : collect();
+    $others = $people->reject(fn ($p) => (int) $p->id === (int) $t->pic_user_id); // the PIC already shows first on the card
     $initials = fn ($name) => \Illuminate\Support\Str::of($name)->explode(' ')->filter()->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
 @endphp
-<article class="task-card" data-task-id="{{ $t->id }}" data-status="{{ $t->status }}" @if($canMoveStatus) data-movable @endif aria-label="{{ $t->title }}">
-    <div class="d-flex align-items-start gap-2">
-        @if($canMoveStatus)<span class="task-handle d-none d-lg-inline-flex" title="Seret untuk memindah kolom" aria-hidden="true"><x-icon name="grip-vertical" :size="16"/></span>@endif
+<article class="task-card" data-task-id="{{ $t->id }}" data-status="{{ $t->status }}" @if($canMoveStatus) data-movable @endif @if(! empty($later)) hidden data-kanban-later @endif aria-label="{{ $t->title }}">
+    {{-- Compact card (Linear/Railway boards): title, one meta line, the next step as a small button on the last line. --}}
+    <div class="task-card-head">
         <div class="flex-grow-1 min-w-0">
-            @if(! empty($showProject))<div class="small muted text-truncate">{{ $t->project?->name }}</div>@endif
+            @if(! empty($showProject))<div class="task-card-project text-truncate">{{ $t->project?->name }}</div>@endif
             <a href="{{ route('tasks.show', $t) }}" class="task-title no-stretch" data-task-panel draggable="false">{{ $t->title }}</a>
         </div>
         @if($t->priority === 'high' || $t->priority === 'urgent')<span class="pill pill-risk">{{ Codes::label(Codes::PRIORITY, $t->priority) }}</span>@endif
     </div>
-    <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
-        <span class="small muted text-truncate">PIC: {{ $t->pic?->name ?? '-' }}</span>
-        @if($people->isNotEmpty())
+    @php($hasAction = ($t->status === 'backlog' && $user->can('moveStatus', $t)) || ($t->status === 'in_progress' && $user->can('submit', $t)) || ($t->status === 'review' && $user->can('review', $t)))
+    {{-- One line: PIC as initials, checklist count, time to the deadline, people, then the next step on the right. Full words stay in titles and for screen readers. --}}
+    <div class="task-card-meta">
+        <span class="avatar avatar-pic" title="PIC: {{ $t->pic?->name ?? '-' }}" aria-hidden="true">{{ $t->pic ? $initials($t->pic->name) : '-' }}</span><span class="visually-hidden">PIC: {{ $t->pic?->name ?? '-' }}</span>
+        @if($subTotal)<span class="meta-sub numeric" title="Checklist {{ $subDone }} dari {{ $subTotal }} {{ $routine ? 'hari' : 'subtask' }}"><x-icon name="list-checks" :size="13"/><span data-sub-count>{{ $subDone }} / {{ $subTotal }} {{ $routine ? 'hari' : 'subtask' }}</span></span>@endif
+        @if($t->due_at)<span class="meta-due numeric {{ $late ? 'is-late' : '' }}" title="Deadline: {{ Dates::date($t->due_at) }}"><x-icon name="calendar-days" :size="13"/>{{ $t->status !== 'done' ? Dates::relative($t->due_at) : Dates::date($t->due_at) }}<span class="visually-hidden"> (Deadline: {{ Dates::date($t->due_at) }})</span></span>@endif
+        @if($late)<span class="pill pill-late">Terlambat</span>@endif
+        @if(($t->pending ?? 0) > 0 || $t->status === 'review')<span class="pill pill-review">Menunggu review</span>@endif
+        @if($others->isNotEmpty())
             <span class="avatar-stack" title="Pelaksana: {{ $people->pluck('name')->implode(', ') }}">
-                @foreach($people->take(3) as $person)<span class="avatar" aria-hidden="true">{{ $initials($person->name) }}</span>@endforeach
-                @if($people->count() > 3)<span class="avatar avatar-more" aria-hidden="true">+{{ $people->count() - 3 }}</span>@endif
+                @foreach($others->take(3) as $person)<span class="avatar" aria-hidden="true">{{ $initials($person->name) }}</span>@endforeach
+                @if($others->count() > 3)<span class="avatar avatar-more" aria-hidden="true">+{{ $others->count() - 3 }}</span>@endif
                 <span class="visually-hidden">Pelaksana: {{ $people->pluck('name')->implode(', ') }}</span>
             </span>
         @endif
+        @if($t->status === 'backlog' && $user->can('moveStatus', $t))
+            <form class="card-actions" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
+                <button class="btn btn-sm btn-outline-secondary" type="submit"><x-icon name="send" :size="14"/> Mulai</button></form>
+        @elseif($t->status === 'in_progress' && $user->can('submit', $t))
+            <div class="card-actions"><a class="btn btn-sm btn-outline-secondary" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="14"/> Kirim hasil</a></div>
+        @elseif($t->status === 'review' && $user->can('review', $t))
+            <div class="card-actions"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review" data-task-panel><x-icon name="clipboard-check" :size="14"/> Review hasil</a></div>
+        @endif
     </div>
-    @if($subTotal)
-        <div class="d-flex align-items-center gap-2 mt-2"><div class="meter flex-grow-1"><span style="width:{{ $percent }}%"></span></div><span class="small numeric muted" data-sub-count>{{ $subDone }} / {{ $subTotal }} {{ $routine ? 'hari' : 'subtask' }}</span></div>
-    @endif
-    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
-        <span class="small {{ $late ? 'text-danger fw-semibold' : 'muted' }}">Deadline: {{ Dates::date($t->due_at) }}@if($t->due_at && $t->status !== 'done') · {{ Dates::relative($t->due_at) }}@endif</span>
-        @if($late)<span class="pill pill-late">Terlambat</span>@endif
-        @if(($t->pending ?? 0) > 0 || $t->status === 'review')<span class="pill pill-review">Menunggu review</span>@endif
-    </div>
-    @if($t->status === 'backlog' && $user->can('moveStatus', $t))
-        <form class="card-actions" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
-            <button class="btn btn-sm btn-outline-primary" type="submit"><x-icon name="send" :size="16"/> Mulai</button></form>
-    @elseif($t->status === 'in_progress' && $user->can('submit', $t))
-        <div class="card-actions"><a class="btn btn-sm btn-outline-primary" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="16"/> Kirim hasil</a></div>
-    @elseif($t->status === 'review' && $user->can('review', $t))
-        <div class="card-actions"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review" data-task-panel><x-icon name="clipboard-check" :size="16"/> Review hasil</a></div>
-    @endif
     @if($canMoveStatus)
         <div class="mt-2 d-lg-none">
             <label class="visually-hidden" for="st-{{ $t->id }}">Status {{ $t->title }}</label>
