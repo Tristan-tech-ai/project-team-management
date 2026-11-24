@@ -45,7 +45,7 @@
 .side-user .user-text { min-width: 0; line-height: 1.2; font-size: .8125rem; }
 .side-user .user-text .small { font-size: .75rem; color: var(--m-text-3); }
 .team-header .avatar { width: 32px; height: 32px; }
-.team-header .user-button { display: flex; align-items: center; height: var(--ptm-hit); padding: 0 4px; border: 0; border-radius: var(--ptm-radius-sm); background: none; }
+.team-header .user-button { display: flex; align-items: center; justify-content: center; height: var(--ptm-hit); min-width: var(--ptm-hit); padding: 0 4px; border: 0; border-radius: var(--ptm-radius-sm); background: none; }
 
 .page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .page-header p { margin: .2rem 0 0; color: var(--m-text-2); }

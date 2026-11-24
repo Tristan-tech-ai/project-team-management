@@ -120,7 +120,7 @@
 }
 
 html { -webkit-text-size-adjust: 100%; }
-body { font-size: 15px; line-height: 1.5; background: var(--m-bg); color: var(--m-text); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-feature-settings: 'ss01' on; }
+body { font-size: 16px; line-height: 1.5; /* Technical Guide 6.1: 16 px on phones, 14-16 px on desktop */ background: var(--m-bg); color: var(--m-text); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-feature-settings: 'ss01' on; }
 @media (min-width: 992px) { body { font-size: 14px; line-height: 20px; } }
 h1, .h1 { font-size: 1.375rem; font-weight: 600; letter-spacing: -.035em; line-height: 1.25; color: var(--m-text); }
 h2, .h2 { font-size: 1.125rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.5; color: var(--m-text); }
@@ -163,7 +163,7 @@ p a:not(.btn), .form-text a, .crumb a, .alert a { text-decoration: underline; te
 .btn-success { --bs-btn-bg: var(--m-ok); --bs-btn-border-color: var(--m-ok); --bs-btn-hover-bg: hsl(133 50% 25%); --bs-btn-hover-border-color: hsl(133 50% 25%); }
 [data-theme="dark"] .btn-success { --bs-btn-color: #000; --bs-btn-hover-color: #000; }
 .btn-link { --bs-btn-color: var(--m-accent-ink); --bs-btn-hover-color: var(--m-accent-hover); text-decoration: none; }
-.btn-icon { width: var(--ptm-hit, 40px); height: var(--ptm-hit, 40px); min-height: 0; padding: 0; border-radius: var(--ptm-radius-sm); color: var(--m-text-2); background: transparent; border: 1px solid transparent; }
+.btn-icon { flex: none; width: var(--ptm-hit, 40px); height: var(--ptm-hit, 40px); min-height: 0; padding: 0; border-radius: var(--ptm-radius-sm); color: var(--m-text-2); background: transparent; border: 1px solid transparent; }
 .btn-icon:hover { background: var(--m-surface-2); color: var(--m-text); }
 
 /* Inputs: line-2 border, surface background, blue focus ring. Phones keep 16 px text so iOS does not zoom. */
@@ -341,7 +341,8 @@ div.dt-container .dt-paging .page-link { min-width: var(--ptm-hit); min-height: 
       --fc-button-hover-bg-color: var(--m-surface-2); --fc-button-hover-border-color: var(--m-line-2);
       --fc-button-active-bg-color: var(--m-surface-3); --fc-button-active-border-color: var(--m-line-2); }
 .fc .fc-button-primary:disabled { opacity: 1; background-color: var(--m-surface-2); border-color: var(--m-line); color: var(--m-text-2); }
-.fc .fc-toolbar-title { font-size: 1rem; font-weight: 600; letter-spacing: -.02em; color: var(--m-text); }
+.fc .fc-toolbar-title { font-size: 1.125rem; font-weight: 600; letter-spacing: -.02em; color: var(--m-text); }
+@media (min-width: 992px) { .fc .fc-toolbar-title { font-size: 1.25rem; } }
 .fc .fc-col-header-cell-cushion, .fc .fc-daygrid-day-number { color: var(--m-text); text-decoration: none; }
 .fc .fc-col-header-cell { background: var(--m-surface-2); font-weight: 500; color: var(--m-text-2); }
 .fc .fc-day-other .fc-daygrid-day-number { color: var(--m-text-3); opacity: 1; }

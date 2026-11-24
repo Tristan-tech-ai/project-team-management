@@ -65,7 +65,7 @@
 .global-search input:focus ~ .kbd { display: none !important; }
 .header-actions { display: flex; align-items: center; gap: 6px; }
 .global-search + .header-actions { margin-left: 0; }
-.user-button { display: flex; align-items: center; gap: 8px; height: var(--ptm-hit); min-height: 0; padding: 0 6px 0 4px; border: 1px solid transparent; border-radius: var(--ptm-radius-sm); color: var(--m-text); }
+.user-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: var(--ptm-hit); min-width: var(--ptm-hit); min-height: 0; padding: 0 6px 0 4px; border: 1px solid transparent; border-radius: var(--ptm-radius-sm); color: var(--m-text); }
 .user-button .avatar { width: 28px; height: 28px; }
 .user-button:hover, .user-button[aria-expanded="true"] { background: var(--m-surface-2); }
 .create-menu { min-width: 260px; }
