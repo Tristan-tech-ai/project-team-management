@@ -36,7 +36,9 @@
 
 /* Header: search with "/" shortcut, Create menu, account. */
 .admin-header { position: sticky; top: 0; z-index: 1020; background: rgba(255, 255, 255, .92); border-bottom: 1px solid var(--ptm-line); -webkit-backdrop-filter: saturate(1.4) blur(8px); backdrop-filter: saturate(1.4) blur(8px); }
-.admin-header .content { display: flex; align-items: center; gap: 12px; padding: 10px 16px; max-width: 1440px; min-height: 64px; }
+/* Content is at most about 1440 px wide (Technical Guide 6.2) and centred in the space beside the sidebar, so a wide screen
+   gets equal margins instead of one empty strip on the right. The header row uses the same box so its edges line up. */
+.admin-header .content { display: flex; align-items: center; gap: 12px; padding: 10px 16px; max-width: 1440px; margin-inline: auto; min-height: 64px; }
 @media (min-width: 992px) { .admin-header .content { padding: 10px 32px; } }
 .global-search { flex: 1; max-width: 520px; position: relative; }
 .global-search > .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ptm-ink-3); pointer-events: none; }
@@ -56,7 +58,7 @@
 .create-icon { width: 34px; height: 34px; border-radius: 9px; display: inline-grid; place-items: center; background: var(--ptm-action-soft); flex: none; }
 .create-icon .icon { color: var(--ptm-action) !important; }
 
-.content-area { padding: 20px 16px 40px; max-width: 1440px; }
+.content-area { padding: 20px 16px 40px; max-width: 1440px; margin-inline: auto; }
 @media (min-width: 992px) { .content-area { padding: 28px 32px 48px; } }
 .page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
 .page-header h1 { margin-bottom: 0; }
