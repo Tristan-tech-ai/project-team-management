@@ -5,8 +5,10 @@
         <p>{{ $new ? 'Pilih company, tipe, PIC, tim, dan template. Task dan subtask dari template dibuat sekaligus.' : 'Tipe project dan target awal tidak berubah setelah project dibuat.' }}</p></div></div>
     <form method="post" action="{{ $new ? route('projects.store') : route('projects.update', $project) }}" data-form-project data-preview-url="{{ route('projects.preview') }}">
         @csrf @unless($new) @method('PUT') @endunless
-        <div class="row g-3">
-            <div class="col-xl-8">
+        {{-- Grid areas: phones show Template first, then Project and Tim, then notes and the save button; from 1200 px the form is left,
+             Template and notes are right (layout.css .project-form-grid). --}}
+        <div class="project-form-grid @unless($new) no-template @endunless">
+            <div class="pf-main">
                 <div class="panel mb-3">
                     <h2 class="panel-title">Project</h2>
                     <div class="row g-2">
@@ -79,14 +81,16 @@
                         @error('members')<div class="text-danger small mt-1">{{ $message }}</div>@enderror</fieldset>
                 </div>
             </div>
-            <div class="col-xl-4">
-                @if($new)
-                    <div class="panel mb-3">
+            @if($new)
+                <div class="pf-template">
+                    <div class="panel">
                         <h2 class="panel-title">Template project</h2>
                         <x-field name="project_template_id" label="Template" type="select" :options="$templates->mapWithKeys(fn ($t) => [$t->id => $t->name.' ('.Codes::label(Codes::PROJECT_TYPE, $t->project_type).')'])" :value="$project->project_template_id" empty="Tanpa template"/>
                         <div data-preview aria-live="polite"></div>
                     </div>
-                @endif
+                </div>
+            @endif
+            <div class="pf-side">
                 <div class="panel"><x-field name="notes" label="Catatan" type="textarea" :value="$project->notes"/>
                     <x-switch name="result_optional" label="Hasil task boleh kosong" :checked="$project->resultOptional()"
                         help="Untuk pekerjaan seperti maintenance atau riset: task bisa dikirim untuk review tanpa tautan atau berkas."/>

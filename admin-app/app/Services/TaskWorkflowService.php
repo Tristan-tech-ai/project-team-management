@@ -65,6 +65,15 @@ class TaskWorkflowService
             }
             $reviewer = Gate::forUser($user)->allows('review', $t);
             if ($to === 'review') {
+                // "Hasil task boleh kosong" (project_settings): moving the card is the same as sending an empty result for review.
+                if ($t->project?->resultOptional()) {
+                    if (! Gate::forUser($user)->allows('submit', $t)) {
+                        throw ValidationException::withMessages(['status' => 'Kamu tidak memegang task ini.']);
+                    }
+                    $this->submitResult($t, $user, null, null, $notes);
+
+                    return $t->refresh();
+                }
                 throw ValidationException::withMessages(['status' => 'Kirim hasil dulu lewat tombol Kirim untuk Review (tautan atau berkas dan catatan singkat).']);
             }
             if (in_array($from, ['review', 'done'], true) || $to === 'done') {

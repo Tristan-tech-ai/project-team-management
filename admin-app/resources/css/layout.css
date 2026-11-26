@@ -63,6 +63,16 @@
 .global-search input:hover { border-color: var(--m-line-2); }
 .global-search .kbd { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 .global-search input:focus ~ .kbd { display: none !important; }
+/* Project form: Template first on phones (PKL supervisor), form left with Template and notes right from 1200 px. */
+.project-form-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "template" "main" "side"; }
+.project-form-grid.no-template { grid-template-areas: "main" "side"; }
+.pf-main { grid-area: main; min-width: 0; }
+.pf-template { grid-area: template; min-width: 0; }
+.pf-side { grid-area: side; min-width: 0; }
+@media (min-width: 1200px) {
+    .project-form-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "main template" "main side"; align-items: start; }
+    .project-form-grid.no-template { grid-template-rows: auto; grid-template-areas: "main side"; }
+}
 /* Search page field: always visible, because on phones the header shows only a search button that opens this page. */
 .search-page-form { display: flex; gap: 8px; max-width: 560px; margin: 0 0 20px; }
 .search-page-field { position: relative; flex: 1 1 auto; min-width: 0; }

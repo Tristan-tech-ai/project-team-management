@@ -153,9 +153,9 @@ p a:not(.btn), .form-text a, .crumb a, .alert a { text-decoration: underline; te
                --bs-btn-hover-border-color: var(--m-accent-solid-hover); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent-solid-hover); --bs-btn-active-border-color: var(--m-accent-solid-hover);
                --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: var(--m-accent-solid); --bs-btn-disabled-border-color: var(--m-accent-solid); }
 .btn-outline-primary { --bs-btn-color: var(--m-accent-ink); --bs-btn-border-color: var(--m-accent-line); --bs-btn-bg: var(--m-surface); --bs-btn-hover-color: var(--m-accent-ink);
-                       --bs-btn-hover-bg: var(--m-accent-soft); --bs-btn-hover-border-color: var(--m-accent); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent);
-                       --bs-btn-active-border-color: var(--m-accent); --bs-btn-disabled-color: var(--m-accent-ink); --bs-btn-disabled-bg: var(--m-surface); }
-.btn-check:checked + .btn-outline-primary { color: #fff; background: var(--m-accent); border-color: var(--m-accent); }
+                       --bs-btn-hover-bg: var(--m-accent-soft); --bs-btn-hover-border-color: var(--m-accent); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent-solid);
+                       --bs-btn-active-border-color: var(--m-accent-solid); --bs-btn-disabled-color: var(--m-accent-ink); --bs-btn-disabled-bg: var(--m-surface); }
+.btn-check:checked + .btn-outline-primary { color: #fff; background: var(--m-accent-solid); border-color: var(--m-accent-solid); }
 .btn-outline-secondary, .btn-light { --bs-btn-color: var(--m-text); --bs-btn-bg: var(--m-surface); --bs-btn-border-color: var(--m-line-2); --bs-btn-hover-color: var(--m-text);
     --bs-btn-hover-bg: var(--m-surface-2); --bs-btn-hover-border-color: var(--m-line-2); --bs-btn-active-color: var(--m-text); --bs-btn-active-bg: var(--m-surface-3);
     --bs-btn-active-border-color: var(--m-line-2); --bs-btn-disabled-color: var(--m-text-3); --bs-btn-disabled-bg: var(--m-surface); --bs-btn-disabled-border-color: var(--m-line); }

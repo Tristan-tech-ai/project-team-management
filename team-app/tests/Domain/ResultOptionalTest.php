@@ -51,4 +51,16 @@ class ResultOptionalTest extends TestCase
         $this->assertSame(0, $sub->attachments()->count());
         $this->actingAs($member)->get("/tasks/{$t->id}")->assertSee('Dikirim tanpa tautan, berkas, atau catatan.');
     }
+
+    public function test_kanban_move_to_review_follows_the_setting(): void
+    {
+        [$t, $member] = $this->startedTask(false);
+        $this->actingAs($member)->patchJson("/tasks/{$t->id}/status", ['status' => 'review'])->assertUnprocessable()->assertJsonValidationErrors('status');
+        $this->assertSame('in_progress', $t->fresh()->status);
+
+        [$t2, $member2] = $this->startedTask(true);
+        $this->actingAs($member2)->patchJson("/tasks/{$t2->id}/status", ['status' => 'review'])->assertOk();
+        $this->assertSame('review', $t2->fresh()->status, 'dragging the card to Review is the same as sending an empty result');
+        $this->assertSame(1, TaskSubmission::query()->where('task_id', $t2->id)->where('status', 'pending')->count());
+    }
 }
