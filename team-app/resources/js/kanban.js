@@ -105,7 +105,12 @@ export function initKanban() {
             }
         } catch (err) {
             select.value = previous;
-            notify(err.message, 'error');
+            // Review needs a result in this project: open the Kirim hasil form (side panel) instead of only showing the refusal.
+            if (select.dataset.resultUrl && String(err.message).startsWith('Kirim hasil dulu')) {
+                document.dispatchEvent(new CustomEvent('ptm:open-task', { detail: { url: select.dataset.resultUrl, title: card?.querySelector('.task-title')?.textContent.trim() ?? '' } }));
+            } else {
+                notify(err.message, 'error');
+            }
         } finally {
             select.disabled = false;
         }

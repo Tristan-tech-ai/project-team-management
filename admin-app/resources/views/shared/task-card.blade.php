@@ -39,21 +39,23 @@
                 <span class="visually-hidden">Pelaksana: {{ $people->pluck('name')->implode(', ') }}</span>
             </span>
         @endif
+        {{-- Phones: the status dropdown below replaces this button, so the card stays one line (PKL supervisor: lebih minimalis). --}}
         @if($t->status === 'backlog' && $user->can('moveStatus', $t))
-            <form class="card-actions" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
+            <form class="card-actions d-none d-lg-flex" method="post" action="{{ route('tasks.status', $t) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="in_progress">
                 <button class="btn btn-sm btn-outline-secondary" type="submit"><x-icon name="send" :size="14"/> Mulai</button></form>
         @elseif($t->status === 'in_progress' && $user->can('submit', $t))
-            <div class="card-actions"><a class="btn btn-sm btn-outline-secondary" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="14"/> Kirim hasil</a></div>
+            <div class="card-actions d-none d-lg-flex"><a class="btn btn-sm btn-outline-secondary" href="{{ route('tasks.show', $t) }}#submit-result" data-task-panel><x-icon name="send" :size="14"/> Kirim hasil</a></div>
         @elseif($t->status === 'review' && $user->can('review', $t))
-            <div class="card-actions"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review" data-task-panel><x-icon name="clipboard-check" :size="14"/> Review hasil</a></div>
+            <div class="card-actions d-none d-lg-flex"><a class="btn btn-sm btn-primary" href="{{ route('tasks.show', $t) }}#review" data-task-panel><x-icon name="clipboard-check" :size="14"/> Review hasil</a></div>
+        @endif
+        {{-- Touch screens: one small status dropdown at the end of the line (Technical Guide 8.2: dropdown status on mobile). --}}
+        @if($canMoveStatus)
+            <span class="card-status d-lg-none">
+                <label class="visually-hidden" for="st-{{ $t->id }}">Status {{ $t->title }}</label>
+                <select id="st-{{ $t->id }}" class="form-select form-select-sm" data-change-status="{{ route('tasks.status', $t) }}" data-result-url="{{ route('tasks.show', $t) }}#submit-result">
+                    @foreach(Codes::TASK_STATUS as $k => $v)<option value="{{ $k }}" @selected($t->status === $k)>{{ $v }}</option>@endforeach
+                </select>
+            </span>
         @endif
     </div>
-    @if($canMoveStatus)
-        <div class="mt-2 d-lg-none">
-            <label class="visually-hidden" for="st-{{ $t->id }}">Status {{ $t->title }}</label>
-            <select id="st-{{ $t->id }}" class="form-select form-select-sm" data-change-status="{{ route('tasks.status', $t) }}">
-                @foreach(Codes::TASK_STATUS as $k => $v)<option value="{{ $k }}" @selected($t->status === $k)>{{ $v }}</option>@endforeach
-            </select>
-        </div>
-    @endif
 </article>

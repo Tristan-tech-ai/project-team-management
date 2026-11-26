@@ -100,7 +100,8 @@
 /* Tabs (project detail): underlined, sticky under the top bar on desktop. */
 .project-tabs { display: flex; gap: 2px; overflow-x: auto; margin-bottom: 20px; border-bottom: 1px solid var(--m-line); scrollbar-width: none; }
 .project-tabs::-webkit-scrollbar { display: none; }
-.project-tabs a { padding: 0 .75rem; margin-bottom: -1px; border-bottom: 2px solid transparent; text-decoration: none; color: var(--m-text-2); white-space: nowrap;
+/* flex: none: on a phone the tabs keep their width and the row scrolls sideways instead of the labels running into each other. */
+.project-tabs a { flex: none; padding: 0 .75rem; margin-bottom: -1px; border-bottom: 2px solid transparent; text-decoration: none; color: var(--m-text-2); white-space: nowrap;
     font-weight: 400; font-size: .875rem; min-height: var(--ptm-hit); display: inline-flex; align-items: center; gap: .4rem; }
 .project-tabs a:hover { color: var(--m-text); text-decoration: none; }
 .project-tabs a[aria-current="page"] { color: var(--m-text); border-bottom-color: var(--m-text); font-weight: 500; }

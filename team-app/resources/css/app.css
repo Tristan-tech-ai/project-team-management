@@ -310,6 +310,9 @@ div.dt-container .dt-paging .page-link { min-width: var(--ptm-hit); min-height: 
 .task-card-meta .avatar-pic { width: 20px; height: 20px; font-size: .5625rem; }
 .task-card-meta .avatar-stack .avatar { width: 20px; height: 20px; }
 .task-card-meta .card-actions { margin: 0 0 0 auto; padding: 0; border: 0; }
+/* Phones: the status dropdown sits at the end of the meta line, as small as the 44 px touch target allows. */
+.task-card-meta .card-status { margin-left: auto; }
+.task-card-meta .card-status .form-select { width: auto; min-height: var(--ptm-hit); padding-top: 0; padding-bottom: 0; font-size: .8125rem; color: var(--m-text); }
 .task-card-meta .card-actions .btn { flex: none; font-size: .75rem; --bs-btn-padding-x: .55rem; }
 .task-card-meta .pill { height: 20px; font-size: .6875rem; }
 .meter-mini { display: inline-block; width: 40px; height: 4px; }
