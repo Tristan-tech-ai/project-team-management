@@ -2,7 +2,17 @@
 {{-- Global search (prototypes 7.1-7.3 header): projects, tasks, and members within the user's data scope. --}}
 <x-layouts.admin title="Pencarian">
     <div class="page-header"><div><h1>Pencarian</h1>
-        <p>{{ mb_strlen($keyword) < 2 ? 'Ketik minimal 2 huruf di kolom cari untuk mencari project, task, atau anggota.' : 'Hasil untuk "'.$keyword.'" sesuai hak aksesmu.' }}</p></div></div>
+        <p>{{ mb_strlen($keyword) < 2 ? 'Ketik minimal 2 huruf untuk mencari project, task, atau anggota.' : 'Hasil untuk "'.$keyword.'" sesuai hak aksesmu.' }}</p></div></div>
+    {{-- The page has its own field: the header field is hidden on phones, where the header shows only a search button that opens this page. --}}
+    <form class="search-page-form" role="search" action="{{ route('search') }}" method="get">
+        <label for="search-page-keyword" class="visually-hidden">Cari project, task, atau anggota</label>
+        <div class="search-page-field">
+            <x-icon name="search"/>
+            <input id="search-page-keyword" type="search" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Cari project, task, anggota"
+                   maxlength="100" enterkeyhint="search" autocomplete="off" @if(mb_strlen($keyword) < 2) autofocus @endif>
+        </div>
+        <button class="btn btn-outline-secondary" type="submit">Cari</button>
+    </form>
     @if(mb_strlen($keyword) >= 2)
         <div class="row g-3">
             <div class="col-xl-4">

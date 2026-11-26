@@ -63,6 +63,12 @@
 .global-search input:hover { border-color: var(--m-line-2); }
 .global-search .kbd { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 .global-search input:focus ~ .kbd { display: none !important; }
+/* Search page field: always visible, because on phones the header shows only a search button that opens this page. */
+.search-page-form { display: flex; gap: 8px; max-width: 560px; margin: 0 0 20px; }
+.search-page-field { position: relative; flex: 1 1 auto; min-width: 0; }
+.search-page-field > .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--m-text-3); pointer-events: none; width: 16px; height: 16px; }
+.search-page-field input { padding-left: 36px; min-height: var(--ptm-hit); }
+@media (max-width: 991.98px) { .search-page-field input { font-size: 16px; } }
 .header-actions { display: flex; align-items: center; gap: 6px; }
 .global-search + .header-actions { margin-left: 0; }
 .user-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: var(--ptm-hit); min-width: var(--ptm-hit); min-height: 0; padding: 0 6px 0 4px; border: 1px solid transparent; border-radius: var(--ptm-radius-sm); color: var(--m-text); }
