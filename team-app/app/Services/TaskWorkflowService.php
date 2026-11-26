@@ -103,10 +103,11 @@ class TaskWorkflowService
         });
     }
 
-    /** Submit a result: a link and/or a file + a note; the task moves to Review. Submission history is never deleted. */
+    /** Submit a result: a link and/or a file + a note; the task moves to Review. Submission history is never deleted.
+     *  A project with "Hasil task boleh kosong" (project_settings.result_optional) accepts a submission without link or file. */
     public function submitResult(Task $task, User $user, ?string $link, ?UploadedFile $file, ?string $notes): TaskSubmission
     {
-        if (! $link && ! $file) {
+        if (! $link && ! $file && ! $task->project?->resultOptional()) {
             throw ValidationException::withMessages(['external_url' => 'Isi tautan hasil atau unggah berkas.']);
         }
 

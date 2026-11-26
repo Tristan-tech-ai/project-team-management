@@ -35,7 +35,15 @@ class ProjectRequest extends FormRequest
         return [
             'company_id' => [$p ? 'prohibited' : 'required', 'integer', Rule::exists('companies', 'id')->whereNull('deleted_at')->where('is_active', 1),
                 function ($a, $v, $fail) use ($companies) { if ($companies !== null && ! in_array((int) $v, array_map('intval', $companies), true)) { $fail('Kamu hanya bisa membuat project di company tempatmu menjadi anggota.'); } }],
-            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')->whereNull('deleted_at')],
+            'client_id' => ['nullable', 'integer', Rule::exists('clients', 'id')->whereNull('deleted_at'),
+                // A client linked to other companies only (client_company) cannot be used here; general clients fit every company.
+                function ($a, $v, $fail) use ($p) {
+                    $company = (int) ($p ? $p->company_id : $this->input('company_id'));
+                    $client = \App\Models\Client::query()->find((int) $v);
+                    if ($company && $client && ! $client->isAvailableFor($company) && (int) ($p?->client_id) !== (int) $v) {
+                        $fail('Client ini bukan client company yang dipilih. Pilih client lain, atau centang company-nya di Data Master, Client.');
+                    }
+                }],
             'name' => ['required', 'string', 'max:200'],
             'code' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('projects', 'code')->ignore($p?->id)],
             'description' => ['nullable', 'string', 'max:5000'],
@@ -52,6 +60,7 @@ class ProjectRequest extends FormRequest
             'members' => ['array'], 'members.*' => ['integer', 'exists:users,id'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'skip_past' => [$p ? 'prohibited' : 'nullable', 'boolean'],
+            'result_optional' => ['nullable', 'boolean'],
         ];
     }
 }

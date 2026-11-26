@@ -1,4 +1,4 @@
-{{-- Form field with label, validation error, and old value. type: text|email|password|number|date|datetime-local|textarea|select|url.
+{{-- Form field with label, validation error, and old value. type: text|email|password|number|date|datetime-local|textarea|select|url|link.
      Optional <x-slot:action> sits on the label row, e.g. a quick "+ Tambah client" button (U5); hint adds a term explanation (I16). --}}
 @props(['name', 'label', 'type' => 'text', 'value' => null, 'options' => [], 'required' => false, 'help' => null, 'empty' => null, 'multiple' => false, 'action' => null, 'hint' => null])
 @php
@@ -23,6 +23,9 @@
                 <option value="{{ $k }}" @selected($multiple ? in_array((string) $k, array_map('strval', (array) $old), true) : (string) $old === (string) $k)>{{ $v }}</option>
             @endforeach
         </select>
+    @elseif($type === 'link')
+        {{-- A web link that may be typed without https:// (instagram.com/p/abc); the request adds it. type=url would refuse it in the browser. --}}
+        <input id="{{ $id }}" type="text" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" name="{{ $name }}" value="{{ $old }}" class="form-control @if($error) is-invalid @endif" @if($required) required @endif @if($help) aria-describedby="{{ $id }}-b" @endif>
     @else
         <input id="{{ $id }}" type="{{ $type }}" name="{{ $name }}" value="{{ $type === 'password' ? '' : $old }}" class="form-control @if($error) is-invalid @endif" @if($required) required @endif @if($help) aria-describedby="{{ $id }}-b" @endif @if($type === 'password') autocomplete="new-password" @endif>
     @endif

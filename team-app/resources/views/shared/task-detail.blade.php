@@ -100,7 +100,8 @@
             <form method="post" action="{{ route('tasks.submissions.store', $task) }}" enctype="multipart/form-data" class="panel mb-3" id="submit-result">
                 @csrf
                 <h2 class="panel-title">Kirim hasil untuk review</h2>
-                <x-field name="external_url" label="Tautan hasil" type="url" help="Misalnya tautan Google Drive, Figma, atau halaman yang sudah jadi."/>
+                @if($task->project?->resultOptional())<p class="small muted mt-n1">Di project ini hasil boleh kosong: bila tidak ada yang dilaporkan, langsung klik Kirim untuk Review.</p>@endif
+                <x-field name="external_url" label="Tautan hasil" type="link" help="Misalnya tautan Google Drive, Figma, atau postingan Instagram. Boleh tanpa https://."/>
                 <div class="mb-3"><span class="form-label d-block" id="file-label">Atau unggah berkas</span>
                     <label class="file-pick @error('file') is-invalid @enderror" for="file"><span class="btn btn-outline-secondary btn-sm"><x-icon name="paperclip" :size="16"/> Pilih berkas</span>
                         <span class="file-name muted small" data-file-name>Belum ada berkas dipilih</span>
@@ -229,7 +230,7 @@
                     <x-field name="scheduled_publish_at" label="Jadwal publikasi" type="datetime-local" :value="Dates::forInput($task->scheduled_publish_at)"/>
                     <x-field name="published_at" label="Tanggal terbit" type="datetime-local" :value="Dates::forInput($task->published_at)"/>
                     <x-field name="publication_status" label="Status publikasi" type="select" :options="Codes::PUBLICATION_STATUS" :value="$task->publication_status" empty="Bukan konten"/>
-                    <x-field name="publication_url" label="Tautan publikasi" type="url" :value="$task->publication_url"/>
+                    <x-field name="publication_url" label="Tautan publikasi" type="link" :value="$task->publication_url" help="Boleh tanpa https://, misalnya instagram.com/p/abc."/>
                     <button class="btn btn-primary btn-sm" type="submit">Simpan</button>
                 </form>
                 @if($can['delete'])

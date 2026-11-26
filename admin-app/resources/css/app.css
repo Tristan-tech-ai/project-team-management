@@ -21,6 +21,9 @@
     --m-text-3: hsl(0 0% 42%);
     --m-accent: hsl(212 100% 46%);
     --m-accent-hover: hsl(212 100% 40%);
+    /* Filled primary button with white text: same in both themes, because the lighter dark-mode accent gives white text only 4.44:1. */
+    --m-accent-solid: hsl(212 100% 46%);
+    --m-accent-solid-hover: hsl(212 100% 40%);
     --m-accent-ink: hsl(211 100% 40%);
     --m-accent-soft: hsl(212 100% 96%);
     --m-accent-line: hsl(212 90% 84%);
@@ -146,9 +149,9 @@ p a:not(.btn), .form-text a, .crumb a, .alert a { text-decoration: underline; te
 .btn:focus-visible { box-shadow: var(--m-focus); outline: 0; }
 .btn-sm { min-height: 44px; min-width: 44px; --bs-btn-padding-y: .25rem; --bs-btn-padding-x: .625rem; --bs-btn-font-size: .8125rem; --bs-btn-border-radius: var(--ptm-radius-sm); }
 @media (min-width: 992px) { .btn-sm { min-height: 40px; min-width: 40px; } }
-.btn-primary { --bs-btn-color: #fff; --bs-btn-bg: var(--m-accent); --bs-btn-border-color: var(--m-accent); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--m-accent-hover);
-               --bs-btn-hover-border-color: var(--m-accent-hover); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent-hover); --bs-btn-active-border-color: var(--m-accent-hover);
-               --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: var(--m-accent); --bs-btn-disabled-border-color: var(--m-accent); }
+.btn-primary { --bs-btn-color: #fff; --bs-btn-bg: var(--m-accent-solid); --bs-btn-border-color: var(--m-accent-solid); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--m-accent-solid-hover);
+               --bs-btn-hover-border-color: var(--m-accent-solid-hover); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent-solid-hover); --bs-btn-active-border-color: var(--m-accent-solid-hover);
+               --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: var(--m-accent-solid); --bs-btn-disabled-border-color: var(--m-accent-solid); }
 .btn-outline-primary { --bs-btn-color: var(--m-accent-ink); --bs-btn-border-color: var(--m-accent-line); --bs-btn-bg: var(--m-surface); --bs-btn-hover-color: var(--m-accent-ink);
                        --bs-btn-hover-bg: var(--m-accent-soft); --bs-btn-hover-border-color: var(--m-accent); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--m-accent);
                        --bs-btn-active-border-color: var(--m-accent); --bs-btn-disabled-color: var(--m-accent-ink); --bs-btn-disabled-bg: var(--m-surface); }

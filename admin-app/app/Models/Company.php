@@ -42,6 +42,12 @@ class Company extends Model
         return $this->hasMany(CompanyMember::class, 'company_id');
     }
 
+    /** Clients this company works with (table client_company). Clients without any company are general and not listed here. */
+    public function clients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'client_company', 'company_id', 'client_id')->withTimestamps();
+    }
+
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'company_members', 'company_id', 'user_id')->withTimestamps();

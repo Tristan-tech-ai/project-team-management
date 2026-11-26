@@ -14,6 +14,10 @@ export function initTemplatePreview() {
     const company = form.querySelector('[name="company_id"]');
     const type = form.querySelector('[name="project_type"]');
     const recurrence = form.querySelector('[data-recurrence]');
+    const client = form.querySelector('[data-client-select]');
+    // Every client option once, with its companies (client_company; empty = general). Options are rebuilt instead of hidden,
+    // because hidden options still show in the picker of some phone browsers.
+    const clientOptions = client ? [...client.options].filter((o) => o.value).map((o) => ({ value: o.value, label: o.textContent, companies: (o.dataset.companies || '').split(',').filter(Boolean) })) : [];
     // Sent with the form: 1 = do not create template tasks whose deadline is already over (chosen in the preview).
     const skipPast = Object.assign(document.createElement('input'), { type: 'hidden', name: 'skip_past', value: '0' });
     form.appendChild(skipPast);
@@ -90,7 +94,26 @@ export function initTemplatePreview() {
             if (!matches) el.querySelectorAll('input').forEach((i) => { i.checked = false; });
         });
         form.querySelectorAll('select[name="pic_user_id"] option[data-company]').forEach((o) => { o.hidden = companyId && o.dataset.company !== companyId; });
+        filterClients(companyId);
     }
+
+    // The chosen company's clients plus the general ones; a client of another company is cleared from the field.
+    function filterClients(companyId) {
+        if (!client) return;
+        const current = client.value;
+        [...client.options].filter((o) => o.value).forEach((o) => o.remove());
+        clientOptions.filter((c) => !companyId || !c.companies.length || c.companies.includes(companyId)).forEach((c) => {
+            const o = new Option(c.label, c.value);
+            o.dataset.companies = c.companies.join(',');
+            client.add(o);
+        });
+        client.value = [...client.options].some((o) => o.value === current) ? current : '';
+    }
+
+    // A client added with the quick add button belongs to the chosen company; keep it in the list across company changes.
+    client?.addEventListener('ptm:option-added', (e) => {
+        clientOptions.push({ value: String(e.detail.id), label: e.detail.name, companies: (e.detail.companies || []).map(String) });
+    });
 
     function toggleRecurrence() {
         if (recurrence && type) recurrence.hidden = type.value === 'one_time';

@@ -8,7 +8,19 @@
             <div class="col-md-4"><x-field name="code" label="Kode" :value="$client->code" data-code-from="name" :data-code-url="route('codes.suggest', ['for' => 'clients'])" :data-code-auto="old('code_auto')" help="Terisi otomatis dari nama. Boleh diganti."/></div>
             <div class="col-md-6"><x-field name="email" label="Email" type="email" :value="$client->email"/></div>
             <div class="col-md-6"><x-field name="phone" label="Telepon" :value="$client->phone"/></div>
-            <div class="col-12"><x-field name="website" label="Situs" type="url" :value="$client->website" help="Diawali https://"/></div>
+            <div class="col-12"><x-field name="website" label="Situs" type="link" :value="$client->website" help="Boleh tanpa https://, misalnya kopisenja.id."/></div>
+            @php($checked = array_map('intval', (array) old('companies', $linked)))
+            <div class="col-12"><fieldset class="mb-3">
+                <legend class="form-label">Company yang melayani client ini</legend>
+                @forelse($companies as $id => $name)
+                    <div class="form-check"><input class="form-check-input" type="checkbox" name="companies[]" value="{{ $id }}" id="cc-{{ $id }}" @checked(in_array((int) $id, $checked, true))>
+                        <label class="form-check-label" for="cc-{{ $id }}">{{ $name }}</label></div>
+                @empty
+                    <p class="form-text mb-0">Belum ada company.</p>
+                @endforelse
+                <div class="form-text">Saat membuat project, client hanya muncul di company yang dicentang. Biarkan kosong bila client umum dan boleh dipakai semua company.</div>
+                @error('companies.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            </fieldset></div>
             <div class="col-12"><x-field name="address" label="Alamat" type="textarea" :value="$client->address"/></div>
             <div class="col-12"><x-field name="notes" label="Catatan" type="textarea" :value="$client->notes"/></div>
         </div>

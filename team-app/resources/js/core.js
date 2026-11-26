@@ -238,11 +238,17 @@ export function initQuickAdd(Modal) {
         const submit = form.querySelector('[type=submit]');
         submit.disabled = true;
         try {
-            const result = await sendJson(trigger.dataset.url, 'POST', { ...Object.fromEntries(new FormData(form)), is_active: 1 });
+            // A client added from the project form belongs to the company chosen there (data-link-company points to that select).
+            const linked = trigger.dataset.linkCompany ? document.querySelector(trigger.dataset.linkCompany)?.value : '';
+            const companies = linked ? [linked] : [];
+            const result = await sendJson(trigger.dataset.url, 'POST', { ...Object.fromEntries(new FormData(form)), is_active: 1, ...(companies.length ? { companies } : {}) });
             const select = document.querySelector(trigger.dataset.target);
             if (select) {
-                select.add(new Option(result.name, result.id, true, true));
+                const option = new Option(result.name, result.id, true, true);
+                if (companies.length) option.dataset.companies = companies.join(',');
+                select.add(option);
                 select.value = String(result.id);
+                select.dispatchEvent(new CustomEvent('ptm:option-added', { detail: { id: result.id, name: result.name, companies } }));
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             }
             modal.hide();

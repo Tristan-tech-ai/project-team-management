@@ -3,12 +3,21 @@
 namespace App\Http\Requests\Work;
 
 use App\Support\Codes;
+use App\Support\Links;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /** Update task content. Once a baseline exists the deadline cannot change directly: use a schedule change request. */
 class TaskUpdateRequest extends FormRequest
 {
+    /** "instagram.com/p/abc" is enough: the https:// is added here. */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('publication_url')) {
+            $this->merge(['publication_url' => Links::normalize($this->input('publication_url'))]);
+        }
+    }
+
     public function authorize(): bool
     {
         return $this->user()->can('update', $this->route('task'));
@@ -29,12 +38,13 @@ class TaskUpdateRequest extends FormRequest
             'scheduled_publish_at' => ['nullable', 'date'],
             'published_at' => ['nullable', 'date'],
             'publication_status' => ['nullable', Rule::in(array_keys(Codes::PUBLICATION_STATUS))],
-            'publication_url' => ['nullable', 'url:https,http', 'max:1000'],
+            'publication_url' => ['nullable', 'url:https,http', Links::RULE, 'max:1000'],
         ];
     }
 
     public function messages(): array
     {
-        return ['due_at.prohibited' => 'Deadline sudah punya target awal. Ajukan perubahan jadwal supaya disetujui PIC atau manager.'];
+        return ['due_at.prohibited' => 'Deadline sudah punya target awal. Ajukan perubahan jadwal supaya disetujui PIC atau manager.',
+            'publication_url.url' => Links::MESSAGE, 'publication_url.regex' => Links::MESSAGE];
     }
 }

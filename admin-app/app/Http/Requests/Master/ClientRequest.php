@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Services\Scope;
+use App\Support\Links;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,6 +15,9 @@ class ClientRequest extends FormRequest
     {
         if ($this->boolean('code_auto')) {
             $this->merge(['code' => null]);
+        }
+        if ($this->has('website')) {
+            $this->merge(['website' => Links::normalize($this->input('website'))]);
         }
     }
 
@@ -31,9 +36,18 @@ class ClientRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:2000'],
-            'website' => ['nullable', 'url:http,https', 'max:255'],
+            'website' => ['nullable', 'url:http,https', Links::RULE, 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'is_active' => ['boolean'],
+            // Companies that work with this client; none = general, every company may pick it (table client_company).
+            'companies' => ['array'],
+            'companies.*' => ['integer', Rule::exists('companies', 'id')->whereNull('deleted_at'),
+                function ($a, $v, $fail) { if (! Scope::filterCompanies($this->user())->has((int) $v)) { $fail('Company itu di luar aksesmu.'); } }],
         ];
+    }
+
+    public function messages(): array
+    {
+        return ['website.url' => 'Alamat situs belum lengkap. Contoh: kopisenja.id', 'website.regex' => 'Alamat situs belum lengkap. Contoh: kopisenja.id'];
     }
 }

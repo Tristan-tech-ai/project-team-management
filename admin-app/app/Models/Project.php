@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
@@ -31,6 +32,18 @@ class Project extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    /** Settings outside the module SQL (table project_settings); no row means the defaults. */
+    public function setting(): HasOne
+    {
+        return $this->hasOne(ProjectSetting::class, 'project_id');
+    }
+
+    /** Tasks may be sent for review without a link or a file (maintenance, research: nothing to hand in). */
+    public function resultOptional(): bool
+    {
+        return (bool) $this->setting?->result_optional;
     }
 
     public function template(): BelongsTo

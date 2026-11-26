@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Company;
 use App\Models\Division;
 use App\Models\Project;
+use App\Models\ProjectSetting;
 use App\Models\ProjectTemplate;
 use App\Models\SystemSetting;
 use App\Models\Task;
@@ -110,6 +111,7 @@ class ProjectController extends Controller
         $d['due_at'] = Dates::fromInput($d['due_at'] ?? null);
         $d['code'] = $d['code'] ?? null;
         $project = $this->templates->createProject($d, $request->user());
+        $this->saveSettings($project, $request);
 
         return redirect()->route('projects.board', $project)->with('ok', "Project {$project->name} dibuat dengan ".$project->tasks()->count().' task dan subtask.');
     }
@@ -158,12 +160,21 @@ class ProjectController extends Controller
         }
         DB::transaction(function () use ($project, $update, $d, $request) {
             $project->update($update);
+            $this->saveSettings($project, $request);
             if ($request->user()->can('manageTeam', $project)) {
                 $this->teamService->setTeam($project->refresh(), $d['divisions'] ?? [], $d['members'] ?? [], $request->user());
             }
         });
 
         return redirect()->route('projects.show', $project)->with('ok', 'Project tersimpan.');
+    }
+
+    /** Project settings outside the module SQL (table project_settings): only written when the form sends them. */
+    private function saveSettings(Project $project, ProjectRequest $request): void
+    {
+        if ($request->has('result_optional')) {
+            ProjectSetting::query()->updateOrCreate(['project_id' => $project->id], ['result_optional' => $request->boolean('result_optional')]);
+        }
     }
 
     public function destroy(Project $project): RedirectResponse
@@ -290,7 +301,8 @@ class ProjectController extends Controller
 
         return [
             'companies' => $companies->pluck('name', 'id'),
-            'clients' => Client::query()->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            // With their companies (client_company), so the form lists only the chosen company's clients plus the general ones.
+            'clients' => Client::query()->where('is_active', 1)->with('companies:id')->orderBy('name')->get(['id', 'name']),
             'templates' => ProjectTemplate::query()->where('is_active', 1)->orderBy('name')->get(['id', 'name', 'project_type']),
             'divisions' => Division::query()->where('is_active', 1)->whereIn('company_id', $companies->pluck('id'))->with('company:id,name')->orderBy('name')->get(),
             'people' => DB::table('users')->join('company_members', 'company_members.user_id', '=', 'users.id')->join('user_profiles', 'user_profiles.user_id', '=', 'users.id')

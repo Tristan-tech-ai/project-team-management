@@ -16,8 +16,21 @@
                         @else
                             <div class="col-md-6"><div class="mb-3"><span class="form-label d-block">Company</span>{{ $project->company?->name }}</div></div>
                         @endif
-                        <div class="col-md-6"><x-field name="client_id" label="Client" type="select" :options="$clients" :value="$project->client_id" empty="Tanpa client (project internal)">
-                            <x-slot:action>@can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru"/>@endcan</x-slot:action></x-field>
+                        {{-- Client options carry their companies (empty = general); the list follows the chosen company. On edit the company is fixed. --}}
+                        @php($clientCompany = $new ? null : (int) $project->company_id)
+                        @php($selectedClient = (string) old('client_id', $project->client_id))
+                        <div class="col-md-6"><div class="mb-3"><div class="label-row"><label class="form-label me-auto" for="f-client_id">Client</label>
+                            @can('clients.manage')<x-quick-add :url="route('clients.store')" target="#f-client_id" title="Tambah client" label="Client baru" link-company="#f-company_id"/>@endcan</div>
+                            <select id="f-client_id" name="client_id" class="form-select @error('client_id') is-invalid @enderror" data-client-select aria-describedby="f-client_id-b">
+                                <option value="">Tanpa client (project internal)</option>
+                                @foreach($clients as $c)
+                                    @php($ids = $c->companies->pluck('id')->map(fn ($id) => (int) $id))
+                                    @continue($clientCompany && $ids->isNotEmpty() && ! $ids->contains($clientCompany) && $selectedClient !== (string) $c->id)
+                                    <option value="{{ $c->id }}" data-companies="{{ $ids->implode(',') }}" @selected($selectedClient === (string) $c->id)>{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                            <div id="f-client_id-b" class="form-text" data-client-hint>{{ $new ? 'Client umum dan client milik company yang dipilih.' : 'Client umum dan client milik company project ini.' }}</div>
+                            @error('client_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror</div>
                             @cannot('clients.manage')<p class="form-text mt-n2">Client belum ada? Minta Super Admin menambahkannya di Data Master, Client.</p>@endcannot</div>
                         <div class="col-md-8"><x-field name="name" label="Nama project" :value="$project->name" required/></div>
                         <div class="col-md-4"><x-field name="code" label="Kode" :value="$project->code" data-code-from="name" :data-code-url="route('codes.suggest', ['for' => 'projects'])" :data-code-auto="old('code_auto')" help="Terisi otomatis dari nama. Boleh diganti."/></div>
@@ -75,6 +88,8 @@
                     </div>
                 @endif
                 <div class="panel"><x-field name="notes" label="Catatan" type="textarea" :value="$project->notes"/>
+                    <x-switch name="result_optional" label="Hasil task boleh kosong" :checked="$project->resultOptional()"
+                        help="Untuk pekerjaan seperti maintenance atau riset: task bisa dikirim untuk review tanpa tautan atau berkas."/>
                     <button class="btn btn-primary w-100" type="submit">{{ $new ? 'Buat project dan task' : 'Simpan perubahan' }}</button></div>
                 @if(! $new && auth()->user()->can('delete', $project))
                     <form method="post" action="{{ route('projects.destroy', $project) }}" class="mt-3" data-confirm="Hapus project {{ $project->name }}? Project disimpan sebagai terhapus dan bisa dipulihkan.">@csrf @method('DELETE')

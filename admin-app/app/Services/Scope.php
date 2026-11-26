@@ -95,7 +95,10 @@ class Scope
     {
         $q = Client::query();
 
-        return $user->isSuperAdmin() ? $q : $q->whereIn('clients.id', self::projects($user)->whereNotNull('projects.client_id')->select('projects.client_id'));
+        // Also the clients linked to the user's own companies (table client_company), so a manager sees their company's clients.
+        return $user->isSuperAdmin() ? $q : $q->where(fn (Builder $w) => $w
+            ->whereIn('clients.id', self::projects($user)->whereNotNull('projects.client_id')->select('projects.client_id'))
+            ->orWhereHas('companies', fn (Builder $c) => $c->whereIn('companies.id', $user->activeCompanyIds() ?: [0])));
     }
 
     /** Company filter options: membership companies plus companies of projects within scope. */
