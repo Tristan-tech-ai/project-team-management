@@ -5,3 +5,4 @@
 /docs/video/backup/
 /docs/video/tmp-compose/
 __pycache__/
+/docs/video/*.mp4

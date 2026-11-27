@@ -52,7 +52,8 @@
 .admin-header { position: sticky; top: 0; z-index: 1020; background: color-mix(in srgb, var(--m-bg) 88%, transparent); border-bottom: 1px solid var(--m-line);
     -webkit-backdrop-filter: saturate(1.4) blur(10px); backdrop-filter: saturate(1.4) blur(10px); }
 /* Content fills the space beside the sidebar on common screens (up to 2168 px wide); only ultrawide screens get equal margins. */
-.admin-header .content { display: flex; align-items: center; gap: 10px; padding: 8px 16px; max-width: 1920px; margin-inline: auto; min-height: 56px; }
+/* Technical Guide 6.2: container-fluid with a content max-width of about 1440 px; wider screens centre the content. */
+.admin-header .content { display: flex; align-items: center; gap: 10px; padding: 8px 16px; max-width: 1440px; margin-inline: auto; min-height: 56px; }
 @media (min-width: 992px) { .admin-header .content { padding: 8px 32px; } }
 .header-title { min-width: 0; display: flex; align-items: center; gap: .4rem; font-size: .875rem; font-weight: 500; color: var(--m-text); }
 .header-title .sep { color: var(--m-line-2); }
@@ -89,7 +90,7 @@
 .create-icon { width: 28px; height: 28px; border-radius: 6px; display: inline-grid; place-items: center; background: var(--m-surface-2); border: 1px solid var(--m-line); flex: none; }
 .create-icon .icon { color: var(--m-text-2) !important; width: 16px; height: 16px; }
 
-.content-area { padding: 20px 16px 40px; max-width: 1920px; margin-inline: auto; }
+.content-area { padding: 20px 16px 40px; max-width: 1440px; margin-inline: auto; }
 @media (min-width: 992px) { .content-area { padding: 28px 32px 48px; } }
 .page-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .page-header h1 { margin-bottom: 0; }

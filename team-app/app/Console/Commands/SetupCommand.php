@@ -50,12 +50,13 @@ class SetupCommand extends Command
                 }
             }
         }
+        $before = array_combine(array_keys($set), array_map(fn ($key) => $env->get($key), array_keys($set)));
         if ($set) {
             $env->set($set);
             $this->line('  .env dilengkapi: '.implode(', ', array_keys($set)));
         }
 
-        $process = new Process([PHP_BINARY, 'artisan', 'ptm:setup', '--stage=check'], base_path());
+        $process = new Process([PHP_BINARY, 'artisan', 'ptm:setup', '--stage=check'], base_path(), EnvFile::staleInChild($set, $before, EnvFile::processVariables()));
         $process->setTimeout(null);
         $process->run(fn ($type, $out) => $this->output->write($out));
 

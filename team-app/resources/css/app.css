@@ -6,7 +6,7 @@
 @import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 
 :root {
-    --ptm-font: var(--font-sans, 'Geist'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --ptm-font: var(--font-sans, 'Inter'), system-ui, -apple-system, 'Segoe UI', sans-serif;
     --ptm-mono: var(--font-mono, 'Geist Mono'), ui-monospace, SFMono-Regular, Consolas, monospace;
 
     /* Neutral scale (Geist light values, vercel.com/geist/colors, read 24 Nov 2026). */
@@ -295,7 +295,8 @@ div.dt-container .dt-paging .page-link { min-width: var(--ptm-hit); min-height: 
 .min-w-0 { min-width: 0; }
 
 /* Compact task card: title, one meta line, a foot with people and the next step on the right. */
-.task-card { padding: 16px; }
+/* Technical Guide 6.2 example: .task-card { border-radius: 14px; padding: 16px; } (table 6.1: radius 12-16, desktop padding 18-24). */
+.task-card { padding: 16px; border-radius: 14px; }
 @media (min-width: 992px) { .task-card { padding: 18px; } }
 .task-card-head { display: flex; align-items: flex-start; gap: 6px; }
 /* The whole card is the drag area (kanban.js), so there is no separate grip; the grab cursor says it can be moved. */

@@ -1,225 +1,375 @@
 # Project & Team Management
 
-Sistem manajemen project dan tim untuk agensi (developer, content creator, digital marketing): **dua aplikasi Laravel 13** yang berbagi satu database MySQL.
+Versi 2.0 (November 2026). Sistem manajemen project dan tim untuk agensi (developer, content creator, digital marketing): **dua aplikasi Laravel 13** yang memakai satu database MySQL yang sama.
 
-- **Admin App** (`admin-app`, desktop-first): master data, project dari template, Kanban, review hasil, monitoring, laporan, hak akses, dan menu dinamis.
-- **Team App** (`team-app`, mobile-first): task saya, papan, checklist, kirim hasil, kalender, aktivitas, dan profil.
+- **Admin App** (`admin-app`, untuk desktop): data master, project dari template, Kanban, review hasil, monitoring, laporan, hak akses, dan menu dinamis.
+- **Team App** (`team-app`, untuk HP): task saya, papan, checklist, kirim hasil, kalender, aktivitas, dan profil.
 
 | Admin: ringkasan | Admin: Kanban project | Tim di HP: beranda |
 |---|---|---|
 | ![Dashboard admin](docs/evidence/ui/admin-1366-dashboard.png) | ![Kanban](docs/evidence/ui/admin-1366-projects_5_board.png) | ![Beranda tim di HP](docs/evidence/ui/team-390-home.png) |
 
-Video alur kerja (rekaman aplikasi yang berjalan, bukan animasi): [`docs/video/ptm-demo.mp4`](docs/video/ptm-demo.mp4).
+## Isi
 
-## Coba dalam 5 menit
+1. [Yang baru di versi 2.0](#yang-baru-di-versi-20)
+2. [Coba di komputer sendiri (sekitar 5 menit)](#coba-di-komputer-sendiri-sekitar-5-menit)
+3. [Pasang di server sendiri (Linux)](#pasang-di-server-sendiri-linux)
+4. [Memperbarui instalasi versi sebelumnya](#memperbarui-instalasi-versi-sebelumnya)
+5. [Kalau ada masalah](#kalau-ada-masalah)
+6. [Fitur per peran](#fitur-per-peran)
+7. [Versi online](#versi-online)
+8. [Teknologi, struktur folder, dan uji](#teknologi)
 
-Butuh PHP 8.3+, Composer 2, Node.js 22+, dan Docker Desktop (untuk MySQL). Dari folder ini:
+## Yang baru di versi 2.0
+
+**Tampilan baru** untuk kedua app, mengikuti pola aplikasi kerja modern (Vercel, Supabase, Railway):
+- Warna netral, garis tipis tanpa bayangan, dan biru hanya untuk aksi utama. Status selalu berupa titik dan teks, tidak hanya warna.
+- **Mode gelap** penuh. Tombol terang/gelap ada di bilah atas, pilihan "ikuti sistem" ada di menu akun.
+- Sidebar berkelompok dengan pencarian `Ctrl K`. Bilah atas berisi breadcrumb, tombol **Buat**, dan lonceng. Halaman project memakai tab yang tetap terlihat saat digulir.
+- Tetap rapi saat data sangat banyak. Tabel tidak bergeser ke samping di layar 1280 sampai 1920 px, kepala tabel tetap di atas, dan kakinya menulis "1-25 dari 1.234". Kolom Kanban bergulir sendiri dan menampilkan 50 kartu dulu (**Tampilkan 50 lagi**). Diuji dengan 3 perusahaan, 420 project, dan 32.373 task.
+- Huruf Inter (sesuai tabel 6.1 petunjuk teknis) dan Geist Mono untuk kode, keduanya berlisensi OFL dan disajikan dari server sendiri. Semua ikon ada dalam satu berkas. Halaman tidak lebih lambat dari desain lama: jumlah query per halaman sama ([`docs/evidence/performance.md`](docs/evidence/performance.md)).
+
+**Fitur tambahan dari masukan pembina (26 November 2026):**
+- **Client per company.** Di Data Master, Client, centang company yang melayani client itu (tabel baru `client_company`). Saat membuat project, pilihan Client otomatis tersaring sesuai Company yang dipilih. Client tanpa centang berarti client umum yang boleh dipakai semua company. Server juga menolak client yang bukan milik company project.
+- **Hasil task boleh kosong.** Pilihan per project (tabel baru `project_settings`) untuk pekerjaan yang tidak punya hasil untuk dilaporkan, misalnya maintenance atau riset. Task di project itu bisa dikirim untuk review tanpa tautan atau berkas, termasuk lewat seret kartu atau dropdown status di Kanban.
+- **Tautan tanpa `https://`.** Tautan hasil, publikasi, dan situs client boleh ditulis seperti `instagram.com/p/abc`. Aplikasi melengkapinya sendiri dan menolak tautan yang belum lengkap dengan contoh yang benar.
+- **Lebih nyaman di HP.** Pencarian punya kotak cari sendiri. Panel Template tampil di atas formulir project. Kartu Kanban cukup satu baris: inisial PIC, checklist, deadline, dan dropdown status kecil. Memilih Review pada task yang wajib ada hasilnya langsung membuka formulir Kirim hasil. Tab project bisa digeser ke samping.
+
+Dua tabel baru itu dibuat lewat migrasi `admin-app`. Tabel dari SQL modul tidak diubah, jadi aturan petunjuk teknis tetap berlaku.
+
+## Coba di komputer sendiri (sekitar 5 menit)
+
+Butuh **PHP 8.4** atau lebih baru (dengan ekstensi `pdo_mysql`, `mbstring`, `xml`, `curl`, `zip`, `gd`), **Composer 2**, **Node.js 22** atau lebih baru, dan **Docker Desktop** untuk MySQL. Dari folder ini jalankan:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup.ps1    # Windows (Linux/macOS: ./setup.sh)
 powershell -ExecutionPolicy Bypass -File start.ps1    # Linux/macOS: ./start.sh
 ```
 
-`setup` menyalakan MySQL, memasang kedua app, membuat `.env` dan kunci aplikasi, membuat tabel (migrasi + SQL modul), lalu mengisi data awal, akun setiap peran, dan data contoh agensi (project berjalan, task berbagai status, template berisi task dan checklist). Aman dijalankan ulang. Tanpa Docker: `setup.ps1 -NoDocker` setelah mengisi `DB_*` di `admin-app/.env`.
+`setup` melakukan ini:
+- menyalakan MySQL dan memasang kedua app;
+- membuat `.env` dan kunci aplikasi;
+- membuat tabel (migrasi dan SQL modul);
+- mengisi data awal, akun setiap peran, dan data contoh agensi (project berjalan, task berbagai status, template berisi task dan checklist).
 
-Buka **Admin App** http://127.0.0.1:8101 dan **Team App** http://127.0.0.1:8102. Di halaman masuk lokal ada tombol **Coba sebagai** untuk setiap akun di bawah.
+Perintah ini aman dijalankan ulang. Tanpa Docker, isi `DB_*` di `admin-app/.env` lalu jalankan `setup.ps1 -NoDocker` (atau `./setup.sh --no-docker`).
+
+Buka **Admin App** di http://127.0.0.1:8101 dan **Team App** di http://127.0.0.1:8102. Halaman masuk lokal punya tombol **Coba sebagai** untuk setiap akun berikut.
 
 | Peran | Email | Sandi (lokal) | Masuk di |
 |---|---|---|---|
 | Super Admin | `admin@example.test` | `ptm-demo-2026` | Admin App |
 | Manager | `demo.manager@example.test` | `ptm-demo-2026` | Admin App dan Team App |
-| Member | `demo.member@example.test` | `ptm-demo-2026` | Team App (juga Admin App, menu terbatas) |
+| Member | `demo.member@example.test` | `ptm-demo-2026` | Team App (juga Admin App dengan menu terbatas) |
 | Tim contoh | `radit@example.test` (manager), `ayu@`, `binda@`, `putri@`, `dika@`, `raka@` (member) | `ptm-demo-2026` | sesuai peran |
 
-Sandi demo hanya dipakai bila `.env` lokal mengosongkannya; seeder menolak sandi ini di luar `APP_ENV=local`, dan tombol Coba sebagai hanya muncul bila `APP_ENV=local` dan `PTM_DEMO_LOGIN=true`.
+Sandi demo itu hanya dipakai bila `.env` lokal mengosongkannya. Seeder menolak sandi ini di luar `APP_ENV=local`. Tombol Coba sebagai juga hanya muncul bila `APP_ENV=local` dan `PTM_DEMO_LOGIN=true`.
+
+## Pasang di server sendiri (Linux)
+
+Langkah ini untuk server kantor atau VPS. Contohnya memakai Ubuntu 24.04 LTS, Nginx, PHP 8.4-FPM, dan MySQL 8. Kedua app dipasang di satu server, sesuai petunjuk teknis, dengan satu (sub)domain per app:
+
+| App | Contoh alamat | Folder web (root) |
+|---|---|---|
+| Admin App | `admin.example.com` | `/var/www/project-team-management/admin-app/public` |
+| Team App | `team.example.com` | `/var/www/project-team-management/team-app/public` |
+
+Ganti `example.com` dengan domain sendiri (misalnya `admin.kantor.co.id`), lalu arahkan rekaman DNS A kedua subdomain ke IP server. Berkas siap salin ada di `docs/server/`: [`nginx-ptm.conf`](docs/server/nginx-ptm.conf), [`php-ptm.ini`](docs/server/php-ptm.ini), dan [`apache-ptm.conf`](docs/server/apache-ptm.conf) bila server memakai Apache.
+
+Langkah 3 sampai 9 sudah diuji di server Linux tiruan (container Nginx 1.27, PHP 8.4-FPM, dan MySQL 8.4) dari zip ini. Langkah 1 (paket `apt`) dan 10 (HTTPS) tidak bisa diuji di sana. Keduanya memakai perintah standar Ubuntu dan Certbot.
+
+### 1. Pasang paket
+
+Aplikasi ini butuh **PHP 8.4**. Pustakanya (Symfony 8.1) menolak PHP 8.3, padahal Ubuntu 24.04 bawaannya memasang PHP 8.3. Karena itu PHP 8.4 diambil dari PPA `ondrej/php`:
+
+```bash
+sudo apt update
+sudo apt install -y software-properties-common curl git unzip nginx mysql-server
+sudo add-apt-repository -y ppa:ondrej/php
+sudo apt update
+sudo apt install -y php8.4-fpm php8.4-cli php8.4-mysql php8.4-mbstring php8.4-xml php8.4-curl php8.4-zip php8.4-gd
+php -v        # harus 8.4.x
+```
+
+Pasang **Composer 2** mengikuti https://getcomposer.org/download/ (jangan memakai paket `composer` dari apt, karena paket itu menarik PHP 8.3), lalu pindahkan ke `/usr/local/bin/composer`.
+
+**Node.js 22** hanya dibutuhkan untuk membangun CSS dan JS (langkah 4). Ada dua pilihan:
+- pasang Node.js 22 di server (https://nodejs.org/en/download);
+- jalankan `npm ci && npm run build` di laptop, lalu salin folder `admin-app/public/build` dan `team-app/public/build` ke server.
+
+Server lain juga bisa dipakai, asalkan memakai PHP 8.4 dengan ekstensi di atas dan MySQL 8.0 atau lebih baru. Yang sudah diuji: MySQL 8.4 dan TiDB (kompatibel MySQL 8.0). MariaDB belum diuji.
+
+### 2. Taruh aplikasi di server
+
+```bash
+sudo mkdir -p /var/www
+sudo unzip project-team-management-v2.0.zip -d /var/www      # menghasilkan /var/www/project-team-management
+sudo chown -R $USER:www-data /var/www/project-team-management
+cd /var/www/project-team-management
+```
+
+### 3. Buat database
+
+```bash
+sudo mysql
+```
+```sql
+CREATE DATABASE project_team_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'ptm'@'localhost' IDENTIFIED BY 'ganti-dengan-sandi-kuat';
+GRANT ALL PRIVILEGES ON project_team_management.* TO 'ptm'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 4. Pasang pustaka dan bangun tampilan (kedua app)
+
+```bash
+for app in admin-app team-app; do
+  (cd $app && composer install --no-dev --optimize-autoloader && npm ci && npm run build)
+done
+```
+
+`npm run build` mengunduh huruf Inter dan Geist Mono satu kali, jadi butuh internet. Setelah itu huruf disajikan dari server sendiri.
+
+### 5. Isi `.env` Admin App
+
+```bash
+cd /var/www/project-team-management/admin-app
+cp .env.example .env
+nano .env
+```
+
+Ubah baris berikut. Baris lain biarkan seperti contoh.
+
+| Variabel | Isi |
+|---|---|
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_URL` | `https://admin.example.com` |
+| `ADMIN_APP_URL` | `https://admin.example.com` (tambahkan barisnya) |
+| `TEAM_APP_URL` | `https://team.example.com` |
+| `DB_HOST`, `DB_PORT` | `127.0.0.1`, `3306` |
+| `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `project_team_management`, `ptm`, sandi dari langkah 3 |
+| `LOG_LEVEL` | `warning` |
+| `INITIAL_ADMIN_EMAIL` | email Super Admin pertama, misalnya `admin@kantor.co.id` |
+| `INITIAL_ADMIN_PASSWORD` | sandi Super Admin pertama, minimal 12 karakter |
+| `SESSION_SECURE_COOKIE` | `true` setelah HTTPS aktif (langkah 10). Tambahkan barisnya, dan biarkan kosong selama masih http |
+
+`DEBUGBAR_ENABLED=false` dan `PTM_DEMO_LOGIN=false` sudah benar dari contoh. `APP_KEY` dibuat otomatis di langkah berikut.
+
+### 6. Buat tabel dan data awal
+
+```bash
+php artisan ptm:setup
+```
+
+Perintah ini melakukan, berurutan:
+1. membuat `APP_KEY`;
+2. menjalankan migrasi Laravel;
+3. mengimpor `docs/project_team_management_laravel.sql` **satu kali** (dilewati bila tabel modul sudah ada);
+4. mengisi data awal: peran, hak akses, menu, pengaturan, dan akun Super Admin dari `INITIAL_ADMIN_*`.
+
+Di `production` tidak ada akun demo dan tidak ada data contoh. Perintah ini aman diulang.
+
+Kalau petunjuk teknis mengharuskan impor lewat phpMyAdmin, jalankan langkah manualnya:
+1. `php artisan key:generate`;
+2. `php artisan migrate --force`;
+3. impor berkas SQL itu sekali lewat phpMyAdmin (menu Import), atau `mysql -u ptm -p project_team_management < ../docs/project_team_management_laravel.sql`;
+4. `php artisan db:seed --force`.
+
+### 7. Isi `.env` Team App
+
+```bash
+cd /var/www/project-team-management/team-app
+cp .env.example .env
+nano .env          # APP_ENV=production, APP_DEBUG=false, APP_URL=https://team.example.com,
+                   # ADMIN_APP_URL=https://admin.example.com, TEAM_APP_URL=https://team.example.com, LOG_LEVEL=warning
+php artisan ptm:setup
+```
+
+`ptm:setup` di Team App membuat `APP_KEY` sendiri (harus berbeda dari Admin App) dan menyalin sambungan database dari `../admin-app/.env`. Team App tidak membuat tabel: `migrate` dan `db:seed` sengaja ditolak di sana.
+
+Lampiran hasil task dan foto profil dari kedua app disimpan di satu folder, `admin-app/storage/app/private`, jadi berkas yang diunggah di Team App terbuka di Admin App. Bila kedua app dipasang di folder atau server berbeda, isi `PTM_STORAGE_ROOT` di kedua `.env` dengan folder bersama yang sama.
+
+### 8. Izin folder, batas unggah, dan cache
+
+```bash
+cd /var/www/project-team-management
+for app in admin-app team-app; do
+  (cd $app && php artisan optimize)
+  sudo chown -R www-data:www-data $app/storage $app/bootstrap/cache
+  sudo chmod -R ug+rwX $app/storage $app/bootstrap/cache
+done
+sudo cp docs/server/php-ptm.ini /etc/php/8.4/fpm/conf.d/99-ptm.ini
+sudo systemctl restart php8.4-fpm
+```
+
+- **Izin folder.** PHP berjalan sebagai `www-data` dan harus bisa menulis `storage` dan `bootstrap/cache` di kedua app. Team App menulis lampiran ke `admin-app/storage`, jadi izin di folder itu wajib.
+- **Batas unggah.** `php-ptm.ini` menaikkan batas unggah PHP dari bawaan 2 MB, karena lampiran hasil task boleh sampai 10 MB.
+- **Cache.** `php artisan optimize` menyimpan konfigurasi, route, dan tampilan supaya cepat. Setiap kali `.env` diubah, jalankan lagi `php artisan optimize` di app itu.
+
+### 9. Nginx
+
+```bash
+sudo cp docs/server/nginx-ptm.conf /etc/nginx/sites-available/ptm.conf
+sudo nano /etc/nginx/sites-available/ptm.conf      # ganti admin.example.com dan team.example.com
+sudo ln -s /etc/nginx/sites-available/ptm.conf /etc/nginx/sites-enabled/ptm.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Buka `http://admin.example.com/login` lalu masuk dengan `INITIAL_ADMIN_EMAIL` dan `INITIAL_ADMIN_PASSWORD`. `http://team.example.com/login` harus terbuka juga.
+
+### 10. HTTPS
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d admin.example.com -d team.example.com
+```
+
+Setelah itu, di kedua `.env`:
+1. pastikan semua alamat memakai `https://`;
+2. tambahkan `SESSION_SECURE_COOKIE=true`;
+3. jalankan lagi `php artisan optimize` di kedua app.
+
+### 11. Langkah pertama di aplikasi
+
+Masuk sebagai Super Admin di Admin App. Dashboard menampilkan **Langkah pertama**:
+1. lengkapi data perusahaan;
+2. tambah anggota tim (divisi dan jabatan baru bisa dibuat langsung dari formulir anggota);
+3. periksa template project;
+4. buat project pertama.
+
+Client ditambah di Data Master, Client, sekalian mencentang company yang melayaninya. Manager dan member masuk di Admin App atau Team App sesuai perannya.
+
+**Server uji dengan data contoh (opsional, jangan di server produksi).** Pakai `APP_ENV=staging` dan isi `DEMO_SEED_PASSWORD` (minimal 12 karakter) di `admin-app/.env`, lalu jalankan:
+
+```bash
+php artisan db:seed --class=UatScenarioSeeder --force
+```
+
+Hasilnya tim agensi sintetis:
+- manager `radit@example.test`;
+- member `ayu`, `binda`, `putri`, `dika`, dan `raka` (semua `@example.test`), dengan sandi `DEMO_SEED_PASSWORD`;
+- client SMA Harapan Bangsa dan Kopi Senja;
+- project berulang, project berkelanjutan, dan arsip 520 task.
+
+### Cadangan
+
+- **Database:** `mysqldump -u ptm -p --single-transaction project_team_management > ptm-$(date +%F).sql`. Jadwalkan lewat cron, misalnya setiap malam.
+- **Berkas:** salin folder `admin-app/storage/app/private` (lampiran dan foto profil).
+- Simpan juga kedua berkas `.env`. Tanpa `APP_KEY` yang sama, sesi dan data terenkripsi tidak bisa dibaca.
+
+Aplikasi ini tidak memakai antrean (queue), jadwal (cron Laravel), atau email, jadi tidak perlu worker atau cron untuk menjalankannya.
+
+## Memperbarui instalasi versi sebelumnya
+
+Database versi sebelumnya bisa dipakai langsung, tanpa impor ulang:
+
+```bash
+# cadangkan database dan kedua .env dulu (lihat Cadangan)
+# timpa folder aplikasi dengan isi zip baru, tetapi pertahankan admin-app/.env, team-app/.env, dan admin-app/storage
+cd /var/www/project-team-management
+for app in admin-app team-app; do
+  (cd $app && composer install --no-dev --optimize-autoloader && npm ci && npm run build)
+done
+(cd admin-app && php artisan migrate --force)                 # hanya di admin-app: tabel client_company dan project_settings
+for app in admin-app team-app; do (cd $app && php artisan optimize); done
+sudo chown -R www-data:www-data admin-app/storage admin-app/bootstrap/cache team-app/storage team-app/bootstrap/cache
+sudo systemctl restart php8.4-fpm
+```
+
+Setelah diperbarui, semua client lama menjadi client umum (boleh dipakai semua company) sampai company-nya dicentang di Data Master, Client. Semua project lama tetap mewajibkan hasil, sampai pilihan "Hasil task boleh kosong" dinyalakan di formulir project.
+
+Jangan menjalankan `migrate:fresh`, `db:wipe`, atau impor SQL ulang pada database yang sudah berisi data. Perintah perusak itu juga diblokir di kode.
+
+## Kalau ada masalah
+
+| Gejala | Penyebab dan jalan keluar |
+|---|---|
+| `composer install` menulis "requires php >=8.4.1" | PHP di server masih 8.3. Pasang PHP 8.4 (langkah 1), lalu cek `php -v` dan `composer -V` memakai PHP yang sama. |
+| `composer install` menulis "ext-gd" atau "ext-zip is missing" | Pasang `php8.4-gd` dan `php8.4-zip`. |
+| Halaman 500 dan `storage/logs/laravel.log` menulis "Permission denied" | Ulangi `chown` dan `chmod` di langkah 8. Perintah `php artisan` yang dijalankan sebagai root bisa membuat berkas log milik root. |
+| Halaman tanpa gaya (CSS hilang) atau "Vite manifest not found" | `npm run build` belum dijalankan di app itu, atau folder `public/build` belum ikut tersalin. |
+| Kirim hasil berkas besar gagal, atau Nginx menjawab 413 | Batas unggah belum dipasang. Ulangi `php-ptm.ini` (langkah 8) dan cek `client_max_body_size 16m` di Nginx. |
+| "419 Page Expired" setelah masuk | `APP_URL` tidak sama dengan alamat yang dibuka, atau `SESSION_SECURE_COOKIE=true` dipasang sebelum HTTPS aktif. Perbaiki `.env`, lalu `php artisan optimize`. |
+| Perubahan `.env` tidak berpengaruh | Konfigurasi masih tersimpan di cache. Jalankan `php artisan optimize` lagi. |
+| Lampiran dari Team App tidak terbuka di Admin App | Kedua app harus melihat folder yang sama. Pasang di satu server sesuai langkah di atas, atau isi `PTM_STORAGE_ROOT` yang sama di kedua `.env`. |
+| `php artisan migrate` di Team App ditolak | Memang disengaja. Migrasi hanya dijalankan di `admin-app`. |
 
 ## Fitur per peran
 
 | Peran | Yang bisa dilakukan |
 |---|---|
-| **Super Admin** | Semua akses: perusahaan, divisi, jabatan, anggota, client, template, pengaturan sistem, role dan permission, menu dinamis, log aktivitas semua aksi. |
-| **Manager** | Membuat project (sekali, berulang, berkelanjutan) dari template dengan pratinjau task; memilih tim dari divisi; Kanban dengan aturan status di server; PIC dan banyak pelaksana per task; checklist; meninjau hasil (terima atau revisi wajib beralasan); menyetujui pengajuan geser deadline (target awal tetap tercatat); membuka periode baru tanpa menutup project induk; laporan dan monitoring. Hanya untuk perusahaan tempat ia anggota aktif. |
-| **Member** | Task saya, centang checklist, kirim hasil (tautan atau berkas), kirim ulang setelah revisi, catat aktivitas dan hambatan, ajukan geser deadline, kalender. Hanya untuk project yang ia ikuti; halaman manajemen dijawab 403. |
+| **Super Admin** | Semua akses: perusahaan, divisi, jabatan, anggota, client (dan company yang melayaninya), template, pengaturan sistem, role dan hak akses, menu dinamis, dan log aktivitas semua aksi. |
+| **Manager** | Membuat project (sekali, berulang, atau berkelanjutan) dari template dengan pratinjau task, memilih tim dari divisi, dan menentukan apakah hasil task boleh kosong. Mengelola Kanban dengan aturan status di server, PIC dan banyak pelaksana per task, serta checklist. Meninjau hasil (terima, atau revisi dengan alasan wajib) dan menyetujui pengajuan geser deadline (target awal tetap tercatat). Membuka periode baru tanpa menutup project induk, melihat laporan, dan memantau project. Semua ini hanya untuk perusahaan tempat ia menjadi anggota aktif. |
+| **Member** | Membuka Task saya, mencentang checklist, mengirim hasil (tautan, berkas, atau kosong bila project mengizinkan), dan mengirim ulang setelah revisi. Mencatat aktivitas dan hambatan, mengajukan geser deadline, dan memakai kalender. Hanya untuk project yang ia ikuti; halaman manajemen dijawab 403. |
 
-Kemudahan pakai (penilaian pembina 14 Nov 2026 dan rencana [`docs/UX-PLAN.md`](docs/UX-PLAN.md)):
-- **Satu klik ke setiap halaman.** Menu dengan satu tujuan (Dashboard, Project, Kalender) langsung terbuka; kelompok lain tampil terbuka dengan ikon per menu, bisa dilipat dan diingat. Tombol **+ Buat** di kepala halaman dan pintasan `/` untuk mencari.
-- **Perlu kamu kerjakan** di Dashboard: hasil yang menunggu review-mu, pengajuan geser deadline yang menunggu keputusanmu, task yang dikembalikan untuk revisi, task terlambat dan yang jatuh tempo dua hari ke depan, masing-masing langsung menuju tempat tindakannya.
-- **Tanpa bolak-balik halaman.** Kode company dan client dibuat otomatis dari nama, data baru langsung aktif, tombol **Client baru** dan **Company baru** di formulir project, Tambah task dalam satu layar (project, judul, PIC, pelaksana, deadline), tombol **Pakai** di daftar template, filter papan langsung berlaku, kartu Kanban berisi langkah berikutnya (Mulai, Kirim hasil, Review hasil), pilihan cepat tanggal (Hari ini, Besok, Jumat, +1 minggu), dan tanggal yang langsung terbaca ("terlambat 2 hari").
-- **Detail task di panel samping.** Task dari Kanban, daftar task, Task Saya, Menunggu Review, Perlu kamu kerjakan, lonceng, dan kalender terbuka di panel samping (penuh layar di HP): centang checklist, kirim hasil, terima atau revisi, putuskan geser deadline, lalu tutup dengan Esc atau tombol Kembali HP; papan, filter, dan halaman tabel di belakangnya tetap dan langsung disegarkan.
-- **Aksi massal dan perintah cepat.** Centang beberapa task di daftar Admin lalu Mulai kerjakan, Ganti PIC, atau Tambah pelaksana sekaligus (task yang tidak boleh diubah dilewati dengan alasannya). `Ctrl K` membuka palet perintah untuk ke menu mana pun, membuat data baru, atau mencari project, task, dan orang; `?` menampilkan pintasan, `n` task baru.
-- **Memilih orang dengan mudah.** Daftar orang yang panjang punya kotak Cari nama, jumlah task aktif tampil di samping nama supaya pembagian kerja adil, dan divisi serta jabatan baru bisa ditambah langsung dari formulir anggota.
-- **Pengaturan tanpa istilah teknis.** Urutan menu diatur dengan seret-lepas dan pindah kelompok lewat satu pilihan; hak akses berupa tabel centang Lihat, Tambah, Ubah, Hapus, dan aksi khusus bernama biasa. Route dan kode izin tidak tampil di layar.
-- **Template mengikuti cara kerja nyata** (studi kasus 19 Nov 2026, [`docs/UX-PLAN.md`](docs/UX-PLAN.md#putaran-3-studi-kasus-dari-lapangan-17-sampai-19-nov-2026)). Template berulang memakai tanggal ("tgl 28"); task bisa **Setiap hari** atau **Setiap hari kerja** dengan jam (checklist satu per hari, muncul sebagai **Rutin hari ini** di Beranda Team App); tombol **Ulangi** membuat Konten 1 sampai 5 sekaligus; **Tempel daftar** mengubah daftar fitur menjadi task dan checklist. Project yang dimulai di tengah bulan bisa melewati task yang sudah lewat, dan periode baru meneruskan PIC serta pelaksana bulan sebelumnya.
-- **KPI per anggota** di Monitoring Divisi & Anggota: persen selesai tepat waktu dan hari rutin yang dicentang.
-- **Diukur, bukan dikira.** `docs/tools/ux-metrics.mjs` menghitung klik, isian, dan halaman yang benar-benar dimuat untuk alur inti sebelum dan sesudah perubahan, termasuk ganti PIC tiga task satu per satu dibanding sekaligus.
+Yang memudahkan pemakaian sehari-hari (penilaian pembina 14 November 2026 dan rencana [`docs/UX-PLAN.md`](docs/UX-PLAN.md)):
+- **Perlu kamu kerjakan** di Dashboard: hasil yang menunggu review, pengajuan deadline, task yang dikembalikan, dan task terlambat. Setiap butir langsung menuju tempat tindakannya.
+- **Detail task di panel samping** (penuh layar di HP). Panel ini bisa dibuka dari Kanban, daftar task, lonceng, dan kalender. Dari panel bisa mencentang checklist, mengirim hasil, menerima atau meminta revisi, dan memutuskan deadline. Papan di belakangnya tetap dan langsung diperbarui.
+- **Tanpa bolak-balik halaman.** Kode company dan client dibuat otomatis. Ada tombol Client baru dan Company baru di formulir project, Tambah task dalam satu layar, tombol **Pakai** template, dan pilihan cepat tanggal.
+- **Aksi massal dan perintah cepat.** Bisa Mulai kerjakan, Ganti PIC, atau Tambah pelaksana untuk beberapa task sekaligus. `Ctrl K` membuka palet perintah, `?` menampilkan pintasan, dan `n` membuat task baru.
+- **Template mengikuti cara kerja nyata.** Template berulang memakai tanggal ("tgl 28"). Task bisa rutin Setiap hari atau Setiap hari kerja dengan jam. Ada **Ulangi** untuk membuat Konten 1 sampai 5 dan **Tempel daftar** untuk mengubah daftar fitur menjadi task. Periode baru meneruskan PIC dan pelaksana.
+- **Pengaturan tanpa istilah teknis.** Urutan menu diatur dengan seret-lepas, dan hak akses berupa tabel centang.
 
-Aturan penting yang dijaga di server, bukan hanya di tampilan:
-- Task ke **Review** hanya lewat kirim hasil; ke **Selesai** hanya lewat terima oleh peninjau. Kartu yang diseret ke kolom terlarang dikembalikan.
-- Deadline tidak bisa ditimpa langsung: lewat `schedule_change_requests` yang disetujui manager; baseline tetap.
-- Data tanpa `deleted_at` (divisi, jabatan, anggota, keanggotaan) dinonaktifkan, tidak dihapus. Perintah perusak database (`migrate:fresh`, `db:wipe`) diblokir di kode.
-- DataTables memuat data dari server (baris per halaman dari Pengaturan Sistem, bawaan 25; cari dan urut di server); diuji dengan 520 task.
-- **Satu aturan cakupan data** (`App\Services\Scope`) untuk daftar, filter (Company, Client, PIC, pelaksana, divisi), data master, detail, dan Kanban di kedua app: Super Admin semua, Manager company tempat ia anggota aktif, Member project yang ia ikuti. Data di luar cakupan tidak muncul di pilihan filter, dan URL langsung ke data itu dijawab 403.
-- **Satu penyimpanan berkas untuk dua app.** Lampiran hasil task dan foto profil disimpan di storage `admin-app` (disk `shared`, folder `admin-app/storage/app/private`), termasuk yang diunggah lewat Team App, sehingga terbuka di kedua app. Bila kedua app dipasang di folder atau server berbeda, isi `PTM_STORAGE_ROOT` di kedua `.env` dengan folder bersama yang sama.
-- **Log aktivitas**: setiap aksi yang mengubah data di kedua app tercatat (`audit_logs`) tanpa kata sandi; dilihat Super Admin di Pengaturan Sistem.
-- **Pencarian global** di kepala Admin App: project, task, dan anggota dalam satu halaman, masing-masing dengan cakupan data yang sama seperti halaman aslinya (Member hanya menemukan rekan satu project, berdasarkan nama).
-- **Timeline project** (Activities project): task selesai, rapat, kunjungan, revisi, hambatan, dan usulan perubahan deadline dalam satu urutan waktu, dengan kartu Kondisi Jadwal (target awal, target baru, status) seperti prototipe petunjuk teknis.
-- **Ukuran tampilan mengikuti tabel 6.1 petunjuk teknis**: area klik minimal 44 x 44 px di HP dan 40 x 40 px di desktop, ukuran huruf, padding, dan kartu diukur otomatis di setiap halaman (`docs/tools/ui-audit.mjs`).
+Aturan yang dijaga di server, bukan hanya di tampilan:
+- Task masuk **Review** hanya lewat kirim hasil (atau langsung, bila project mengizinkan hasil kosong), dan masuk **Selesai** hanya lewat terima oleh peninjau. Kartu yang diseret ke kolom terlarang dikembalikan.
+- Deadline tidak bisa ditimpa langsung. Perubahannya lewat `schedule_change_requests` yang disetujui manager, dan target awal tetap tercatat.
+- Data tanpa `deleted_at` (divisi, jabatan, anggota, keanggotaan) dinonaktifkan, tidak dihapus.
+- **Satu aturan cakupan data** (`App\Services\Scope`) untuk daftar, filter, data master, detail, dan Kanban di kedua app. Super Admin melihat semua, Manager melihat company tempat ia anggota aktif, dan Member melihat project yang ia ikuti. URL langsung ke data di luar cakupan dijawab 403.
+- **Log aktivitas** mencatat setiap aksi yang mengubah data di kedua app, tanpa kata sandi.
+- DataTables memuat data dari server (cari, urut, dan halaman di server).
+- **Ukuran tampilan mengikuti tabel 6.1 petunjuk teknis.** Area klik minimal 44 x 44 px di HP dan 40 x 40 px di desktop. Ukuran ini diukur otomatis di setiap halaman (`docs/tools/ui-audit.mjs`).
+
+## Versi online
+
+Tiga tempat demo memakai desain versi 2.0. Masing-masing punya database sendiri (TiDB Cloud) dan dua app di Vercel:
+
+| Tempat | Admin App | Team App | Isi |
+|---|---|---|---|
+| Instalasi baru | https://ptm-app-admin.vercel.app | https://ptm-app-team.vercel.app | hanya Super Admin, seperti server yang baru dipasang |
+| Data contoh | https://ptm-demo-admin.vercel.app | https://ptm-demo-team.vercel.app | agensi dengan 15 orang, 22 project, dan sekitar 1.000 task |
+| Skala besar | https://ptm-skala-admin.vercel.app | https://ptm-skala-team.vercel.app | 3 perusahaan, 420 project, dan 32.373 task |
+
+Email dan sandi akun demo tidak ditulis di repositori publik. Keduanya ada di lembar akses yang dibagikan terpisah. Semua data di sana sintetis.
+
+Di versi online, kedua app berjalan di dua container terpisah dengan penyimpanan sementara. Akibatnya, berkas yang diunggah bisa hilang saat container diganti. Kirim hasil berupa tautan saja di sana. Di server sendiri (langkah di atas) berkas tersimpan permanen. Cara versi online dibangun ada di `Dockerfile` dan folder `docker/` tiap app.
 
 ## Teknologi
 
-Laravel 13 (PHP 8.3+), MySQL 8.4 (Docker) + phpMyAdmin, Bootstrap 5.3.8, jQuery 3.7.1, Yajra DataTables (datatables.net 2.3), SortableJS 1.15.7, FullCalendar 6.1.22, ikon Lucide (ISC), Laravel Debugbar (hanya pengembangan). Versi pustaka dikunci karena perintah pasang "terbaru" kini memasang versi mayor lain (catatan di `docs/RESEARCH.md`).
-
-## Memasang dari nol (langkah manual)
-
-Langkah di bawah sama dengan yang dijalankan `setup.ps1`/`setup.sh`, untuk yang ingin memasang satu per satu.
-
-Persyaratan: PHP 8.3 atau lebih baru dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `intl`, `fileinfo`; Composer 2; Node.js 22+ dan npm; Docker Desktop (atau Docker Engine) untuk MySQL.
-
-```bash
-git clone https://github.com/Tristan-tech-ai/project-team-management.git
-cd project-team-management
-```
-
-1. **Database.** Buat berkas `.env` di folder akar berisi dua sandi kuat (berkas ini tidak di-commit):
-   ```
-   MYSQL_ROOT_PASSWORD=isi-sandi-kuat-root
-   MYSQL_PASSWORD=isi-sandi-kuat-aplikasi
-   ```
-   lalu `docker compose up -d`. MySQL ada di `127.0.0.1:33061` (database `project_team_management`, user `ptm`), phpMyAdmin di `http://127.0.0.1:8180`.
-2. **Dua aplikasi.** Untuk `admin-app` dan `team-app` masing-masing:
-   ```bash
-   composer install
-   npm install
-   cp .env.example .env        # Windows PowerShell: copy .env.example .env
-   php artisan key:generate    # APP_KEY kedua app harus berbeda
-   ```
-   Isi `DB_PASSWORD` di kedua `.env` sama dengan `MYSQL_PASSWORD`.
-3. **Skema.** Hanya di `admin-app`: `php artisan migrate`. Team App tidak punya folder `database` (tanpa migrasi, seeder, dan factory), dan `migrate`/`db:seed` di Team App ditolak dengan pesan. Lalu impor `docs/project_team_management_laravel.sql` **satu kali** ke database `project_team_management` lewat phpMyAdmin (menu Import), atau `node docs/tools/import-phpmyadmin.mjs` (menolak bila tabel modul sudah ada).
-4. **Data awal.** Di `admin-app/.env` isi `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD` (minimal 12 karakter), dan untuk lokal `DEMO_SEED_PASSWORD`, lalu `php artisan db:seed` di `admin-app`.
-5. **Jalankan.** `npm run build` di kedua app, lalu:
-   ```bash
-   cd admin-app && php artisan serve --port=8101   # http://127.0.0.1:8101
-   cd team-app  && php artisan serve --port=8102   # http://127.0.0.1:8102
-   ```
-6. **Data contoh UAT (opsional, lokal saja, ditolak di production):** `php artisan db:seed --class=UatScenarioSeeder` di `admin-app`. Isinya tim agensi sintetis: manager `radit@example.test`, member `ayu`, `binda`, `putri`, `dika`, `raka` (semua `@example.test`, sandi = `DEMO_SEED_PASSWORD` yang kamu isi), client SMA Harapan Bangsa dan Kopi Senja, project berulang, project berkelanjutan, dan arsip 520 task.
-
-Masuk sebagai Super Admin dengan `INITIAL_ADMIN_EMAIL` di Admin App; manager dan member masuk di Admin App atau Team App sesuai perannya.
-
-Jangan menjalankan `migrate:fresh`, `db:wipe`, atau impor SQL ulang pada database berisi data.
-
-**Production:** `composer install --no-dev`, `APP_ENV=production`, `APP_DEBUG=false`, `DEBUGBAR_ENABLED=false`, lalu `npm run build`.
-
-## Online (gratis)
-
-Versi yang bisa dicoba langsung:
-
-| Aplikasi | Alamat |
-|---|---|
-| Admin App | https://ptm-admin.vercel.app |
-| Team App | https://ptm-team.vercel.app |
-
-### Akun demo
-
-Semua data di dalamnya sintetis. Setiap pengunjung memakai akun yang sama. Jangan mengganti sandi, menonaktifkan akun, atau mencabut hak akses peran, supaya pengunjung berikutnya tetap bisa mencoba.
-
-| Peran | Email | Sandi | Masuk di |
-|---|---|---|---|
-| Super Admin | `admin@example.test` | `F1A7YS31ZOT0G4MaaEmoBbmv` | Admin App |
-| Manager | `demo.manager@example.test` | `pmkB5rtCJ4n31f4GHsa7H5-q` | Admin App |
-| Member | `demo.member@example.test` | `pmkB5rtCJ4n31f4GHsa7H5-q` | Team App (juga Admin App, dengan menu terbatas) |
-
-Sebelum mencoba:
-- Sandi lokal `ptm-demo-2026` tidak berlaku di versi online.
-- Manager di Admin App dan Member di Team App bisa masuk bersamaan karena alamatnya berbeda. Super Admin dan Manager sama-sama di Admin App: pakai jendela penyamaran, atau keluar dulu sebelum ganti akun.
-- Kirim hasil kerja berupa tautan. Berkas yang diunggah di versi online bersifat sementara (lihat batasan di bawah).
-
-### Alur coba (sekitar 25 menit)
-
-1. **Super Admin**
-   - Data Master > Anggota Tim > + Buat: coba Divisi baru dan Jabatan baru dari formulir. Sandi awal dibuat otomatis.
-   - Template > Template Project > Digital Marketing Campaign > Pakai template.
-   - Di formulir project: tekan Client baru, pilih Demo Manager sebagai PIC, centang Demo Member, lalu Simpan.
-   - Lihat juga Pengaturan Menu (seret-lepas), Role & Hak Akses (tabel centang), dan Pengaturan Sistem > Log aktivitas.
-2. **Manager**
-   - Dashboard: lihat Perlu kamu kerjakan.
-   - Papan Kanban project tadi: seret kartu dari Antrian ke Dikerjakan (diterima), lalu ke Selesai (ditolak, karena Selesai hanya lewat review).
-   - Klik kartu untuk membuka panel samping: tambah checklist dan pelaksana.
-   - Task > Semua Task: centang beberapa task > Ganti PIC > Demo Member > Terapkan.
-   - Tekan `Ctrl K` untuk mencari project, task, atau orang.
-3. **Member di HP**
-   - Task: Mulai, centang checklist, isi Catat waktu kerja, lalu kirim hasil berupa tautan.
-   - Task lain: Butuh geser deadline? > +3/+7/+14 hari > Ajukan.
-4. **Manager**
-   - Buka lonceng, lalu review hasil: Kembalikan untuk revisi dengan alasan.
-   - Member mengirim ulang hasilnya.
-   - Manager memilih Terima, task selesai, lalu menyetujui pengajuan deadline. Target awal tetap tercatat.
-   - Lihat Monitoring Project, Laporan Operasional, dan Kalender mode Selesai aktual.
-5. **Aturan**
-   - Member membuka `/settings/menus` di Admin App dan mendapat halaman 403.
-   - Opsional: buat project Berulang, lalu tekan Buka periode baru.
-
-Susunannya tetap sama dengan petunjuk teknis: satu database MySQL bersama untuk dua aplikasi yang dideploy terpisah, skema dari migrasi + SQL modul yang diimpor satu kali, nama tabel dan kolom tidak berubah. Kode aplikasi tidak diubah; yang ditambahkan hanya `Dockerfile`, `.dockerignore`, dan folder `docker/` di tiap app.
-
-- **Database: TiDB Cloud Starter.** Kompatibel MySQL 8.0, gratis dalam kuota (5 GiB, 50 juta Request Unit per bulan), region AWS Singapura, koneksi wajib TLS. Sebelum online, seluruh tes dijalankan terhadap TiDB (12 November 2026): migrasi dan impor SQL lulus (40 tabel), tes admin 41/41 dan tim 31/31 lulus, uji semua menu untuk 3 peran (`docs/tools/smoke-test.mjs`) tanpa galat, dan alur kerja ujung ke ujung (`docs/tools/e2e-flow.mjs`) 15/15 lulus; setelah log audit ditambahkan (13 November 2026) tes admin 47/47 dan tim 32/32 lulus. Rinciannya di [docs/evidence/tests/TESTING.md](docs/evidence/tests/TESTING.md#uji-versi-online-12-nov-2026).
-- **Aplikasi: Vercel Container Runtime** (Beta, tersedia di paket gratis). Image dibangun dari `Dockerfile` tiap app: aset Vite, PHP 8.4 dengan FrankenPHP, `composer install --no-dev` (Debugbar tidak ikut terpasang), `APP_ENV=production`, `APP_DEBUG=false`, `DEBUGBAR_ENABLED=false`, log ke stderr, sesi dan cache di database.
-
-Memasang sendiri:
-
-1. **TiDB Cloud.** Buat instance Starter, buka Connect, buat sandi, lalu buat database `project_team_management` (misalnya `CREATE DATABASE project_team_management;` di SQL Editor).
-2. **Skema dan data awal**, dari `admin-app` lokal dengan env menunjuk ke TiDB (`DB_HOST`, `DB_PORT=4000`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, dan `MYSQL_ATTR_SSL_CA` berisi path berkas CA sistem, misalnya `/etc/ssl/certs/ca-certificates.crt`):
-   ```bash
-   php artisan migrate --force
-   php ../docs/tools/import-sql.php ../docs/project_team_management_laravel.sql   # satu kali; dilewati bila tabel modul sudah ada
-   php artisan db:seed                                                       # INITIAL_ADMIN_* dan DEMO_SEED_PASSWORD
-   ```
-   phpMyAdmin yang diarahkan ke TiDB juga bisa dipakai untuk impor, asalkan memakai TLS.
-3. **Vercel**, sekali untuk tiap app: Add New Project, impor repositori ini, Root Directory `admin-app` (atau `team-app`), Framework Preset **Container**, region Functions `sin1` (dekat TiDB Singapura). Isi Environment Variables:
-
-   | Variabel | Isi |
-   |---|---|
-   | `APP_KEY` | kunci baru per app (`php artisan key:generate --show`), tipe Sensitive |
-   | `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` | dari TiDB Connect, tipe Sensitive |
-   | `DB_CONNECTION`, `DB_PORT`, `DB_DATABASE` | `mysql`, `4000`, `project_team_management` |
-   | `APP_URL` | alamat app itu sendiri |
-   | `ADMIN_APP_URL`, `TEAM_APP_URL` | alamat kedua app (tautan antar-app) |
-   | `APP_NAME`, `SESSION_COOKIE`, `CACHE_PREFIX` | beda per app, seperti `.env.example` |
-   | `FORCE_HTTPS`, `SESSION_SECURE_COOKIE` | `on`, `true` (Vercel melayani lewat HTTPS) |
-   | `APP_LOCALE`, `APP_FALLBACK_LOCALE` | `id`, `en` |
-
-   Lalu Deploy. Setiap push ke `main` membangun ulang kedua app.
-
-Batasan versi online:
-- Di versi online kedua app berjalan di dua container terpisah dengan penyimpanan sementara, jadi berkas yang diunggah (foto profil, lampiran hasil task) hilang saat instance diganti dan berkas dari Team App online belum terbuka di Admin App online. Di instalasi biasa (kedua app di satu server, sesuai petunjuk teknis) berkas sudah bersama lewat disk `shared`. Tautan hasil kerja tetap aman karena tersimpan di database. Untuk versi online dibutuhkan penyimpanan objek bersama (misalnya disk `s3` Laravel), yang berarti menambah paket.
-- App tidur setelah 5 menit tanpa kunjungan; permintaan pertama sesudahnya sedikit lebih lambat.
-- Image di atas dibangun dan dijalankan oleh Vercel. Untuk menjalankannya dengan Docker di komputer sendiri: `docker build -t ptm-admin admin-app`, lalu `docker run -p 8101:80` dengan variabel yang sama (untuk MySQL lokal tanpa TLS, isi `MYSQL_ATTR_SSL_CA` dengan string kosong).
+Laravel 13 (PHP 8.4), MySQL 8 (lokal: Docker MySQL 8.4 dan phpMyAdmin), Bootstrap 5.3.8, jQuery 3.7.1, Yajra DataTables (datatables.net 2.3), SortableJS 1.15.7, FullCalendar 6.1.22, ikon Lucide (ISC), huruf Inter dan Geist Mono (OFL), dan Laravel Debugbar (hanya pengembangan). Versi pustaka dikunci, karena perintah pasang "terbaru" kini memasang versi mayor lain (catatan di `docs/RESEARCH.md`).
 
 ## Struktur
 
 ```
 admin-app/      Laravel: manajemen (memegang migrasi schema)
-team-app/       Laravel: aplikasi tim mobile-first (tanpa migrasi dan seeder; berkas disimpan di storage admin-app)
-  Dockerfile, docker/   image produksi tiap app (Docker dan Vercel)
+team-app/       Laravel: aplikasi tim untuk HP (tanpa migrasi dan seeder; berkas disimpan di storage admin-app)
+  Dockerfile, docker/   image tiap app untuk versi online
 docs/
   project_team_management_laravel.sql   schema modul (diimpor satu kali)
-  RESEARCH.md      keputusan versi dan arsitektur
-  tools/         skrip uji peramban, impor (phpMyAdmin atau import-sql.php), sinkron kode domain (sync-domain.php)
-  evidence/     hasil uji (tests/TESTING.md), audit UI, tangkapan layar, performa
-  UAT.pdf       dokumen UAT
-  video/        video alur dan langkah rekamannya
-docker-compose.yml   MySQL 8.4 + phpMyAdmin
+  server/        contoh Nginx, Apache, dan setelan PHP untuk server sendiri
+  RESEARCH.md    keputusan versi dan arsitektur
+  UX-PLAN.md     rencana dan catatan perbaikan kegunaan
+  tools/         skrip uji peramban, impor SQL, sinkron kode domain
+  evidence/      hasil uji (tests/TESTING.md), audit UI, tangkapan layar, performa
+  UAT.pdf        dokumen UAT
+  video/         langkah rekaman video demo
+docker-compose.yml   MySQL 8.4 + phpMyAdmin untuk komputer lokal
+setup.ps1, setup.sh, start.ps1, start.sh   pasang dan jalankan di komputer lokal
 ```
 
-Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `admin-app` lalu disalin ke `team-app` dengan `php docs/tools/sync-domain.php`. Tes `tests/Domain/SharedDomainTest` gagal bila salinannya berbeda.
+Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `admin-app`, lalu disalin ke `team-app` dengan `php docs/tools/sync-domain.php`. Tes `tests/Domain/SharedDomainTest` gagal bila salinannya berbeda.
 
 ## Uji
 
-- Database uji: `sh docs/tools/prepare-test-db.sh` (membuat `ptm_test` dengan urutan pasang yang sama).
-- Tes: `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app (admin 115, tim 49; tes domain identik di keduanya).
-- Uji peramban (kedua app berjalan): `node docs/tools/smoke-test.mjs` (semua menu untuk 3 peran), `node docs/tools/e2e-flow.mjs` (alur 18 langkah), `node docs/tools/ui-audit.mjs` (axe, area klik, ukuran tabel 6.1, gulir samping), dan `node docs/tools/ux-metrics.mjs` (klik dan isian 12 alur inti).
-- Hasil lengkap per skenario dan peran: `docs/evidence/tests/TESTING.md`; dokumen UAT: `docs/UAT.pdf`.
-
-README ini diuji dari nol (19 November 2026): zip serah terima diekstrak ke folder baru, dipasang mengikuti langkah manual di atas ke database kosong yang baru (database dari TiDB Cloud seperti bagian Online, bukan Docker), lalu tes admin 125/125 dan tim 50/50 lulus dan `/login` kedua app 200 (`docs/evidence/tests/clean-install.txt`). Jalur cepat `php artisan ptm:setup` diuji terpisah dari salinan tanpa `.env` ke database kosong.
+- Database uji: jalankan `sh docs/tools/prepare-test-db.sh`. Skrip ini membuat `ptm_test` dengan urutan pasang yang sama.
+- Tes otomatis: jalankan `npm run build` dulu di kedua app (beberapa tes merender halaman yang memuat aset Vite), lalu `php artisan test` di masing-masing app. Hasil terakhir: admin 138 tes, tim 58 tes, semua lulus. Tes domain identik di kedua app.
+- Uji peramban (kedua app berjalan):
+  - `node docs/tools/smoke-test.mjs`: semua menu untuk 3 peran;
+  - `node docs/tools/e2e-flow.mjs`: alur kerja dari project baru sampai periode baru;
+  - `node docs/tools/ui-audit.mjs`: axe, area klik, ukuran tabel 6.1, dan gulir samping.
+- Hasil lengkap per skenario dan peran ada di `docs/evidence/tests/TESTING.md`. Dokumen UAT ada di `docs/UAT.pdf`.
 
 ## Catatan
 
-Dibuat sebagai tugas PKL berdasarkan petunjuk teknis dan skema SQL dari tempat PKL. Dokumen petunjuk teknisnya tidak disertakan di repositori publik ini; skema SQL disertakan karena dibutuhkan untuk memasang. Semua nama orang dan perusahaan di data contoh adalah sintetis.
+Dibuat sebagai tugas PKL berdasarkan petunjuk teknis dan skema SQL dari tempat PKL. Dokumen petunjuk teknisnya tidak disertakan di repositori publik ini. Skema SQL disertakan karena dibutuhkan untuk memasang. Semua nama orang dan perusahaan di data contoh adalah sintetis.

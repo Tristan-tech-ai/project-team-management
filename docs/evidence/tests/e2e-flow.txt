@@ -1,5 +1,5 @@
 ok   pratinjau template menampilkan 5 task sebelum generate
-ok   project 30005 dibuat dari template: 5 task di Antrian, 3 divisi
+ok   project 6 dibuat dari template: 5 task di Antrian, 3 divisi
 ok   seret ke Dikerjakan tersimpan di server (bertahan setelah muat ulang)
 ok   seret ke Selesai ditolak API: "Task tidak bisa pindah dari Dikerjakan ke Selesai. Kirim hasil untuk review dulu; Selesai hanya lewat persetujuan PIC atau manager.", kartu kembali ke Dikerjakan
 ok   task punya 2 pelaksana + 2 checklist

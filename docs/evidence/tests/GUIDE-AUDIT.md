@@ -74,15 +74,15 @@ Ringkasan: 0 pernyataan belum terpenuhi. Putaran pertama (13 Nov pagi) menemukan
 
 | No | Pernyataan | Status | Bukti |
 |---|---|---|---|
-| 6.1 | Font Inter/system, ukuran body, heading, line-height, padding halaman, kartu, input, sidebar 232-260 px, bottom nav 64-72 px | Diperbaiki | Diukur di setiap halaman audit pada 390 dan 1366 px (`ui-audit.mjs`, kolom `styleIssues` di `../ui/audit-*.json` bernilai 0): body 16/15 px, line-height 1,5, H1 24/28 px, H2 18,4/20 px (judul kartu sebelumnya 16,8 px), padding halaman 16/32 px, kartu 16/24 px radius 14 px, input dan tombol 44/40 px, sidebar 248 px, bottom nav 72 px |
+| 6.1 | Font Inter/system, ukuran body, heading, line-height, padding halaman, kartu, input, sidebar 232-260 px, bottom nav 64-72 px | Diperbaiki | Versi 2.0: huruf badan Inter (desain baru sempat memakai Geist; dikembalikan 27 Nov 2026). Diukur di setiap halaman audit pada 390 dan 1366 px (`ui-audit.mjs`, kolom `styleIssues` di `../ui/audit-*.json` bernilai 0): jenis huruf badan, body 16 px HP / 14-16 px desktop, line-height 1,45-1,6, H1 22-24 / 26-30 px, H2 18-20 / 20-24 px, padding halaman 12-16 / 24-32 px, kartu padding 16 / 18-24 px radius 12-16 px, input dan tombol 44-48 / 40-44 px, sidebar 248 px, bottom nav 64-72 px |
 | 6.2 | Area klik minimal 44x44 HP dan 40x40 desktop | Diperbaiki | Semua elemen yang bisa diklik diukur di setiap halaman audit (`smallTargets` 0 di `../ui/audit-*.json`): tombol, tautan, checkbox bersama labelnya, judul lipatan, kepala tabel yang bisa diurutkan, paginasi, kontrol dan kejadian kalender, pegangan seret Kanban. Putaran pertama hanya memperbaiki tombol (`btn-sm` 36 px ke 44/40 px) |
-| 6.3 | Contoh CSS: task-card radius 14, padding 16 | Diperbaiki | Kartu task kini radius 14 px, padding 16 px |
+| 6.3 | Contoh CSS: task-card radius 14, padding 16 | Diperbaiki | Kartu task radius 14 px, padding 16 px di HP dan 18 px di desktop (tabel 6.1: 18-24 px); versi 2.0 sempat 12 px dan dikembalikan 27 Nov 2026 |
 | 6.4 | Warna: biru aksi, merah terlambat, kuning review, hijau selesai; status selalu ditulis | Sesuai | Komponen badge selalu berteks, audit axe 0 pelanggaran serius |
-| 6.5 | d-lg-none / d-none d-lg-flex; container maks ~1440 px; padding bawah HP dihapus di desktop | Sesuai | Layout kedua app |
+| 6.5 | d-lg-none / d-none d-lg-flex; container maks ~1440 px; padding bawah HP dihapus di desktop | Diperbaiki | Versi 2.0 sempat melebarkan konten sampai 1920 px; kini konten Admin dan Tim maksimal 1440 px dan berada di tengah layar lebar (diukur di 1920 px: lebar konten 1440 px, tanpa gulir samping). Bottom nav dan sidebar memakai kelas yang sama, padding bawah HP hilang di desktop |
 | 6.6 | Quick Add dari halaman Tasks dan Board; project otomatis dari detail project | Diperbaiki | Admin Tasks kini punya Tambah Task; Board dan detail project tetap modal per project |
 | 6.7 | Form awal judul, PIC, pelaksana, deadline; status Antrian | Sesuai | `QuickTaskRequest`, `test_quick_add_is_available_from_tasks_page` |
-| 6.8 | Satu aksi utama per status; dropdown status di HP; checklist langsung; laporan link/file + catatan + durasi cepat; notifikasi singkat; revisi wajib catatan | Sesuai | `TaskWorkflowService::primaryAction`, e2e langkah 4-5 |
-| 6.9 | Pegangan seret Kanban sebagai area klik | Diperbaiki | Sebelumnya lebih kecil dari 40 px dan ditandai catatan; kini 44/40 px seperti area klik lain (termasuk dalam pengukuran 6.2) |
+| 6.8 | Satu aksi utama per status; dropdown status di HP; checklist langsung; laporan link/file + catatan + durasi cepat; notifikasi singkat; revisi wajib catatan | Sesuai | `TaskWorkflowService::primaryAction` di detail task dan kartu desktop (Mulai, Kirim hasil, Review hasil); di HP kartu dibuat satu baris atas permintaan pembina (26 Nov 2026) dengan dropdown status, dan memilih Review pada task yang wajib ada hasilnya membuka formulir Kirim hasil; e2e langkah HP |
+| 6.9 | Pegangan seret Kanban sebagai area klik | Diperbaiki | Versi 2.0 tidak memakai pegangan kecil: seluruh kartu bisa diseret (kursor grab), jadi area seret selalu lebih besar dari 44/40 px; e2e menyeret kartu dan penolakan server mengembalikan kartu |
 
 ## 07 Prototipe
 
@@ -128,7 +128,7 @@ Ringkasan: 0 pernyataan belum terpenuhi. Putaran pertama (13 Nov pagi) menemukan
 |---|---|---|---|
 | 11.1 | Lima tahap kerja | Sesuai | Semua keluaran tahap ada (login tiap role, project dari template, Kanban, operasional, management & responsive) |
 | 11.2 | Checklist UAT 17 area | Sesuai | `TESTING.md` bagian checklist |
-| 11.3 | Delapan skenario wajib direkam | Sesuai | e2e-flow.txt 18 langkah lulus, video `docs/video/ptm-demo.mp4` |
+| 11.3 | Delapan skenario wajib direkam | Sesuai | e2e-flow.txt dengan gambar setiap langkah di `e2e/` (dokumen meminta "video/gambar alur tugas"); video versi 1 di cabang main repositori publik |
 | 11.4 | Hasil akhir: source dua app, migrasi terkendali, seeder, bukti uji semua role, video/gambar, catatan instalasi | Sesuai | Repositori, README, `docs/evidence`, `docs/UAT.pdf` |
 
 ## Konsistensi bahasa

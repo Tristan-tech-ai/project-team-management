@@ -61,13 +61,15 @@ class SetupCommand extends Command
                 $set['PTM_DEMO_LOGIN'] = 'true';
             }
         }
+        $before = array_combine(array_keys($set), array_map(fn ($key) => $env->get($key), array_keys($set)));
         if ($set) {
             $env->set($set);
             $this->line('  .env dilengkapi: '.implode(', ', array_keys($set)));
         }
 
         // The next step runs in a new process so the values just written to .env are loaded.
-        $process = new Process(array_values(array_filter([PHP_BINARY, 'artisan', 'ptm:setup', '--stage=data', $this->option('no-sample') ? '--no-sample' : null])), base_path());
+        $process = new Process(array_values(array_filter([PHP_BINARY, 'artisan', 'ptm:setup', '--stage=data', $this->option('no-sample') ? '--no-sample' : null])), base_path(),
+            EnvFile::staleInChild($set, $before, EnvFile::processVariables()));
         $process->setTimeout(null);
         $process->run(fn ($type, $out) => $this->output->write($out));
 

@@ -1,6 +1,6 @@
 # Audit UI
 
-Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yang kini juga mengukur angka bagian 06 Petunjuk Teknis. Arah desain dikunci bagian 06 (Bootstrap 5.3, Inter/system sans, putih/off-white, biru untuk aksi, merah terlambat, kuning review, hijau selesai). Skill yang dipakai sesuai `docs/RESEARCH.md`: impeccable mode Operate (kontras, keadaan, fokus, salinan yang menamai aksi), daftar periksa app-screens (warna di data, KPI berupa angka, permukaan datar, tabel tanpa zebra), emil-design-eng untuk interaksi Kanban.
+Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yang kini juga mengukur angka bagian 06 Petunjuk Teknis, dan 27 Nov 2026 untuk desain versi 2.0. Arah desain dikunci bagian 06 (Bootstrap 5.3, Inter/system sans, putih/off-white, biru untuk aksi, merah terlambat, kuning review, hijau selesai). Skill yang dipakai sesuai `docs/RESEARCH.md`: impeccable mode Operate (kontras, keadaan, fokus, salinan yang menamai aksi), daftar periksa app-screens (warna di data, KPI berupa angka, permukaan datar, tabel tanpa zebra), emil-design-eng untuk interaksi Kanban.
 
 ## Cara
 
@@ -9,12 +9,25 @@ Diulang 13 Nov 2026 setelah penyeragaman nama ke bahasa Inggris, dengan alat yan
 - **axe** WCAG 2.1 A/AA, dihitung pelanggaran serious dan critical;
 - **gulir samping** halaman;
 - **area klik** (tabel 6.1): setiap tombol, tautan, isian, checkbox bersama labelnya, judul lipatan, kepala tabel yang bisa diurutkan, paginasi, kontrol dan kejadian kalender, dan pegangan seret minimal 44 x 44 px di HP dan 40 x 40 px di desktop;
+- **jenis huruf badan** Inter atau huruf sistem (tabel 6.1);
 - **ukuran tabel 6.1**: body 16 px HP / 14-16 px desktop, line-height 1,45-1,6, H1 22-24 / 26-30 px, H2 18-20 / 20-24 px, padding halaman 12-16 / 24-32 px, padding kartu 16 / 18-24 px dengan radius 12-16 px, tinggi input dan tombol 44-48 / 40-44 px, bottom navigation 64-72 px, sidebar 232-260 px;
 - **navigasi Tim**: bottom navigation hanya tampil di HP.
 
 Server dijalankan dengan `DEBUGBAR_ENABLED=false` supaya tangkapan bersih. Rincian per halaman ada di `audit-admin.json`, `audit-team.json`, dan `audit-team-manager.json` (kolom `serious`, `smallTargets`, `styleIssues`).
 
-## Hasil akhir (19 Nov 2026, putaran 3 studi kasus)
+## Hasil akhir (27 Nov 2026, versi 2.0)
+
+Diulang pada desain baru versi 2.0 dengan database baru hasil `php artisan ptm:setup` (`ptm_ev_1127b`). Alat audit kini juga memeriksa jenis huruf badan (tabel 6.1 "Inter / system sans"); pemeriksaan itu menemukan bahwa desain baru sempat memakai Geist, dan hurufnya dikembalikan ke Inter. Layar baru ikut diaudit: formulir client dengan pilihan company (`/master/clients/create`) dan formulir ubah project dengan pilihan "Hasil task boleh kosong" (`/projects/1/edit`). Tampilan 1920 px diperiksa terpisah: konten maksimal 1440 px di tengah (bagian 6.2), tanpa gulir samping, terang dan gelap.
+
+| App | Peran | Layar | Pemeriksaan (390 + 1366 px) | Di antaranya keadaan setelah klik | Masalah |
+|---|---|---:|---:|---:|---:|
+| Admin | Super Admin | 50 | 100 | 8 | 0 |
+| Tim | Manager (Review Task) | 3 | 6 | 1 | 0 |
+| Tim | Member | 17 | 34 | 4 | 0 |
+
+Tangkapan di folder ini adalah desain versi 2.0. Tangkapan desain versi 1 ada di cabang main repositori publik.
+
+## Hasil versi 1 (19 Nov 2026, putaran 3 studi kasus)
 
 Diulang pada database baru hasil `php artisan ptm:setup` (`ptm_ev_1119`) setelah studi kasus digital marketing dan web PPDB: penyusun template (Dikerjakan, Deadline tgl, Ulangi, Tempel daftar), editor deskripsi project, pilihan bagian Dashboard, Rutin hari ini, KPI per anggota, dan judul yang bisa diklik di daftar.
 

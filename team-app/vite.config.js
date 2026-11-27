@@ -50,7 +50,9 @@ function iconSprite() {
 }
 
 
-// Geist Sans and Geist Mono (SIL OFL 1.1) are self-hosted: downloaded at build time and served by the app.
+// Inter (Technical Guide 6.1: "Inter / system sans") and Geist Mono for codes, both SIL OFL 1.1, are self-hosted: downloaded at build time
+// and served by the app, no third-party font host at run time. Only the two weights above the fold are preloaded. Fallbacks are the
+// plain system fonts (metric-matched fallbacks would need the optional fontaine package, which is not installed).
 export default defineConfig({
     plugins: [
         iconSprite(),
@@ -59,8 +61,8 @@ export default defineConfig({
             input: ['resources/css/layout.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('Geist', { alias: 'sans', weights: [400, 500, 600], preload: [{ weight: 400 }, { weight: 500 }], fallbacks: ['system-ui', 'sans-serif'] }),
-                bunny('Geist Mono', { alias: 'mono', weights: [400, 500], preload: false, fallbacks: ['ui-monospace', 'monospace'] }),
+                bunny('Inter', { alias: 'sans', weights: [400, 500, 600], preload: [{ weight: 400 }, { weight: 500 }], fallbacks: ['system-ui', 'sans-serif'], optimizedFallbacks: false }),
+                bunny('Geist Mono', { alias: 'mono', weights: [400, 500], preload: false, fallbacks: ['ui-monospace', 'monospace'], optimizedFallbacks: false }),
             ],
         }),
     ],

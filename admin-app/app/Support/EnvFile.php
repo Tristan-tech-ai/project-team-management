@@ -50,6 +50,35 @@ final class EnvFile
         file_put_contents($this->path, $content);
     }
 
+    /**
+     * Environment for the artisan process that runs after set(). Laravel never lets .env override a variable that already exists,
+     * and a child process inherits the variables this process loaded from the old file, so the child would keep the old values.
+     * Every changed key whose current value came from the old file is unset for the child (false, as Symfony Process expects) so the
+     * child reads the new value; a value set in the real environment (different from the old file) is kept, because it wins anyway.
+     *
+     * @param  array<string, string>  $changed  the values passed to set()
+     * @param  array<string, ?string>  $before  the values in the file before set()
+     * @param  array<string, mixed>  $current  this process's variables (getenv(), $_ENV, $_SERVER)
+     * @return array<string, false>
+     */
+    public static function staleInChild(array $changed, array $before, array $current): array
+    {
+        $unset = [];
+        foreach (array_keys($changed) as $key) {
+            if (array_key_exists($key, $current) && is_scalar($current[$key]) && (string) $current[$key] === (string) ($before[$key] ?? '')) {
+                $unset[$key] = false;
+            }
+        }
+
+        return $unset;
+    }
+
+    /** @return array<string, mixed> the variables of the running process, as Laravel sees them */
+    public static function processVariables(): array
+    {
+        return array_filter(getenv() + $_ENV + $_SERVER, 'is_scalar');
+    }
+
     private static function quote(string $value): string
     {
         return preg_match('/[\s#"\'$]/', $value) ? '"'.addcslashes($value, '"\\').'"' : $value;

@@ -99,6 +99,8 @@ for (const width of [390, 1366]) {
             const visible = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden' && !el.closest('[hidden], .visually-hidden, details:not([open]) > :not(summary)'); };
             const range = (label, value, lo, hi) => { if (value < lo - 0.5 || value > hi + 0.5) out.push(`${label} ${Math.round(value * 100) / 100} (${lo}-${hi})`); };
             const body = getComputedStyle(document.body);
+            const family = body.fontFamily.split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+            if (!['inter', 'system-ui', '-apple-system', 'sans-serif'].includes(family)) out.push(`body font-family ${family} (Inter / system sans)`);
             range('body font-size', px(body.fontSize), mobile ? 16 : 14, 16);
             range('body line-height ratio', px(body.lineHeight) / px(body.fontSize), 1.45, 1.6);
             const h1 = [...document.querySelectorAll('main h1, .app-main h1')].find(visible);

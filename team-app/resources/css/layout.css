@@ -17,13 +17,14 @@
 .team-header .header-title { font-size: .9375rem; font-weight: 600; letter-spacing: -.02em; }
 .team-header .brand-small { font-size: .75rem; color: var(--m-text-3); }
 
-/* Desktop: content fills the space beside the 248 px sidebar on common screens and is centred only on ultrawide ones (cap 1920 px). */
+/* Desktop: content fills the space beside the 248 px sidebar and is centred from a content width of 1440 px (Technical Guide 6.2:
+   container-fluid with a content max-width of about 1440 px). Padding percentages resolve against the viewport: 1688 = 1440 + 248. */
 @media (min-width: 992px) {
-    .app-main { padding: 28px max(32px, calc((100% - 2104px) / 2)); margin-left: 248px; max-width: none; }
+    .app-main { padding: 28px max(32px, calc((100% - 1688px) / 2)); margin-left: 248px; max-width: none; }
     .mobile-bottom-nav { display: none !important; }
     .desktop-sidebar { display: flex !important; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 248px; background: var(--m-surface); color: var(--m-text);
         border-right: 1px solid var(--m-line); overflow: hidden; z-index: 1030; }
-    .team-header { margin-left: 248px; padding: 8px max(32px, calc((100% - 2104px) / 2)); }
+    .team-header { margin-left: 248px; padding: 8px max(32px, calc((100% - 1688px) / 2)); }
     .team-header .header-title { font-size: .875rem; font-weight: 500; letter-spacing: -.01em; }
 }
 .desktop-sidebar .brand { display: flex; align-items: center; gap: .6rem; padding: 14px 16px 10px; color: var(--m-text); text-decoration: none; min-height: 56px; }

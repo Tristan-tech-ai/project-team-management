@@ -1,5 +1,33 @@
 # Bukti performa (LV-05)
 
+## Versi 2.0: desain baru dibanding desain lama
+
+Diukur 27 Nov 2026 pada kode versi 2.0 (setelah tambahan 26 Nov dan huruf Inter) di tempat "Skala besar": salinan lokal database `ptm_modern_padat_c` (3 perusahaan, 420 project, 32.373 task) di TiDB Singapura, Admin App lokal dengan Debugbar, masuk sebagai Super Admin. Angka desain lama diukur 25 Nov 2026 dengan alat yang sama (jumlah query dari data Debugbar yang tertanam di halaman) pada worktree cabang `main` ke database yang sama.
+
+| Halaman | Route | Query desain lama | Query versi 2.0 |
+|---|---|---:|---:|
+| Dashboard | `/dashboard` | 45 | 45 |
+| Daftar project | `/projects` | 11 | 11 |
+| Ringkasan project | `/projects/1` | 27 | 27 |
+| Papan Kanban | `/projects/1/board` | 24 | 24 |
+| Semua Task | `/tasks` | 11 | 11 |
+| Kalender | `/calendar` | 9 | 9 |
+
+Waktu database di lokal didominasi jarak ke TiDB (sekitar 30 ms per query dari Bali), jadi yang dibandingkan adalah jumlah query, bukan detik. Ikon kini satu berkas sprite (dirujuk dengan `<use>`), bukan SVG sebaris di setiap kartu, sehingga HTML papan yang padat lebih kecil.
+
+Ukuran aset awal (`npm run build`, gzip tingkat 9):
+
+| Aset | Desain lama | Versi 2.0 |
+|---|---:|---:|
+| CSS Admin App | 40,9 KB | 36,2 KB |
+| JS Admin App | 33,6 KB | 34,0 KB |
+| CSS Team App | 39,0 KB | 34,0 KB |
+| JS Team App | 29,7 KB | 29,9 KB |
+
+CSS lebih kecil karena modul Bootstrap yang tidak dipakai dibuang saat build. JS sedikit lebih besar (0,2 sampai 0,4 KB) karena pilihan tema terang/gelap, penyaring client per company, dan dropdown status kartu di HP.
+
+## Desain lama (11 Nov 2026)
+
 Diukur 11 Nov 2026 di lokal (PHP 8.4.16, MySQL 8.4.13 Docker, data seeder + project uji). Jumlah query dan durasi dibaca dari penyimpanan Laravel Debugbar 4.4.5 (`storage/debugbar/*.json`) untuk permintaan GET terakhir tiap halaman.
 
 | Halaman | Route | Query | Durasi query |

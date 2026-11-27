@@ -174,7 +174,7 @@ Yang dibangun atau diubah karena studi kasus (semua dengan tes):
 | Manager tidak tahu cara menambah client | Keterangan di bawah pilihan Client: client baru ditambah Super Admin di Data Master |
 | Pemasangan dari nol gagal di tengah (ditemukan oleh `ptm:setup` ke database kosong) | Tabel rutin tanpa kunci asing ke tabel SQL modul, karena migrasi berjalan sebelum SQL modul diimpor |
 
-Video studi kasus satu alur tanpa potongan adegan: `docs/video/ptm-case-study.mp4` (langkah rekaman `docs/video/case-study.json`).
+Video studi kasus satu alur tanpa potongan adegan, direkam dengan desain versi 1 (berkas videonya ada di cabang main repositori publik; langkah rekaman `docs/video/case-study.json`).
 
 ## Hasil ukuran I0 (sebelum dan sesudah)
 
@@ -212,4 +212,4 @@ Geser deadline naik satu langkah dengan sengaja: panelnya dilipat di detail task
 | 16 Nov 2026 | U5.1 | Divisi dan jabatan baru dari formulir anggota; baris divisi mengikuti company yang dicentang | `MemberOrgQuickAddTest` 2/2, uji peramban 1366 |
 | 16 Nov 2026 | I9 | Palet perintah Ctrl+K, pintasan `?` dan `n` | `CommandPaletteTest` 2/2, uji peramban 1366 |
 | 16 Nov 2026 | I5 | Kotak Cari nama di daftar orang (8 orang atau lebih), jumlah task aktif di daftar pelaksana detail task | `PeopleFilterTest`, uji peramban 1366 |
-| 16 Nov 2026 | Video v3 | 11 segmen direkam ulang dari instalasi baru (`docs/video/s1`-`s11`), disusun sebagai film 5 menit 9 detik (72% rekaman asli); dua temuan saat merekam diperbaiki: pencarian per kata, geser deadline dari deadline sekarang | `docs/video/ptm-demo.mp4`, `docs/video/README.md` |
+| 16 Nov 2026 | Video v3 | 11 segmen direkam ulang dari instalasi baru (`docs/video/s1`-`s11`), disusun sebagai film 5 menit 9 detik (72% rekaman asli); dua temuan saat merekam diperbaiki: pencarian per kata, geser deadline dari deadline sekarang | video versi 1 (cabang main), `docs/video/README.md` |

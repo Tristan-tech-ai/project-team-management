@@ -1,8 +1,25 @@
 # Hasil uji LV-07
 
+## Versi 2.0: desain baru dan tambahan pembina (27 Nov 2026)
+
+Tampilan baru untuk kedua app (24-26 Nov 2026) dan tambahan dari pembina (26 Nov 2026), lalu semua bukti dibuat ulang pada kode yang sama (hash tree di bagian Hasil terbaru): tes Laravel ke database uji TiDB `ptm_test`; e2e, uji asap, dan audit UI ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_ev_1127b`); zip serah terima dipasang dari nol di server Linux tiruan mengikuti README "Pasang di server sendiri" dan di Windows mengikuti README "Coba di komputer sendiri".
+
+| Perubahan | Bukti |
+|---|---|
+| Tampilan baru: token warna terang dan gelap, sidebar berkelompok, bilah atas dengan breadcrumb, tabel padat tanpa gulir samping, Kanban ringkas yang bergulir per kolom (50 kartu lalu Tampilkan 50 lagi), ikon satu sprite, modul Bootstrap yang tak terpakai dibuang | `../ui/AUDIT.md`, tangkapan `../ui/*.png`; `../performance.md` (query per halaman sama dengan desain lama, CSS lebih kecil) |
+| Client per company (tabel `client_company`): pilihan Client di formulir project tersaring sesuai Company, client tanpa company berarti umum, server menolak client company lain | `ClientCompanyTest` |
+| Hasil task boleh kosong per project (tabel `project_settings`), juga saat kartu diseret atau dropdown status dipakai | `ResultOptionalTest`, `ProjectSettingsTest` |
+| Tautan tanpa `https://` dilengkapi otomatis; tautan yang belum lengkap ditolak dengan contoh | `LinkInputTest` |
+| HP: kotak cari sendiri di halaman Pencarian, panel Template di atas formulir project, kartu Kanban satu baris dengan dropdown status (Review pada task yang wajib ada hasilnya membuka formulir Kirim hasil), tab project bisa digeser | audit UI 390 px, e2e langkah HP |
+| Audit ulang kalimat per kalimat bagian 06 petunjuk teknis pada desain baru: huruf kembali Inter (tabel 6.1 "Inter / system sans"; desain baru sempat memakai Geist), lebar konten maksimal 1440 px (6.2; sempat 1920 px), radius kartu task 14 px (contoh CSS 6.2). Audit UI kini juga memeriksa jenis huruf badan | `GUIDE-AUDIT.md` 6.1 sampai 6.9, `../ui/audit-*.json` |
+| Syarat PHP 8.4 sesuai `composer.lock` (Symfony 8.1 menolak PHP 8.3, padahal README lama menulis 8.3); Symfony 8.1.12 untuk lima advisori keamanan yang terbit 25 Nov 2026 | `composer audit`: tidak ada advisori |
+| Ditemukan saat uji pasang di server: `ptm:setup` menulis `.env` lalu menjalankan langkah berikutnya di proses baru yang mewarisi nilai lama, sehingga Team App tetap memakai `DB_HOST` lama (gagal tersambung) dan Admin App dengan MySQL Docker tetap memakai sandi kosong | `EnvFileTest` (gagal sebelum perbaikan), bagian Pasang bersih dari zip |
+| Panduan pasang di server sendiri (Ubuntu, Nginx, PHP 8.4-FPM, MySQL 8) dengan contoh Nginx, Apache, dan setelan PHP untuk batas unggah 10 MB | README, `docs/server/` |
+| Video versi 1 memakai desain lama, jadi tidak disertakan di versi 2.0; dokumen meminta "video/gambar alur tugas", dan gambar setiap langkah e2e dibuat ulang pada desain baru | `e2e/*.png`, `docs/video/README.md` |
+
 ## Studi kasus putaran 3 (19 Nov 2026)
 
-Dua catatan tulisan tangan dari lapangan (digital marketing berulang dan KPI Web PPDB Sekolah) dicoba dari instalasi baru sebagai pengguna yang belum pernah memakai PTM; setiap kesulitan diperbaiki dengan tes, lalu semua bukti dibuat ulang pada kode yang sama (hash tree di bawah): tes Laravel ke database uji TiDB `ptm_test`; audit UI, e2e, uji asap, dan ukuran kegunaan ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_ev_1119`). Rincian kesulitan dan perubahannya di `docs/UX-PLAN.md` bagian Putaran 3; video satu alur `docs/video/ptm-case-study.mp4`.
+Dua catatan tulisan tangan dari lapangan (digital marketing berulang dan KPI Web PPDB Sekolah) dicoba dari instalasi baru sebagai pengguna yang belum pernah memakai PTM; setiap kesulitan diperbaiki dengan tes, lalu semua bukti dibuat ulang pada kode yang sama (hash tree di bawah): tes Laravel ke database uji TiDB `ptm_test`; audit UI, e2e, uji asap, dan ukuran kegunaan ke dua app lokal yang memakai database baru hasil `php artisan ptm:setup` (`ptm_ev_1119`). Rincian kesulitan dan perubahannya di `docs/UX-PLAN.md` bagian Putaran 3; video satu alur direkam dengan desain versi 1 (cabang main).
 
 | Perubahan | Bukti |
 |---|---|
@@ -59,31 +76,19 @@ Diuji ulang dengan kode terbaru: tes Laravel kedua app ke database uji TiDB `ptm
 | Pengujian akhir | Semua tes dan bukti diperbarui (13 Nov 2026) | `phpunit-admin-app.xml` (63 tes), `phpunit-team-app.xml` (40 tes), `e2e-flow.txt` (18 lulus), `smoke-admin.txt` (53 halaman), `smoke-team.txt` (29 halaman), audit UI 102 pemeriksaan tanpa masalah |
 
 
-Hasil terbaru 19 Nov 2026, setelah studi kasus putaran 3. Kode yang diuji: admin-app `18f5bbf1c5b7`, team-app `9994db0a561f` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_r2_1116`); pasang bersih dari zip mengikuti README di bagian "Pasang bersih dari zip". Debugbar mati. Semua berkas bukti ada di folder ini.
+## Hasil terbaru
+
+Hasil terbaru 27 Nov 2026, versi 2.0. Kode yang diuji: admin-app `463d422a50c7`, team-app `4ff9e99ce4e6` (hash tree git; `docs/tools/release-check.py` memastikan hash ini sama dengan kode di repositori). Tes Laravel ke database uji TiDB `ptm_test`; uji peramban ke dua app lokal (`:8101`, `:8102`) dengan database baru hasil `ptm:setup` (`ptm_ev_1127b`). Debugbar mati. Semua berkas bukti ada di folder ini.
 
 | Bukti | Isi | Hasil |
 |---|---|---|
-| `phpunit-admin-app.xml` | `php artisan test --log-junit` admin-app (tes domain bersama + tes fitur Admin), 19 Nov 2026 | 125 lulus, 0 gagal |
-| `phpunit-team-app.xml` | `php artisan test --log-junit` team-app (tes domain bersama identik + tes fitur Tim), 19 Nov 2026 | 50 lulus, 0 gagal |
-| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366: project dari template, seret Kanban dan penolakan, pelaksana dan checklist, panel samping, aksi massal, kirim hasil dari HP, revisi dan terima, kartu diseret dari badan kartu, aktivitas dan persetujuan deadline, kalender, periode baru, 403 member, DataTables 520 baris (19 Nov 2026) | 20 lulus, 0 gagal |
-| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (19 Nov 2026) | 53 halaman, 0 gagal |
-| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (19 Nov 2026) | 38 halaman, 0 gagal |
-| `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, dan gulir samping terhadap lebar layar yang diminta, di 390 dan 1366 px, termasuk panel, palet, dan aksi massal yang terbuka (`../ui/audit-admin.json` 48 layar, 96 pemeriksaan; `../ui/audit-team-manager.json` 3 layar, 6 pemeriksaan; `../ui/audit-team.json` 17 layar, 34 pemeriksaan) | 136 pemeriksaan, 0 masalah |
-| `clean-install.txt` | Pasang bersih dari zip serah terima (commit publik d941bc0) ke database baru, tes dari folder itu (19 Nov 2026) | admin 125 dan tim 50 tes lulus, `/login` kedua app 200 |
-| `../performance.md`, `../debugbar.txt` | Query per halaman, N+1, Debugbar | lihat berkas |
-| `../../video/ptm-demo.mp4` | Video rekaman alur kerja dalam satu cerita (Radit manager, Putri member di HP, Super Admin), 8 skenario 11.3 dengan tampilan setelah peningkatan kegunaan putaran 2: panel samping, Ctrl K, aksi massal, pengaturan menu seret-lepas, hak akses centang; direkam 16 Nov 2026 dari instalasi baru hasil `ptm:setup` | 5 menit 9 detik, 1920x1080, -16 LUFS |
-
-## Pasang bersih dari zip
-
-Zip serah terima dibuat dengan `git archive` dari HEAD repositori publik (commit `ec337ee`, kode sama dengan hash di atas), diekstrak ke folder baru, lalu dipasang mengikuti README langkah 2-6 apa adanya ke dua database TiDB kosong yang baru dibuat (`ptm_fresh` untuk aplikasi, `ptm_fresh_test` untuk tes seperti bagian Uji README). Rinciannya di `clean-install.txt`.
-
-| Langkah | Hasil |
-|---|---|
-| `composer install`, `npm install`, `.env` dari `.env.example`, `php artisan key:generate` di kedua app | Lulus; APP_KEY kedua app berbeda |
-| `php artisan migrate` hanya di admin-app, impor SQL modul satu kali, `db:seed`, `UatScenarioSeeder` | Lulus pada database kosong (0 tabel sebelum pasang) |
-| `php artisan migrate` di Team App | Ditolak dengan pesan, sesuai petunjuk teknis |
-| `npm run build` lalu `php artisan test` | admin-app 63 lulus, team-app 40 lulus, 0 gagal |
-| Kedua app dijalankan dari folder itu, `smoke-test.mjs` 3 peran | Admin 53 halaman, Tim 20 menu, 0 gagal; `/login` kedua app 200 |
+| `phpunit-admin-app.xml` | `php artisan test --log-junit` admin-app (tes domain bersama + tes fitur Admin), 27 Nov 2026 | 138 lulus, 0 gagal |
+| `phpunit-team-app.xml` | `php artisan test --log-junit` team-app (tes domain bersama identik + tes fitur Tim), 27 Nov 2026 | 58 lulus, 0 gagal |
+| `e2e-flow.txt`, `e2e/*.png` | Uji peramban sungguhan, dua app, HP 390 dan desktop 1366: project dari template, seret Kanban dan penolakan, pelaksana dan checklist, panel samping, aksi massal, kirim hasil dari HP, revisi dan terima, kartu diseret, aktivitas dan persetujuan deadline, kalender, periode baru, 403 member, DataTables 520 baris (27 Nov 2026) | 20 lulus, 0 gagal |
+| `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (27 Nov 2026) | 53 halaman, 0 gagal |
+| `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (27 Nov 2026) | 38 halaman, 0 gagal |
+| `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, jenis huruf, dan gulir samping di 390 dan 1366 px, termasuk panel, palet, dan aksi massal yang terbuka (`../ui/audit-admin.json` 50 layar, 100 pemeriksaan; `../ui/audit-team-manager.json` 3 layar, 6 pemeriksaan; `../ui/audit-team.json` 17 layar, 34 pemeriksaan) | 140 pemeriksaan, 0 masalah |
+| `../performance.md`, `../debugbar.txt` | Query per halaman (desain lama dan versi 2.0), ukuran aset, N+1, Debugbar | lihat berkas |
 
 ## Checklist penerimaan 11.2
 
