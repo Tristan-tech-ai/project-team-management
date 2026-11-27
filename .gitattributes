@@ -1,0 +1,3 @@
+# Text files keep LF line endings in every checkout and in `git archive` zips, also on Windows with core.autocrlf=true,
+# so the shell scripts (setup.sh, start.sh, docs/tools/*.sh) run on Linux servers.
+* text=auto eol=lf

@@ -295,6 +295,7 @@ Jangan menjalankan `migrate:fresh`, `db:wipe`, atau impor SQL ulang pada databas
 | Perubahan `.env` tidak berpengaruh | Konfigurasi masih tersimpan di cache. Jalankan `php artisan optimize` lagi. |
 | Lampiran dari Team App tidak terbuka di Admin App | Kedua app harus melihat folder yang sama. Pasang di satu server sesuai langkah di atas, atau isi `PTM_STORAGE_ROOT` yang sama di kedua `.env`. |
 | `php artisan migrate` di Team App ditolak | Memang disengaja. Migrasi hanya dijalankan di `admin-app`. |
+| Anggota lupa sandi | Aplikasi tidak mengirim email, jadi tidak ada tautan atur ulang. Super Admin membuka Data Master, Anggota Tim, lalu Ubah, dan mengisi **Kata sandi baru**. |
 
 ## Fitur per peran
 
