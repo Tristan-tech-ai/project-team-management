@@ -76,7 +76,7 @@ Langkah ini untuk server kantor atau VPS. Contohnya memakai Ubuntu 24.04 LTS, Ng
 
 Ganti `example.com` dengan domain sendiri (misalnya `admin.kantor.co.id`), lalu arahkan rekaman DNS A kedua subdomain ke IP server. Berkas siap salin ada di `docs/server/`: [`nginx-ptm.conf`](docs/server/nginx-ptm.conf), [`php-ptm.ini`](docs/server/php-ptm.ini), dan [`apache-ptm.conf`](docs/server/apache-ptm.conf) bila server memakai Apache.
 
-Langkah 3 sampai 9 sudah diuji di server Linux tiruan (container Nginx 1.27, PHP 8.4-FPM, dan MySQL 8.4) dari zip ini. Langkah 1 (paket `apt`) dan 10 (HTTPS) tidak bisa diuji di sana. Keduanya memakai perintah standar Ubuntu dan Certbot.
+Langkah 3 sampai 9 sudah diuji di server Linux tiruan (container Nginx 1.27, PHP 8.4-FPM, dan MySQL 8.4) dari zip ini. Hasilnya ada di [`docs/evidence/tests/server-install.txt`](docs/evidence/tests/server-install.txt). Langkah 1 (paket `apt`) dan 10 (HTTPS) tidak bisa diuji di sana. Keduanya memakai perintah standar Ubuntu dan Certbot.
 
 ### 1. Pasang paket
 
@@ -368,8 +368,14 @@ Kode domain bersama (model, policy, service, aturan status) ditulis sekali di `a
 - Uji peramban (kedua app berjalan):
   - `node docs/tools/smoke-test.mjs`: semua menu untuk 3 peran;
   - `node docs/tools/e2e-flow.mjs`: alur kerja dari project baru sampai periode baru;
-  - `node docs/tools/ui-audit.mjs`: axe, area klik, ukuran tabel 6.1, dan gulir samping.
+  - `node docs/tools/ui-audit.mjs`: axe, area klik, ukuran tabel 6.1, jenis huruf, dan gulir samping.
 - Hasil lengkap per skenario dan peran ada di `docs/evidence/tests/TESTING.md`. Dokumen UAT ada di `docs/UAT.pdf`.
+
+README ini diuji dari nol (27 November 2026). Zip serah terima diekstrak ke folder baru lalu dipasang dua kali tanpa langkah tambahan. Penyesuaian karena server tiruan memakai container (nama host, socket PHP-FPM) ditulis di awal berkas buktinya:
+- di server Linux tiruan mengikuti "Pasang di server sendiri" ([`docs/evidence/tests/server-install.txt`](docs/evidence/tests/server-install.txt));
+- di Windows mengikuti "Coba di komputer sendiri", lalu bagian Uji ini dari folder itu ([`docs/evidence/tests/local-docker-install.txt`](docs/evidence/tests/local-docker-install.txt)).
+
+Di kedua tempat, `/login` kedua app menjawab 200, dan tes dari folder Windows itu lulus semua.
 
 ## Catatan
 

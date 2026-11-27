@@ -88,7 +88,20 @@ Hasil terbaru 27 Nov 2026, versi 2.0. Kode yang diuji: admin-app `463d422a50c7`,
 | `smoke-admin.txt` | Super Admin, Manager, Member membuka setiap menu Admin; kolom status tabel wajib berlabel (27 Nov 2026) | 53 halaman, 0 gagal |
 | `smoke-team.txt` | Ketiga role membuka setiap menu Tim + project, board, task, tambah task (27 Nov 2026) | 38 halaman, 0 gagal |
 | `../ui/AUDIT.md` | axe, area klik 44/40 px, ukuran tabel 6.1, jenis huruf, dan gulir samping di 390 dan 1366 px, termasuk panel, palet, dan aksi massal yang terbuka (`../ui/audit-admin.json` 50 layar, 100 pemeriksaan; `../ui/audit-team-manager.json` 3 layar, 6 pemeriksaan; `../ui/audit-team.json` 17 layar, 34 pemeriksaan) | 140 pemeriksaan, 0 masalah |
+| `server-install.txt` | Zip serah terima (commit publik d735864) dipasang di server Linux tiruan (Nginx 1.27, PHP 8.4-FPM, MySQL 8.4) mengikuti README langkah 2 sampai 9 dengan `APP_ENV=production`; juga jalur manual (migrate, impor lewat `mysql`, `db:seed`) dan server uji dengan data contoh (27 Nov 2026) | `/login` dan `/up` kedua app 200, Super Admin membuka setiap menu Admin tanpa galat, berkas dari Team App terbaca Admin App, kiriman 12 MB diterima Nginx dan PHP |
+| `local-docker-install.txt` | Zip yang sama dipasang di Windows mengikuti README "Coba di komputer sendiri" (`setup.ps1`, MySQL Docker), lalu bagian Uji README dari folder itu (27 Nov 2026) | `/login` kedua app 200 dengan tombol Coba sebagai; admin 138 dan tim 58 tes lulus |
 | `../performance.md`, `../debugbar.txt` | Query per halaman (desain lama dan versi 2.0), ukuran aset, N+1, Debugbar | lihat berkas |
+
+## Pasang bersih dari zip
+
+Zip serah terima dibuat dengan `git archive` dari HEAD repositori publik, lalu dipasang dari nol dua kali tanpa langkah di luar README:
+
+| Jalur | Langkah | Hasil |
+|---|---|---|
+| Server Linux (`server-install.txt`) | README "Pasang di server sendiri" langkah 2-9: zip diekstrak, `composer install --no-dev`, `npm ci` dan `npm run build`, database dan user MySQL, `.env` production, `php artisan ptm:setup` di kedua app (diulang di Admin App: aman), `php artisan optimize`, izin `www-data`, `php-ptm.ini`, Nginx dari `docs/server/nginx-ptm.conf` | Lulus. Production tanpa akun demo dan data contoh; `migrate` di Team App ditolak; `UatScenarioSeeder` ditolak di production dan berjalan di staging |
+| Windows (`local-docker-install.txt`) | README "Coba di komputer sendiri": `setup.ps1` (MySQL 8.4 dari `docker-compose.yml`, kedua app, `ptm:setup`), kedua app dijalankan, lalu bagian Uji README (`prepare-test-db.sh`, `php artisan test`) | Lulus |
+
+Langkah 1 README server (paket `apt`) dan langkah 10 (HTTPS dengan Certbot) tidak dijalankan: server tiruan memakai image PHP, Nginx, dan MySQL yang sudah ada di mesin uji dan tidak punya domain publik.
 
 ## Checklist penerimaan 11.2
 
